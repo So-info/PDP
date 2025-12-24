@@ -2,182 +2,711 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Suivi Défi -30 kg — Ultra simple</title>
-  <meta name="theme-color" content="#F97316" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Santé — Défi -30 kg</title>
+  <meta name="theme-color" content="#FF2D55" />
 
-  <!-- Carte (Leaflet + OpenStreetMap) -->
+  <!-- Leaflet / OSM -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root{
-      --orange:#F97316;
-      --orange2:#FB923C;
-      --bg:#F6F7F9;
-      --card:#FFFFFF;
+      --bg:#F2F2F7;
+      --card:rgba(255,255,255,.92);
+      --card2:rgba(255,255,255,.86);
       --text:#111827;
-      --muted:#6B7280;
-      --line:#E5E7EB;
-      --shadow: 0 8px 20px rgba(17,24,39,.08);
-      --r:16px;
+      --muted:rgba(17,24,39,.55);
+      --muted2:rgba(17,24,39,.40);
+      --line:rgba(17,24,39,.08);
+      --shadow: 0 12px 30px rgba(0,0,0,.08);
+      --shadow2: 0 18px 60px rgba(0,0,0,.14);
+      --r:20px;
+
+      /* iOS-ish palette */
+      --pink:#FF2D55;
+      --red:#FF3B30;
+      --orange:#FF9F0A;
+      --blue:#0A84FF;
+      --mint:#00C7BE;
+      --purple:#BF5AF2;
+
       --good:#16A34A;
       --bad:#DC2626;
+
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
     }
+
     *{box-sizing:border-box}
-    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,system-ui,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--text)}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== Header (sticky blur) ===== */
     header{
-      position:sticky; top:0; z-index:50;
-      background:linear-gradient(90deg,var(--orange),var(--orange2));
-      color:#fff; padding:16px 14px 14px;
-      box-shadow: 0 10px 22px rgba(249,115,22,.25);
+      position:sticky;
+      top:0;
+      z-index:10; /* IMPORTANT: pas au-dessus Leaflet */
+      padding: calc(10px + var(--safeTop)) 14px 12px;
+      background: rgba(242,242,247,.82);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom:1px solid var(--line);
+      transform: translateZ(0);
+      transition: padding .22s ease, background .22s ease;
     }
-    header .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    header h1{margin:0;font-size:18px;letter-spacing:.2px}
+    header.shrink{
+      padding: calc(8px + var(--safeTop)) 14px 10px;
+      background: rgba(242,242,247,.92);
+    }
 
-    .wrap{max-width:900px;margin:0 auto;padding:12px 14px 40px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding: 12px 14px calc(78px + var(--safeBottom));
+    }
+
+    .topRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .titleStack{min-width:0}
+    .title{
+      margin:0;
+      font-size:34px;
+      font-weight:950;
+      letter-spacing:-.7px;
+      line-height:1.05;
+      transition: font-size .22s ease, letter-spacing .22s ease;
+    }
+    header.shrink .title{
+      font-size:22px;
+      letter-spacing:-.2px;
+    }
+    .subtitle{
+      margin-top:6px;
+      font-size:13px;
+      color:var(--muted);
+      letter-spacing:.1px;
+      transition: margin-top .22s ease, opacity .22s ease;
+    }
+    header.shrink .subtitle{ margin-top:4px; opacity:.92; }
+
+    .pill{
+      min-width:154px;
+      text-align:right;
+      padding:10px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,.86);
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      transition: transform .22s ease, padding .22s ease;
+    }
+    header.shrink .pill{ padding:8px 10px; transform:scale(.98); }
+    .pillLabel{font-size:11px;color:var(--muted)}
+    .pillValue{font-size:16px;font-weight:950;margin-top:3px}
+
+    /* Search bar (visuel) */
+    .searchBar{
+      margin-top:12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      transition: margin-top .22s ease, opacity .18s ease, transform .18s ease, max-height .22s ease;
+    }
+    .searchIcon{opacity:.55}
+    .searchInput{
+      border:none !important;
+      background:transparent !important;
+      padding:0 !important;
+      font-size:15px !important;
+      outline:none !important;
+      color:rgba(17,24,39,.70);
+    }
+    header.shrink .searchBar{
+      opacity:0;
+      transform: translateY(-6px);
+      max-height:0;
+      overflow:hidden;
+      padding:0 12px;
+      border-width:0;
+      margin-top:0;
+      box-shadow:none;
+    }
+
+    /* Rings row + miniSummary swap */
+    .ringsRow{
+      margin-top:12px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      transition: opacity .18s ease, transform .18s ease, max-height .22s ease, margin-top .22s ease;
+      transform-origin: top;
+    }
+    .miniSummary{
+      display:none;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.88);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      font-weight:950;
+      font-size:13px;
+      color:rgba(17,24,39,.78);
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      gap:10px;
+      transition: opacity .18s ease, transform .18s ease, max-height .22s ease, margin-top .22s ease;
+    }
+    .msDot{opacity:.35}
+    header.shrink .ringsRow{
+      opacity:0;
+      transform: translateY(-6px) scale(.98);
+      max-height:0;
+      overflow:hidden;
+      margin-top:0;
+    }
+    header.shrink .miniSummary{
+      display:flex;
+      opacity:1;
+      transform: translateY(0);
+      max-height:48px;
+    }
+    header:not(.shrink) .miniSummary{
+      opacity:0;
+      transform: translateY(-6px);
+      max-height:0;
+      overflow:hidden;
+      margin-top:0;
+    }
+
+    /* Ring cards */
+    .ringCard{
+      flex:1 1 240px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border-radius:20px;
+      background: rgba(255,255,255,.88);
+      border:1px solid var(--line);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      min-width:0;
+    }
+    .ringMeta{min-width:0}
+    .ringTitle{font-size:12px;color:var(--muted)}
+    .ringValue{
+      margin-top:2px;
+      font-size:16px;
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* Conic ring (cute) */
+    .miniRing{
+      width:54px;height:54px;border-radius:50%;
+      position:relative;
+      flex:0 0 54px;
+      --p:0%;
+      --c1: var(--pink);
+      --c2: #FF5B7A;
+      background:
+        conic-gradient(from -90deg,
+          var(--c1) 0%,
+          var(--c2) var(--p),
+          rgba(17,24,39,.10) var(--p) 100%
+        );
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.88),
+        0 10px 18px rgba(0,0,0,.06);
+    }
+    .miniRing::before{
+      content:"";
+      position:absolute;
+      inset:7px;
+      background:#fff;
+      border-radius:50%;
+      box-shadow:0 6px 16px rgba(0,0,0,.06);
+    }
+    .miniRing::after{
+      content:"";
+      position:absolute;
+      width:10px;height:10px;border-radius:50%;
+      top:6px; right:8px;
+      background:rgba(255,255,255,.85);
+      box-shadow:0 6px 14px rgba(0,0,0,.10);
+      opacity:.75;
+    }
+    .ringIcon{
+      position:absolute; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px;
+      z-index:1;
+      transform: translateY(1px);
+    }
+    .miniRing.pop{ animation: pop .22s ease; }
+    @keyframes pop{
+      0%{ transform:scale(.94); }
+      60%{ transform:scale(1.06); }
+      100%{ transform:scale(1); }
+    }
+    .ringCard.goal   .miniRing{ --c1: var(--pink);   --c2:#FF5B7A; }
+    .ringCard.streak .miniRing{ --c1: var(--red);    --c2:#FF7A70; }
+    .ringCard.move   .miniRing{ --c1: var(--orange); --c2:#FFD36A; }
+
+    /* ===== Bottom tab bar ===== */
+    .tabBar{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      padding: 10px 14px calc(10px + var(--safeBottom));
+      background: rgba(242,242,247,.82);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-top:1px solid var(--line);
+      z-index:20;
+    }
+    .tabBarInner{
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      gap:10px;
+    }
+    .tbBtn{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 12px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      color:rgba(17,24,39,.70);
+      font-weight:950;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+    }
+    .tbBtn.active{
+      border-color: rgba(255,45,85,.25);
+      color: var(--text);
+      box-shadow: 0 14px 30px rgba(255,45,85,.10);
+    }
+    .tbIco{opacity:.9}
+
+    /* ===== Content building blocks ===== */
     .stack{display:grid;gap:12px}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row > *{flex:1 1 160px}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    input, button, select, textarea{
-      width:100%;border-radius:12px;border:1px solid var(--line);background:#fff;
-      padding:11px 12px;font-size:16px;outline:none;
-    }
-    input:focus, select:focus, textarea:focus{border-color:rgba(249,115,22,.6);box-shadow:0 0 0 3px rgba(249,115,22,.14)}
-    textarea{resize:vertical}
-    button{
-      background:var(--orange);color:#fff;font-weight:900;cursor:pointer;border:none;
-      -webkit-tap-highlight-color:transparent;
-    }
-    button.secondary{background:#fff;color:var(--text);border:1px solid var(--line);font-weight:800}
-    button:disabled{opacity:.55;cursor:not-allowed}
-
-    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media(min-width:720px){.kpis{grid-template-columns:repeat(4,1fr)}}
-    .kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
-    .kpi .t{font-size:12px;color:var(--muted)}
-    .kpi .v{margin-top:6px;font-size:18px;font-weight:950}
-    .pos{color:var(--good)} .neg{color:var(--bad)}
-    canvas{width:100%;height:220px;border-radius:14px;border:1px solid var(--line);background:#fff}
-
-    .tabs{display:flex;gap:10px;margin:12px 0 0}
-    .tabBtn{
-      flex:1;padding:10px 12px;border-radius:14px;border:1px solid var(--line);
-      background:#fff;font-weight:900;color:var(--muted);text-align:center;
-    }
-    .tabBtn.active{border-color:rgba(249,115,22,.35);color:var(--text);box-shadow:0 8px 18px rgba(249,115,22,.10)}
     .section{display:none}
     .section.active{display:block}
 
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding:14px;
+    }
+    .cardTitleRow{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .cardTitle{
+      margin:0;
+      font-size:15px;
+      font-weight:950;
+      letter-spacing:-.15px;
+    }
+    .chevBtn{
+      border:none;
+      background:transparent;
+      padding:6px 8px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:950;
+      color:var(--muted);
+    }
+    .chevBtn:active{transform: translateY(1px)}
+    .smallMeta{font-size:12px;color:var(--muted);line-height:1.35}
+
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1 1 160px}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+
+    input, button, select, textarea{
+      width:100%;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+      padding:11px 12px;
+      font-size:16px;
+      outline:none;
+    }
+    input:focus, select:focus, textarea:focus{
+      border-color:rgba(255,45,85,.45);
+      box-shadow:0 0 0 3px rgba(255,45,85,.12);
+    }
+    textarea{resize:vertical}
+
+    button{
+      background:var(--pink);
+      color:#fff;
+      font-weight:950;
+      border:none;
+      cursor:pointer;
+      box-shadow:0 12px 22px rgba(255,45,85,.18);
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active{transform: translateY(1px)}
+    button.secondary{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--line);
+      box-shadow:none;
+      font-weight:900;
+    }
+    button:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+
+    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(min-width:820px){.kpis{grid-template-columns:repeat(4,1fr)}}
+    .kpi{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:12px;
+      background:#fff;
+    }
+    .kpi .t{font-size:12px;color:var(--muted)}
+    .kpi .v{margin-top:6px;font-size:18px;font-weight:950}
+    .pos{color:var(--good)} .neg{color:var(--bad)}
+    .tiny{font-size:12px;color:var(--muted)}
+    .muted{color:var(--muted);font-size:12px;line-height:1.35}
+
+    .pillRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:7px 10px;border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .chip strong{color:var(--text)}
+    .chip.info{border-color:rgba(255,45,85,.22);background:rgba(255,45,85,.06)}
+    .chip.warn{border-color:rgba(255,159,10,.22);background:rgba(255,159,10,.08)}
+    .chip.ok{border-color:rgba(22,163,74,.20);background:rgba(22,163,74,.06)}
+
+    /* Chart */
+    .chartWrap{
+      position:relative;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:#fff;
+      overflow:hidden;
+      touch-action: pan-y;
+    }
+    canvas{
+      width:100%;
+      height:240px;
+      display:block;
+    }
+    .chartHint{
+      position:absolute;
+      top:10px; left:10px;
+      padding:8px 10px;
+      border-radius:14px;
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line);
+      font-size:12px;
+      color:rgba(17,24,39,.72);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      pointer-events:none;
+      opacity:0;
+      transform: translateY(-4px);
+      transition: opacity .14s ease, transform .14s ease;
+      max-width: calc(100% - 20px);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .chartHint.show{ opacity:1; transform: translateY(0); }
+
+    .note{
+      border-left:4px solid var(--pink);
+      background:rgba(255,45,85,.06);
+      border-radius:16px;
+      padding:10px 12px;
+      color:rgba(17,24,39,.78);
+      font-size:13px;
+      line-height:1.4;
+      margin-top:10px;
+    }
+
+    /* iOS list (Catégories) */
+    .list{
+      border:1px solid var(--line);
+      border-radius:20px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .listRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px;
+      border-top:1px solid rgba(17,24,39,.06);
+      cursor:pointer;
+      user-select:none;
+    }
+    .listRow:first-child{border-top:none}
+    .lrLeft{display:flex;align-items:center;gap:10px;min-width:0}
+    .lrIco{
+      width:38px;height:38px;border-radius:14px;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(17,24,39,.08);
+      background: rgba(255,45,85,.08);
+      flex:0 0 38px;
+      font-size:18px;
+    }
+    .lrTxt{min-width:0}
+    .lrTitle{font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .lrSub{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .lrRight{color:rgba(17,24,39,.25);font-weight:950}
+    .listRow:active{background:rgba(17,24,39,.03)}
+
+    /* Meals */
     .mealGrid{display:grid;gap:10px}
-    @media(min-width:720px){.mealGrid{grid-template-columns:1fr 1fr}}
-    .mealCard{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}
+    @media(min-width:820px){.mealGrid{grid-template-columns:1fr 1fr}}
+    .mealCard{border:1px solid var(--line);border-radius:20px;padding:12px;background:#fff}
     .mealHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
     .mealTitle{font-weight:950}
     .dayLabel{font-size:12px;color:var(--muted)}
     .check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);user-select:none}
     .check input{width:22px;height:22px}
-    .item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line)}
+    .item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed rgba(17,24,39,.10)}
     .item:first-of-type{border-top:none}
     .left{display:flex;gap:10px}
-    .icon{width:34px;height:34px;border-radius:12px;background:#FFF7ED;border:1px solid rgba(249,115,22,.18);display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 34px}
-    .muted{color:var(--muted);font-size:12px;line-height:1.35}
-    .tiny{font-size:12px;color:var(--muted)}
-    .note{border-left:4px solid var(--orange);background:#FFF7ED;border-radius:12px;padding:10px 12px;color:#7C2D12;font-size:13px;line-height:1.4}
+    .icon{
+      width:38px;height:38px;border-radius:16px;
+      background:rgba(255,45,85,.08);
+      border:1px solid rgba(255,45,85,.14);
+      display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 38px
+    }
+
     .footerBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .footerBtns button{flex:1 1 200px}
+
+    .banner{
+      display:none;
+      margin-top:10px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.85);
+      border-radius:16px;
+      padding:10px 12px;
+      font-size:12px;
+      line-height:1.35;
+      color:rgba(17,24,39,.70);
+    }
+    .banner.show{display:block}
 
     .noscript{
       margin:12px 0 0;
       border:1px solid rgba(220,38,38,.25);
       background:rgba(220,38,38,.06);
       color:#7f1d1d;
-      border-radius:14px;
+      border-radius:16px;
       padding:12px;
       font-size:13px;
       line-height:1.4;
     }
-    .banner{
-      display:none;
-      margin-top:10px;
-      border:1px solid rgba(255,255,255,.35);
-      background:rgba(255,255,255,.16);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:12px;
-      line-height:1.35;
-    }
-    .banner.show{display:block}
 
-    /* Header motivant */
-    .titleLine{display:flex;flex-direction:column;gap:4px}
-    .subtitle{font-size:12px;opacity:.95;letter-spacing:.2px}
-    .badgeRight{
-      min-width:120px;
-      padding:10px 12px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.32);
-      background:rgba(255,255,255,.18);
-      backdrop-filter: blur(8px);
-      text-align:right;
-    }
-    .badgeLabel{font-size:11px;opacity:.9}
-    .badgeValue{font-size:16px;font-weight:950;margin-top:3px}
-    .progressWrap{margin-top:12px}
-    .progressTop{display:flex;justify-content:space-between;gap:10px;font-size:12px;opacity:.95}
-    .progressBar{
-      margin-top:8px;
-      height:10px;
-      border-radius:999px;
-      background:rgba(255,255,255,.22);
-      border:1px solid rgba(255,255,255,.25);
-      overflow:hidden;
-    }
-    .progressFill{
-      height:100%;
-      width:0%;
-      border-radius:999px;
-      background:rgba(255,255,255,.9);
-    }
-
-    /* Historique marche */
-    .histCard{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}
+    /* Walk / history */
+    .histCard{border:1px solid var(--line);border-radius:20px;padding:12px;background:#fff}
     .histTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
     .histTitle{font-weight:950}
     .histMeta{font-size:12px;color:var(--muted);line-height:1.35;margin-top:4px}
     .histBtns{display:flex;gap:8px;margin-top:10px}
     .histBtns button{flex:1}
+
+    /* Leaflet z-index safety */
+    .leaflet-pane, .leaflet-top, .leaflet-bottom{ z-index: 1; }
+    .leaflet-control{ z-index: 2; }
+
+    /* Toasts */
+    .toasts{
+      position:fixed; right:14px; bottom:calc(82px + var(--safeBottom));
+      z-index:9999;
+      display:flex; flex-direction:column; gap:10px;
+      width:min(380px, calc(100vw - 28px));
+      pointer-events:none;
+    }
+    .toast{
+      pointer-events:auto;
+      border-radius:20px;
+      padding:12px 12px;
+      background:#fff;
+      border:1px solid var(--line);
+      box-shadow: var(--shadow2);
+      display:flex; gap:10px; align-items:flex-start;
+      transform: translateY(8px);
+      opacity:0;
+      animation: toastIn .18s ease forwards;
+    }
+    @keyframes toastIn{ to{ transform: translateY(0); opacity:1; } }
+    .toast .ico{
+      width:38px;height:38px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(255,45,85,.08);
+      border:1px solid rgba(255,45,85,.14);
+      flex:0 0 38px;
+    }
+    .toast .title{font-weight:950}
+    .toast .msg{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
+    .toast .x{
+      margin-left:auto;
+      background:transparent;border:none;width:auto;padding:0;
+      color:var(--muted);font-weight:950;cursor:pointer;
+      box-shadow:none;
+    }
+    .toast.good .ico{background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.18)}
+    .toast.bad  .ico{background:rgba(220,38,38,.10);border-color:rgba(220,38,38,.18)}
+
+    /* ===== Sheets (slide-up) ===== */
+    .sheetBackdrop{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.28);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease;
+      z-index:50;
+    }
+    .sheetBackdrop.show{ opacity:1; pointer-events:auto; }
+
+    .sheet{
+      position:fixed;
+      left:0; right:0;
+      bottom:0;
+      transform: translateY(110%);
+      transition: transform .22s ease;
+      z-index:60;
+      padding: 0 14px calc(14px + var(--safeBottom));
+    }
+    .sheet.show{ transform: translateY(0); }
+
+    .sheetCard{
+      max-width:980px;
+      margin:0 auto;
+      border-radius:22px;
+      background: rgba(255,255,255,.96);
+      border:1px solid var(--line);
+      box-shadow: var(--shadow2);
+      overflow:hidden;
+    }
+    .sheetHead{
+      padding:12px 12px;
+      border-bottom:1px solid rgba(17,24,39,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .sheetTitle{font-weight:950}
+    .sheetClose{
+      border:none;
+      background:rgba(17,24,39,.06);
+      color:rgba(17,24,39,.70);
+      border-radius:999px;
+      padding:8px 12px;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .sheetBody{ padding:12px; }
   </style>
 </head>
 
 <body>
 <header>
-  <div class="top">
-    <div class="titleLine">
-      <h1 id="headerTitle">🔥 Défi -30 kg</h1>
-      <div class="subtitle" id="headerSubtitle">Chaque jour compte. Tu avances. 💪</div>
+  <div class="topRow">
+    <div class="titleStack">
+      <h1 class="title" id="headerTitle">Santé</h1>
+      <div class="subtitle" id="headerSubtitle">Aperçu : poids, régularité, activité.</div>
     </div>
-
-    <div class="badgeRight">
-      <div class="badgeLabel">Poids actuel</div>
-      <div class="badgeValue" id="headerPill">—</div>
+    <div class="pill">
+      <div class="pillLabel">Poids actuel</div>
+      <div class="pillValue" id="headerPill">—</div>
     </div>
   </div>
 
-  <div class="progressWrap">
-    <div class="progressTop">
-      <span id="progressText">Progression</span>
-      <span id="progressPct">—</span>
-    </div>
-    <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+  <div class="searchBar" aria-hidden="true">
+    <div class="searchIcon">🔎</div>
+    <input class="searchInput" value="Rechercher (visuel)" readonly />
   </div>
 
-  <!-- IMPORTANT: tu avais supprimé cet élément, mais ton JS le référence -->
+  <div class="ringsRow">
+    <div class="ringCard goal">
+      <div class="miniRing" id="ringGoal" style="--p:0%">
+        <div class="ringIcon">🎯</div>
+      </div>
+      <div class="ringMeta">
+        <div class="ringTitle">Objectif</div>
+        <div class="ringValue" id="ringGoalText">—</div>
+      </div>
+    </div>
+
+    <div class="ringCard streak">
+      <div class="miniRing" id="ringStreak" style="--p:0%">
+        <div class="ringIcon">🔥</div>
+      </div>
+      <div class="ringMeta">
+        <div class="ringTitle">Série (pesées)</div>
+        <div class="ringValue" id="ringStreakText">—</div>
+      </div>
+    </div>
+
+    <div class="ringCard move">
+      <div class="miniRing" id="ringMove" style="--p:0%">
+        <div class="ringIcon">🚶</div>
+      </div>
+      <div class="ringMeta">
+        <div class="ringTitle">Activité (marche)</div>
+        <div class="ringValue" id="ringMoveText">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="miniSummary" id="miniSummary" aria-hidden="true">
+    <span id="msGoal">🎯 —</span>
+    <span class="msDot">•</span>
+    <span id="msStreak">🔥 —</span>
+    <span class="msDot">•</span>
+    <span id="msMove">🚶 —</span>
+  </div>
+
   <div class="banner" id="safariBanner">
-    ⚠️ Si tu ouvres ce fichier dans l’aperçu “Fichiers” (Quick Look), les boutons peuvent ne pas marcher.
-    Ouvre-le dans <b>Safari</b> (Partager → <b>Ouvrir dans Safari</b>) puis “Sur l’écran d’accueil”.
+    ⚠️ Ouvre dans <b>Safari</b> (Partager → <b>Ouvrir dans Safari</b>) puis “Sur l’écran d’accueil”.
   </div>
 </header>
 
@@ -190,17 +719,61 @@
   </div>
 </noscript>
 
-<div class="wrap">
-  <div class="tabs">
-    <button class="tabBtn active" id="tabToday" type="button">Aujourd’hui</button>
-    <button class="tabBtn" id="tabMeals" type="button">Repas</button>
-    <button class="tabBtn" id="tabWalk" type="button">Marche</button>
-    <button class="tabBtn" id="tabProfile" type="button">Profil</button>
-  </div>
+<div class="toasts" id="toasts"></div>
 
-  <div class="stack" style="margin-top:12px">
-    <section class="section active" id="secToday">
+<!-- Sheets -->
+<div class="sheetBackdrop" id="sheetBackdrop"></div>
+
+<div class="sheet" id="sheetWeight">
+  <div class="sheetCard">
+    <div class="sheetHead">
+      <div class="sheetTitle">Détails — Poids</div>
+      <button class="sheetClose" type="button" data-close="sheetWeight">Fermer</button>
+    </div>
+    <div class="sheetBody">
+      <div class="smallMeta" id="weightDetailsMeta">—</div>
+      <div class="card" style="margin-top:10px">
+        <div class="cardTitleRow">
+          <h3 class="cardTitle">Historique (20 derniers)</h3>
+        </div>
+        <div id="weightList" class="list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="sheetMove">
+  <div class="sheetCard">
+    <div class="sheetHead">
+      <div class="sheetTitle">Détails — Activité</div>
+      <button class="sheetClose" type="button" data-close="sheetMove">Fermer</button>
+    </div>
+    <div class="sheetBody">
+      <div class="smallMeta" id="moveDetailsMeta">—</div>
+      <div class="card" style="margin-top:10px">
+        <div class="cardTitleRow">
+          <h3 class="cardTitle">Objectif du jour</h3>
+        </div>
+        <div class="pillRow">
+          <span class="chip ok" id="chipMoveGoal">—</span>
+          <span class="chip" id="chipMoveSpeed">—</span>
+          <span class="chip info" id="chipMoveStreak">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ===== Résumé (Health-like) ===== -->
+  <section class="section active" id="secSummary">
+    <div class="stack">
       <div class="card">
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Highlights</h2>
+          <button class="chevBtn" id="btnOpenWeight" type="button">Poids ›</button>
+        </div>
+
         <div class="row" style="align-items:flex-end">
           <div>
             <label>Date</label>
@@ -211,44 +784,113 @@
             <input id="weight" type="number" step="0.1" inputmode="decimal" placeholder="ex: 114.6" />
           </div>
           <div>
-            <button id="saveWeightBtn" type="button">Enregistrer</button>
+            <button id="saveWeightBtn" type="button">Ajouter</button>
           </div>
         </div>
-        <div class="tiny" style="margin-top:8px">Astuce : pesée le matin (après toilettes) = plus fiable.</div>
+
+        <div class="tiny" style="margin-top:8px">
+          Conseil : pesée matin + conditions similaires = courbe plus fiable.
+        </div>
       </div>
 
       <div class="card">
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Tendances</h2>
+          <button class="chevBtn" id="btnOpenMove" type="button">Activité ›</button>
+        </div>
+
         <div class="kpis">
           <div class="kpi"><div class="t">Poids actuel</div><div class="v" id="kpiWeight">—</div></div>
           <div class="kpi"><div class="t">Perte totale</div><div class="v" id="kpiLost">—</div></div>
           <div class="kpi"><div class="t">Moyenne 7 jours</div><div class="v" id="kpiAvg7">—</div></div>
-          <div class="kpi"><div class="t">Objectif</div><div class="v" id="kpiTarget">—</div></div>
+          <div class="kpi"><div class="t">Activité aujourd’hui</div><div class="v" id="kpiMove">—</div></div>
         </div>
+
+        <div class="pillRow">
+          <span class="chip info" id="pillBMI">IMC : <strong>—</strong></span>
+          <span class="chip warn" id="pillTrend">Tendance : <strong>—</strong></span>
+          <span class="chip" id="pillETA">Estimation : <strong>—</strong></span>
+        </div>
+
         <div style="margin-top:12px">
-          <canvas id="chart" width="1000" height="320"></canvas>
+          <div class="row" style="gap:8px">
+            <button class="secondary" id="range7" type="button">7j</button>
+            <button class="secondary" id="range30" type="button">30j</button>
+            <button class="secondary" id="range180" type="button">6m</button>
+            <button class="secondary" id="range365" type="button">1a</button>
+            <button class="secondary" id="rangeAll" type="button">Tout</button>
+          </div>
+
+          <div style="margin-top:10px" class="chartWrap">
+            <div class="chartHint" id="chartHint">—</div>
+            <canvas id="chart" width="1100" height="360"></canvas>
+          </div>
+
+          <div class="note" id="coachNote" style="display:none"></div>
         </div>
       </div>
 
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🍽️ Tes repas d’aujourd’hui</h2>
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Aujourd’hui</h2>
+          <div class="smallMeta" id="todayMeta">—</div>
+        </div>
+
+        <div class="pillRow" id="todayBadges"></div>
+
+        <div class="smallMeta" style="margin-top:10px">
+          Mini plan : <b>1 pesée</b> + <b>marche</b> + <b>repas cochés</b> = journée “complète”.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Repas d’aujourd’hui</h2>
+        </div>
         <div class="mealGrid" id="todayMeals"></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="section" id="secMeals">
+  <!-- ===== Catégories ===== -->
+  <section class="section" id="secBrowse">
+    <div class="stack">
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">📅 Repas de la semaine</h2>
-        <div class="tiny">Tu peux cocher “fait” jour par jour (optionnel).</div>
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Catégories</h2>
+          <div class="smallMeta">Style iOS</div>
+        </div>
+
+        <div class="list" id="catList">
+          <!-- injected -->
+        </div>
+
+        <div class="note" style="margin-top:12px">
+          ⚠️ Rappel : vise une perte progressive et durable. Si fatigue importante, douleurs, malaise ou troubles alimentaires → parle à un professionnel.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Repas de la semaine</h2>
+        </div>
+        <div class="tiny">Coche “fait” pour suivre ta régularité.</div>
         <div class="mealGrid" id="weekMeals" style="margin-top:10px"></div>
         <div class="footerBtns">
           <button class="secondary" id="resetChecksBtn" type="button">Réinitialiser les coches</button>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="section" id="secWalk">
+  <!-- ===== Activité (Marche) ===== -->
+  <section class="section" id="secMove">
+    <div class="stack">
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🚶 Marche (suivi réel)</h2>
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Marche</h2>
+          <div class="smallMeta">Suivi réel</div>
+        </div>
 
         <div class="row" style="align-items:flex-end">
           <div>
@@ -273,35 +915,50 @@
         </div>
 
         <div class="footerBtns" style="margin-top:10px">
-          <button id="walkStartBtn" type="button">▶️ Début</button>
-          <button class="secondary" id="walkStopBtn" type="button" disabled>⏹ Fin</button>
-          <button class="secondary" id="walkClearBtn" type="button">🗑 Effacer la trace</button>
+          <button id="walkStartBtn" type="button">Démarrer</button>
+          <button class="secondary" id="walkStopBtn" type="button" disabled>Terminer</button>
+          <button class="secondary" id="walkClearBtn" type="button">Effacer la trace</button>
+        </div>
+
+        <div class="tiny" style="margin-top:8px">
+          L’activité “aujourd’hui” = minutes totalisées (marche enregistrée + marche en cours).
         </div>
       </div>
 
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🗺️ Carte</h2>
-        <div id="walkMap" style="height:320px;border-radius:14px;border:1px solid var(--line);background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Carte</h2>
+        </div>
+        <div id="walkMap" style="height:320px;border-radius:18px;border:1px solid var(--line);background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center">
           <div class="tiny" style="padding:14px;text-align:center;max-width:520px">
             La carte utilise OpenStreetMap (Leaflet) chargé en ligne.
-            Hors connexion : le suivi temps/distance marche, mais sans fond de carte.
+            Hors connexion : le suivi temps/distance marche fonctionne, mais sans fond de carte.
           </div>
         </div>
       </div>
 
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🧾 Historique</h2>
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Historique</h2>
+        </div>
         <div id="walkHistory" class="mealGrid"></div>
         <div class="footerBtns">
           <button class="secondary" id="walkExportBtn" type="button">Exporter (JSON)</button>
-          <button class="secondary" id="walkClearAllBtn" type="button">Tout effacer (marches)</button>
+          <button class="secondary" id="walkClearAllBtn" type="button">Tout effacer</button>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="section" id="secProfile">
+  <!-- ===== Profil ===== -->
+  <section class="section" id="secProfile">
+    <div class="stack">
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">👤 Profil (1 fois)</h2>
+        <div class="cardTitleRow">
+          <h2 class="cardTitle">Profil</h2>
+          <div class="smallMeta">1 fois</div>
+        </div>
+
         <div class="row">
           <div>
             <label>Taille (cm)</label>
@@ -312,22 +969,35 @@
             <input id="startWeight" type="number" step="0.1" inputmode="decimal" placeholder="115" />
           </div>
         </div>
+
         <div class="row">
           <div>
             <label>Objectif (kg)</label>
             <input id="targetWeight" type="number" step="0.1" inputmode="decimal" placeholder="85" />
           </div>
           <div>
+            <label>Objectif marche / jour (min)</label>
+            <input id="moveGoalMin" type="number" step="5" inputmode="numeric" placeholder="30" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
             <label>Ω-3 / semaine</label>
             <select id="omegaTarget">
               <option value="2">2 fois</option>
               <option value="3" selected>3 fois</option>
+              <option value="4">4 fois</option>
             </select>
+          </div>
+          <div>
+            <label>—</label>
+            <input value="Données stockées sur l’appareil" readonly />
           </div>
         </div>
 
         <div class="footerBtns">
-          <button id="saveProfileBtn" type="button">Enregistrer le profil</button>
+          <button id="saveProfileBtn" type="button">Enregistrer</button>
           <button class="secondary" id="exportBackupBtn" type="button">Backup (JSON)</button>
           <button class="secondary" id="importBackupBtn" type="button">Importer (JSON)</button>
           <button class="secondary" id="clearAllBtn" type="button">Tout effacer</button>
@@ -335,31 +1005,45 @@
 
         <input id="importFile" type="file" accept="application/json" style="display:none" />
       </div>
-    </section>
+    </div>
+  </section>
+</div>
+
+<!-- Bottom tabs -->
+<div class="tabBar">
+  <div class="tabBarInner">
+    <div class="tbBtn active" id="tabSummary" role="button" tabindex="0"><span class="tbIco">❤️</span> Résumé</div>
+    <div class="tbBtn" id="tabBrowse" role="button" tabindex="0"><span class="tbIco">📚</span> Parcourir</div>
+    <div class="tbBtn" id="tabMove" role="button" tabindex="0"><span class="tbIco">🚶</span> Activité</div>
+    <div class="tbBtn" id="tabProfile" role="button" tabindex="0"><span class="tbIco">👤</span> Profil</div>
   </div>
 </div>
 
 <script>
-/* ✅ Script robuste "anti page blanche" */
 document.addEventListener("DOMContentLoaded", () => {
-  // Affiche une alerte claire si une erreur JS arrive
   window.addEventListener("error", (e) => {
     alert("Erreur dans le script :\n" + (e?.message || "inconnue"));
   });
 
-  (function () {
+  (function(){
     "use strict";
 
-    // ====== CONFIG ======
     const STORAGE = {
-      PROFILE: "defi30_ultra_profile_v2",
-      WEIGHTS: "defi30_ultra_weights_v2",
-      MEAL_CHECKS: "defi30_ultra_meal_checks_v2",
-      WALKS: "defi30_ultra_walks_v1",
-      WALK_ACTIVE: "defi30_ultra_walk_active_v1",
+      PROFILE: "health30_profile_v2",
+      WEIGHTS: "health30_weights_v2",
+      MEAL_CHECKS: "health30_meal_checks_v2",
+      WALKS: "health30_walks_v2",
+      WALK_ACTIVE: "health30_walk_active_v2",
+      UI_RANGE: "health30_ui_range_v2",
     };
 
-    const DEFAULT_PROFILE = { heightCm: 173, startWeight: 115.0, targetWeight: 85.0, omegaTarget: 3 };
+    const DEFAULT_PROFILE = {
+      heightCm: 173,
+      startWeight: 115.0,
+      targetWeight: 85.0,
+      omegaTarget: 3,
+      moveGoalMin: 30
+    };
 
     const PROTEINS = ["Poulet","Œufs","Thon","Skyr","Sardines"];
     const WEEK_PLAN = {
@@ -369,23 +1053,94 @@ document.addEventListener("DOMContentLoaded", () => {
     const MEAL_DEFAULTS = { lunchSoupMl:700, dinnerSoupMl:450 };
 
     const MOTIVATION = [
-      "Chaque jour compte. Tu avances. 💪",
-      "Discipline aujourd’hui. Fierté demain. 🔥",
-      "Pas besoin d’être parfait, juste constant. ✅",
-      "1% mieux chaque jour. 🚀",
+      "Aperçu : poids, régularité, activité.",
+      "Une donnée par jour. Une tendance par semaine.",
+      "Simple, régulier, mesurable.",
+      "Aujourd’hui compte. Demain aussi.",
+      "Constance > perfection.",
     ];
 
     const GPS_OPTS = { enableHighAccuracy:true, maximumAge:1000, timeout:20000 };
 
-    // ====== UI helpers ======
     const $ = (id)=>document.getElementById(id);
     const exists = (id)=>!!document.getElementById(id);
 
     function setText(id, txt){ const el=$(id); if(el) el.textContent = txt; }
     function setHTML(id, html){ const el=$(id); if(el) el.innerHTML = html; }
-    function toggleActive(id, on){ const el=$(id); if(el) el.classList.toggle("active", !!on); }
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-    // ====== data helpers ======
+    // ===== Header shrink =====
+    (function initHeaderScroll(){
+      const h = document.querySelector("header");
+      if(!h) return;
+      let ticking=false;
+      const onScroll=()=>{
+        if(ticking) return;
+        ticking=true;
+        requestAnimationFrame(()=>{
+          h.classList.toggle("shrink", (window.scrollY||0) > 24);
+          ticking=false;
+        });
+      };
+      window.addEventListener("scroll", onScroll, {passive:true});
+      onScroll();
+    })();
+
+    // ===== Toasts =====
+    function toast(type, title, msg, ms=2200){
+      const box = $("toasts");
+      if(!box) return;
+      const el = document.createElement("div");
+      el.className = "toast " + (type||"");
+      const ico = type==="good" ? "✅" : type==="bad" ? "⛔" : "✨";
+      el.innerHTML = `
+        <div class="ico">${ico}</div>
+        <div>
+          <div class="title">${title||"Info"}</div>
+          <div class="msg">${msg||""}</div>
+        </div>
+        <button class="x" type="button" aria-label="Fermer">✕</button>
+      `;
+      const kill = ()=>{ el.style.opacity="0"; el.style.transform="translateY(8px)"; setTimeout(()=>el.remove(), 200); };
+      el.querySelector(".x").addEventListener("click", kill);
+      box.appendChild(el);
+      if(ms>0) setTimeout(kill, ms);
+      try{
+        if(navigator.vibrate){
+          if(type==="good") navigator.vibrate(18);
+          if(type==="bad") navigator.vibrate([10,20,10]);
+        }
+      }catch{}
+    }
+
+    // ===== Sheet =====
+    function openSheet(id){
+      const b = $("sheetBackdrop");
+      const s = $(id);
+      if(!b || !s) return;
+      b.classList.add("show");
+      s.classList.add("show");
+    }
+    function closeSheet(id){
+      const b = $("sheetBackdrop");
+      const s = $(id);
+      if(!b || !s) return;
+      s.classList.remove("show");
+      // on ferme backdrop si plus aucune sheet ouverte
+      setTimeout(()=>{
+        const anyOpen = document.querySelector(".sheet.show");
+        if(!anyOpen) b.classList.remove("show");
+      }, 50);
+    }
+    $("sheetBackdrop")?.addEventListener("click", ()=>{
+      document.querySelectorAll(".sheet.show").forEach(x=>x.classList.remove("show"));
+      $("sheetBackdrop")?.classList.remove("show");
+    });
+    document.querySelectorAll("[data-close]")?.forEach(btn=>{
+      btn.addEventListener("click", ()=> closeSheet(btn.getAttribute("data-close")));
+    });
+
+    // ===== JSON helpers =====
     function loadJSON(key, fallback){
       try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
       catch{ return fallback; }
@@ -400,13 +1155,15 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
-    // ====== small utils ======
+    // ===== Date utils =====
     function isoToday(){
-      const d=new Date(); const tz=d.getTimezoneOffset()*60000;
+      const d=new Date();
+      const tz=d.getTimezoneOffset()*60000;
       return new Date(d - tz).toISOString().slice(0,10);
     }
     function addDays(iso,n){
-      const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n);
+      const d=new Date(iso+"T00:00:00");
+      d.setDate(d.getDate()+n);
       const tz=d.getTimezoneOffset()*60000;
       return new Date(d - tz).toISOString().slice(0,10);
     }
@@ -414,42 +1171,170 @@ document.addEventListener("DOMContentLoaded", () => {
       const d=new Date(iso+"T00:00:00");
       return ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][d.getDay()];
     }
-    function fmt(n,d=1){
-      if(n===null||n===undefined||n==="") return "—";
-      const x=Number(n); if(Number.isNaN(x)) return "—";
-      return x.toFixed(d);
+    function sameIsoDay(ts, iso){
+      const d = new Date(ts);
+      const tz=d.getTimezoneOffset()*60000;
+      const isoTs = new Date(d - tz).toISOString().slice(0,10);
+      return isoTs === iso;
     }
+
     function pad2(n){ return String(n).padStart(2,"0"); }
     function fmtHMS(ms){
       const s=Math.max(0, Math.floor(ms/1000));
       const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
       return `${pad2(h)}:${pad2(m)}:${pad2(ss)}`;
     }
-
-    function haversineMeters(a,b){
-      const R=6371000;
-      const toRad=(x)=>x*Math.PI/180;
-      const dLat=toRad(b.lat-a.lat);
-      const dLon=toRad(b.lng-a.lng);
-      const lat1=toRad(a.lat), lat2=toRad(b.lat);
-      const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
-      const h=s1*s1 + Math.cos(lat1)*Math.cos(lat2)*s2*s2;
-      return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
+    function fmt(n,d=1){
+      if(n===null||n===undefined||n==="") return "—";
+      const x=Number(n);
+      if(Number.isNaN(x)) return "—";
+      return x.toFixed(d);
     }
 
-    // ====== Tabs ======
-    function setTab(which){
-      const tabs=[["tabToday","secToday"],["tabMeals","secMeals"],["tabWalk","secWalk"],["tabProfile","secProfile"]];
-      tabs.forEach(([t,s])=>{
-        toggleActive(t, t===which);
-        toggleActive(s, t===which);
+    // ===== Profile =====
+    function loadProfile(){
+      let p = loadJSON(STORAGE.PROFILE, null);
+      if(!p){ p = DEFAULT_PROFILE; saveJSON(STORAGE.PROFILE, p); }
+      if(typeof p.moveGoalMin!=="number") p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
+      return p;
+    }
+
+    // ===== Weights =====
+    function loadWeights(){
+      const rows = loadJSON(STORAGE.WEIGHTS, []);
+      return Array.isArray(rows)
+        ? rows.filter(r=>r && r.date && typeof r.date==="string").sort((a,b)=>a.date.localeCompare(b.date))
+        : [];
+    }
+    function saveWeight(dateISO, weight){
+      const rows = loadWeights();
+      const idx = rows.findIndex(r=>r.date===dateISO);
+      const row = { date:dateISO, weight:Number(weight) };
+      if(idx>=0) rows[idx]=row; else rows.push(row);
+      rows.sort((a,b)=>a.date.localeCompare(b.date));
+      saveJSON(STORAGE.WEIGHTS, rows);
+    }
+
+    function computeStreak(rows){
+      const dates = rows
+        .filter(r=>typeof r.weight==="number" && r.date)
+        .map(r=>r.date)
+        .sort();
+      if(!dates.length) return 0;
+
+      let streak = 1;
+      for(let i=dates.length-1;i>0;i--){
+        const d1 = new Date(dates[i]+"T00:00:00");
+        const d0 = new Date(dates[i-1]+"T00:00:00");
+        const diffDays = Math.round((d1-d0)/(24*3600*1000));
+        if(diffDays===1) streak++;
+        else if(diffDays===0) continue;
+        else break;
+      }
+      return streak;
+    }
+
+    function computeStats(profile, rows){
+      const withW = rows.filter(r=>typeof r.weight==="number");
+      const current = withW.length ? withW[withW.length-1].weight : null;
+      const lost = (current!=null) ? (Number(profile.startWeight) - current) : null;
+
+      const last7 = withW.slice(-7).map(r=>r.weight);
+      const avg7 = last7.length ? last7.reduce((a,b)=>a+b,0)/last7.length : null;
+
+      const prev7 = withW.slice(-14,-7).map(r=>r.weight);
+      const avgPrev7 = prev7.length ? prev7.reduce((a,b)=>a+b,0)/prev7.length : null;
+
+      return { current, lost, avg7, avgPrev7, count: withW.length };
+    }
+
+    function computeBMI(profile, current){
+      const h = Number(profile.heightCm);
+      if(!h || !current) return null;
+      const m = h/100;
+      return current/(m*m);
+    }
+
+    function estimateETA(profile, stats){
+      const tw = Number(profile.targetWeight);
+      const cur = stats.current;
+      if(cur==null || Number.isNaN(tw)) return null;
+
+      const remaining = cur - tw;
+      if(remaining <= 0) return { text:"Objectif atteint", date:null };
+
+      if(stats.avg7==null || stats.avgPrev7==null) return { text:"Ajoute plus de données", date:null };
+
+      const weeklyLoss = (stats.avgPrev7 - stats.avg7); // baisse => positif
+      if(weeklyLoss <= 0.05) return { text:"Tendance stable", date:null };
+
+      const weeks = remaining / weeklyLoss;
+      const days = Math.ceil(weeks*7);
+      const eta = new Date();
+      eta.setDate(eta.getDate()+days);
+      return { text:`≈ ${days} jours`, date:eta };
+    }
+
+    function coachMessage(stats){
+      if(stats.current==null) return null;
+      if(stats.avg7==null) return "Ajoute 7 pesées pour obtenir une tendance fiable.";
+      const diff = stats.current - stats.avg7;
+      if(diff < -0.2) return "Sous la moyenne 7 jours — bon signal. Continue.";
+      if(diff >  0.2) return "Au-dessus de la moyenne 7 jours — possible rebond (sel, sommeil, eau).";
+      return "Tendance régulière — vise la constance.";
+    }
+
+    // ===== Chart range =====
+    function loadRange(){ return loadJSON(STORAGE.UI_RANGE, "7") || "7"; }
+    function saveRange(v){ saveJSON(STORAGE.UI_RANGE, v); }
+
+    function filterByRange(rows, range){
+      const withW = rows.filter(r=>typeof r.weight==="number");
+      if(range==="all") return withW;
+      const days = Number(range);
+      if(!days || Number.isNaN(days)) return withW;
+      const end = withW.length ? new Date(withW[withW.length-1].date+"T00:00:00").getTime() : Date.now();
+      const start = end - (days-1)*24*3600*1000;
+      return withW.filter(r=>{
+        const t = new Date(r.date+"T00:00:00").getTime();
+        return t >= start && t <= end;
       });
     }
 
-    // ====== Meals ======
+    // ===== Rings =====
+    function setRingProgressEl(id, pct){
+      const el = document.getElementById(id);
+      if(!el) return;
+      const p = clamp(Number(pct)||0, 0, 100);
+      el.style.setProperty("--p", p.toFixed(0) + "%");
+      el.classList.remove("pop");
+      void el.offsetWidth;
+      el.classList.add("pop");
+      setTimeout(()=>el.classList.remove("pop"), 260);
+    }
+
+    function updateRings({goalPct, streakPct, movePct, goalText, streakText, moveText}){
+      setRingProgressEl("ringGoal", goalPct);
+      setRingProgressEl("ringStreak", streakPct);
+      setRingProgressEl("ringMove", movePct);
+
+      setText("ringGoalText", goalText || "—");
+      setText("ringStreakText", streakText || "—");
+      setText("ringMoveText", moveText || "—");
+
+      setText("msGoal", `🎯 ${Math.round(goalPct)}%`);
+      setText("msStreak", `🔥 ${streakText || "—"}`);
+      setText("msMove", `🚶 ${moveText || "—"}`);
+    }
+
+    // ===== Meals =====
+    function mealKey(dateISO, mealType){ return dateISO + "_" + mealType; }
+    function loadMealChecks(){ return loadJSON(STORAGE.MEAL_CHECKS, {}); }
+    function saveMealChecks(obj){ saveJSON(STORAGE.MEAL_CHECKS, obj); }
+
     function mealCard(dateISO, mealType){
-      const checks = loadJSON(STORAGE.MEAL_CHECKS, {});
-      const key = dateISO + "_" + mealType;
+      const checks = loadMealChecks();
+      const key = mealKey(dateISO, mealType);
       const done = !!checks[key];
 
       const weekday = new Date(dateISO+"T00:00:00").getDay();
@@ -471,14 +1356,14 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="item">
           <div class="left">
             <div class="icon">🥣</div>
-            <div><b>Soupe maison</b><div class="muted">${soupMl} ml</div></div>
+            <div><b>Soupe maison</b><div class="tiny">${soupMl} ml</div></div>
           </div>
         </div>
 
         <div class="item">
           <div class="left">
             <div class="icon">🍗</div>
-            <div><b>Protéines</b><div class="muted">${mealType==="lunch" ? "≈ 200 g" : "portion légère"}</div></div>
+            <div><b>Protéines</b><div class="tiny">${mealType==="lunch" ? "≈ 200 g" : "portion légère"}</div></div>
           </div>
           <div style="min-width:120px">
             <select aria-label="Protéines">
@@ -491,102 +1376,32 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="item">
           <div class="left">
             <div class="icon">🫒</div>
-            <div><b>Huile d’olive</b><div class="muted">1 c. à café</div></div>
+            <div><b>Huile d’olive</b><div class="tiny">1 c. à café</div></div>
           </div>
         </div>` : ""}
       `;
 
       const cb = el.querySelector('input[type="checkbox"]');
       cb.addEventListener("change", ()=>{
-        const st=loadJSON(STORAGE.MEAL_CHECKS,{});
-        st[key]=cb.checked;
-        saveJSON(STORAGE.MEAL_CHECKS, st);
+        const st = loadMealChecks();
+        st[key] = cb.checked;
+        saveMealChecks(st);
+        toast("good","Repas", cb.checked ? "Repas coché." : "Coche retirée.", 1400);
+        render();
       });
+
       return el;
     }
 
-    // ====== Weights ======
-    function loadWeights(){
-      const rows = loadJSON(STORAGE.WEIGHTS, []);
-      return Array.isArray(rows) ? rows.filter(r=>r && r.date).sort((a,b)=>a.date.localeCompare(b.date)) : [];
-    }
-    function saveWeight(dateISO, weight){
-      const rows = loadWeights();
-      const idx = rows.findIndex(r=>r.date===dateISO);
-      const row = {date:dateISO, weight:Number(weight)};
-      if(idx>=0) rows[idx]=row; else rows.push(row);
-      rows.sort((a,b)=>a.date.localeCompare(b.date));
-      saveJSON(STORAGE.WEIGHTS, rows);
-    }
-    function computeStats(profile, rows){
-      const withW=rows.filter(r=>typeof r.weight==="number");
-      const current=withW.length ? withW[withW.length-1].weight : null;
-      const lost=(current!=null) ? (profile.startWeight - current) : null;
-      const last7=withW.slice(-7).map(r=>r.weight);
-      const avg7=last7.length ? last7.reduce((a,b)=>a+b,0)/last7.length : null;
-      return {current, lost, avg7};
+    function computeMealsDone(todayISO){
+      const st = loadMealChecks();
+      const a = !!st[mealKey(todayISO,"lunch")];
+      const b = !!st[mealKey(todayISO,"dinner")];
+      const done = (a?1:0) + (b?1:0);
+      return { done, total:2 };
     }
 
-    function drawChart(rows){
-      const c=$("chart");
-      if(!c) return;
-      const ctx=c.getContext("2d");
-      const W=c.width, H=c.height; ctx.clearRect(0,0,W,H);
-
-      const pts=rows.filter(r=>typeof r.weight==="number")
-        .map(r=>({x:new Date(r.date).getTime(), y:r.weight}))
-        .sort((a,b)=>a.x-b.x);
-
-      const padL=52,padR=14,padT=16,padB=30;
-      ctx.strokeStyle="rgba(229,231,235,1)";
-      ctx.lineWidth=1;
-      ctx.strokeRect(padL,padT,W-padL-padR,H-padT-padB);
-
-      ctx.fillStyle="rgba(107,114,128,1)";
-      ctx.font="14px system-ui";
-      if(pts.length<2){
-        ctx.fillText("Ajoute 2 pesées pour voir la courbe.", padL+12, padT+28);
-        return;
-      }
-
-      const minX=pts[0].x, maxX=pts[pts.length-1].x;
-      const ys=pts.map(p=>p.y);
-      let minY=Math.min(...ys), maxY=Math.max(...ys);
-      const margin=Math.max(0.8,(maxY-minY)*0.15);
-      minY-=margin; maxY+=margin;
-
-      const plotW=W-padL-padR, plotH=H-padT-padB;
-      const xToPx=x=>padL+((x-minX)/(maxX-minX))*plotW;
-      const yToPx=y=>padT+(1-((y-minY)/(maxY-minY)))*plotH;
-
-      ctx.strokeStyle="rgba(229,231,235,1)";
-      ctx.fillStyle="rgba(107,114,128,1)";
-      ctx.font="12px system-ui";
-      for(let i=0;i<=4;i++){
-        const t=i/4;
-        const yVal=maxY-t*(maxY-minY);
-        const y=yToPx(yVal);
-        ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
-        ctx.fillText(yVal.toFixed(1), 10, y+4);
-      }
-
-      ctx.strokeStyle="rgba(249,115,22,1)";
-      ctx.lineWidth=2.6;
-      ctx.beginPath();
-      pts.forEach((p,i)=>{
-        const x=xToPx(p.x), y=yToPx(p.y);
-        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-      });
-      ctx.stroke();
-
-      ctx.fillStyle="rgba(249,115,22,1)";
-      pts.forEach(p=>{
-        const x=xToPx(p.x), y=yToPx(p.y);
-        ctx.beginPath(); ctx.arc(x,y,3.2,0,Math.PI*2); ctx.fill();
-      });
-    }
-
-    // ====== Walk ======
+    // ===== Walk =====
     let watchId=null, timerId=null;
     let walkMap=null, walkLine=null, walkMarker=null;
 
@@ -594,6 +1409,17 @@ document.addEventListener("DOMContentLoaded", () => {
     function setActiveWalk(w){ if(!w) del(STORAGE.WALK_ACTIVE); else saveJSON(STORAGE.WALK_ACTIVE, w); }
     function loadWalks(){ const rows = loadJSON(STORAGE.WALKS, []); return Array.isArray(rows)?rows:[]; }
     function saveWalks(rows){ saveJSON(STORAGE.WALKS, rows); }
+
+    function haversineMeters(a,b){
+      const R=6371000;
+      const toRad=(x)=>x*Math.PI/180;
+      const dLat=toRad(b.lat-a.lat);
+      const dLon=toRad(b.lng-a.lng);
+      const lat1=toRad(a.lat), lat2=toRad(b.lat);
+      const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
+      const h=s1*s1 + Math.cos(lat1)*Math.cos(lat2)*s2*s2;
+      return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
+    }
 
     function stopWatchAndTimer(){
       if(watchId!=null){ try{ navigator.geolocation.clearWatch(watchId); }catch{} watchId=null; }
@@ -603,7 +1429,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function ensureLeafletMap(){
       const box = $("walkMap");
       if(!box) return;
-      if(typeof L==="undefined") return; // offline / bloqué
+      if(typeof L==="undefined") return;
       if(walkMap) return;
 
       walkMap = L.map(box, { zoomControl:true });
@@ -641,7 +1467,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const elapsed = w?.active ? (now - w.startedAt) : (w?.elapsedMs || 0);
       const distM = w?.distanceM || 0;
 
-      $("walkStatus").value = w?.active ? "En cours…" : "Prêt";
+      $("walkStatus").value = w?.active ? "En cours" : "Prêt";
       $("walkTime").value = fmtHMS(elapsed);
       $("walkDistance").value = (distM/1000).toFixed(2) + " km";
 
@@ -660,7 +1486,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const walks=loadWalks();
       if(!walks.length){
-        box.innerHTML = `<div class="tiny">Aucune marche enregistrée pour l’instant.</div>`;
+        box.innerHTML = `<div class="tiny">Aucune marche enregistrée.</div>`;
         return;
       }
 
@@ -682,7 +1508,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="histTitle">Marche • ${d}</div>
               <div class="histMeta">
                 Début : ${t}<br>
-                Durée : ${fmtHMS(w.elapsedMs||0)} • Distance : ${km.toFixed(2)} km • Vitesse moy : ${v.toFixed(1)} km/h
+                Durée : ${fmtHMS(w.elapsedMs||0)} • Distance : ${km.toFixed(2)} km • Vitesse : ${v.toFixed(1)} km/h
               </div>
             </div>
             <div class="tiny">${(w.points?.length||0)} pts</div>
@@ -699,17 +1525,20 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.addEventListener("click", ()=>{
           const id=btn.getAttribute("data-view");
           const w=loadWalks().find(x=>x.id===id);
-          if(!w?.points?.length){ alert("Aucun point GPS."); return; }
-          setTab("tabWalk");
-          setTimeout(()=>renderWalkOnMap(w.points,true), 50);
+          if(!w?.points?.length){ toast("bad","Carte","Aucun point GPS."); return; }
+          setTab("move");
+          setTimeout(()=>renderWalkOnMap(w.points,true), 60);
+          toast("info","Carte","Trace chargée.", 1400);
         });
       });
+
       box.querySelectorAll("[data-del]").forEach(btn=>{
         btn.addEventListener("click", ()=>{
           const id=btn.getAttribute("data-del");
           if(!confirm("Supprimer cette marche ?")) return;
           saveWalks(loadWalks().filter(w=>w.id!==id));
-          renderWalkUI();
+          toast("good","Marche","Supprimée.", 1400);
+          render();
         });
       });
     }
@@ -721,13 +1550,9 @@ document.addEventListener("DOMContentLoaded", () => {
       renderWalkHistory();
     }
 
-    function startWalk(){
-      if(!navigator.geolocation){ alert("Géolocalisation non disponible."); return; }
-      if(getActiveWalk()?.active){ alert("Une marche est déjà en cours."); return; }
-
-      const w={ id:"walk_"+Date.now(), active:true, startedAt:Date.now(), elapsedMs:0, distanceM:0, points:[] };
-      setActiveWalk(w);
-      renderWalkUI();
+    function beginWatch(){
+      if(!navigator.geolocation){ toast("bad","GPS","Géolocalisation indisponible."); return; }
+      if(watchId!=null) return;
 
       watchId = navigator.geolocation.watchPosition((pos)=>{
         const cur=getActiveWalk();
@@ -735,36 +1560,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const p={ t:Date.now(), lat:pos.coords.latitude, lng:pos.coords.longitude, acc:pos.coords.accuracy };
 
-        if(typeof p.acc==="number" && p.acc>60){
+        if(typeof p.acc==="number" && p.acc>65){
           if(cur.points.length>0) return;
         }
 
         const last=cur.points[cur.points.length-1];
         if(last){
           const d=haversineMeters({lat:last.lat,lng:last.lng},{lat:p.lat,lng:p.lng});
-          if(d>150) return;
+          if(d>180) return;
+          if(d<1.2) return;
           cur.distanceM += d;
         }
         cur.points.push(p);
         setActiveWalk(cur);
         renderWalkUI(true);
+        renderHeaderAndRings();
       }, (err)=>{
         let msg="Erreur GPS.";
         if(err?.code===1) msg="Permission refusée : autorise Position dans Safari.";
         if(err?.code===2) msg="Position indisponible (essaie dehors).";
         if(err?.code===3) msg="Timeout GPS (réessaie).";
-        alert(msg);
+        toast("bad","GPS",msg, 2600);
         renderWalkUI();
       }, GPS_OPTS);
+    }
 
+    function ensureTimer(){
+      if(timerId!=null) return;
       timerId = setInterval(()=>{
-        if(getActiveWalk()?.active) renderWalkUI(true);
+        const cur=getActiveWalk();
+        if(cur?.active){
+          renderWalkUI(true);
+          renderHeaderAndRings();
+        }
       }, 1000);
+    }
+
+    function startWalk(){
+      if(!navigator.geolocation){ toast("bad","GPS","Géolocalisation indisponible."); return; }
+      const cur=getActiveWalk();
+      if(cur?.active){ toast("bad","Marche","Une marche est déjà en cours."); return; }
+
+      const w={ id:"walk_"+Date.now(), active:true, startedAt:Date.now(), elapsedMs:0, distanceM:0, points:[] };
+      setActiveWalk(w);
+      renderWalkUI();
+      toast("info","Marche","Démarrée.", 1400);
+      beginWatch();
+      ensureTimer();
     }
 
     function stopWalk(){
       const cur=getActiveWalk();
-      if(!cur?.active){ alert("Aucune marche en cours."); return; }
+      if(!cur?.active){ toast("bad","Marche","Aucune marche en cours."); return; }
 
       cur.active=false;
       cur.endedAt=Date.now();
@@ -777,7 +1624,8 @@ document.addEventListener("DOMContentLoaded", () => {
       setActiveWalk(null);
       stopWatchAndTimer();
       renderWalkUI();
-      alert("Marche enregistrée ✅");
+      render();
+      toast("good","Marche","Enregistrée ✅", 1800);
     }
 
     function clearActiveTrace(){
@@ -786,18 +1634,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if(!confirm("Effacer la trace de la marche en cours ?")) return;
         cur.points=[]; cur.distanceM=0;
         setActiveWalk(cur);
+        toast("info","Trace","Effacée.", 1400);
         renderWalkUI();
+        renderHeaderAndRings();
         return;
       }
       if(!confirm("Effacer la trace affichée sur la carte (sans toucher à l’historique) ?")) return;
       if(walkLine) walkLine.setLatLngs([]);
       if(walkMarker && walkMap){ try{ walkMap.removeLayer(walkMarker);}catch{} walkMarker=null; }
-      renderWalkUI();
+      toast("info","Carte","Trace retirée.", 1400);
     }
 
     function exportWalks(){
       const payload={ version:1, exportedAt:new Date().toISOString(), walks:loadWalks() };
-      downloadText("defi30_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+      downloadText("health30_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+      toast("good","Export","Marche exportée.", 1400);
     }
 
     function clearAllWalks(){
@@ -806,85 +1657,594 @@ document.addEventListener("DOMContentLoaded", () => {
       setActiveWalk(null);
       stopWatchAndTimer();
       renderWalkUI();
+      render();
+      toast("info","Marche","Historique effacé.", 1600);
     }
 
-    function initWalkUI(){
-      if(exists("walkStartBtn")){
-        $("walkStartBtn").onclick = startWalk;
-        $("walkStopBtn").onclick  = stopWalk;
-        $("walkClearBtn").onclick = clearActiveTrace;
-        $("walkExportBtn").onclick = exportWalks;
-        $("walkClearAllBtn").onclick = clearAllWalks;
+    function computeMoveMinutesToday(todayISO){
+      const walks = loadWalks();
+      let min = 0;
+
+      walks.forEach(w=>{
+        if(w?.startedAt && sameIsoDay(w.startedAt, todayISO)){
+          min += (w.elapsedMs||0)/60000;
+        }
+      });
+
+      const active = getActiveWalk();
+      if(active?.active && active?.startedAt && sameIsoDay(active.startedAt, todayISO)){
+        min += (Date.now() - active.startedAt)/60000;
       }
 
-      // reprise si marche active
-      const cur=getActiveWalk();
-      if(cur?.active && navigator.geolocation){
-        if(timerId==null){
-          timerId=setInterval(()=>{ if(getActiveWalk()?.active) renderWalkUI(true); }, 1000);
-        }
-        if(watchId==null){
-          watchId = navigator.geolocation.watchPosition(()=>{}, ()=>{}, GPS_OPTS);
-          // ⚠️ on ne duplique pas la logique ici : startWalk gère le vrai suivi.
-          // Si tu veux une reprise parfaite après refresh, dis-moi et je te le fais.
-          try{ navigator.geolocation.clearWatch(watchId); }catch{}
-          watchId=null;
-          // On relance proprement en demandant au user de retoucher "Début"
-        }
-      }
-
-      renderWalkUI();
+      return min;
     }
 
-    // ====== Render global ======
+    // ===== Backup =====
+    function exportBackup(){
+      const payload={
+        version:2,
+        exportedAt:new Date().toISOString(),
+        profile: loadProfile(),
+        weights: loadWeights(),
+        mealChecks: loadMealChecks(),
+        walks: loadWalks(),
+        walkActive: getActiveWalk()
+      };
+      downloadText("health30_backup.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+      toast("good","Backup","Exporté.", 1400);
+    }
+
+    async function importBackupFile(file){
+      const text = await file.text();
+      const payload = JSON.parse(text);
+      if(!payload) throw new Error("Fichier invalide");
+      if(!confirm("Importer ce backup et remplacer tes données ?")) return;
+
+      if(payload.profile) saveJSON(STORAGE.PROFILE, payload.profile);
+      if(Array.isArray(payload.weights)) saveJSON(STORAGE.WEIGHTS, payload.weights);
+      if(payload.mealChecks) saveJSON(STORAGE.MEAL_CHECKS, payload.mealChecks);
+      if(Array.isArray(payload.walks)) saveJSON(STORAGE.WALKS, payload.walks);
+      if(payload.walkActive) saveJSON(STORAGE.WALK_ACTIVE, payload.walkActive);
+
+      stopWatchAndTimer();
+      const aw = getActiveWalk();
+      if(aw?.active){ beginWatch(); ensureTimer(); }
+
+      render();
+      toast("good","Import","Terminé ✅", 1800);
+    }
+
+    // ===== Chart (interactive) =====
+    let lastChartPoints = []; // [{xPx,yPx,date,weight}]
+    let chartSelectedIndex = null;
+
+    function drawWeightChart(profile, rows, range){
+      const c=$("chart");
+      if(!c) return;
+      const ctx=c.getContext("2d");
+      const W=c.width, H=c.height;
+
+      ctx.clearRect(0,0,W,H);
+
+      const data = filterByRange(rows, range)
+        .map(r=>({x:new Date(r.date+"T00:00:00").getTime(), y:r.weight, d:r.date}))
+        .sort((a,b)=>a.x-b.x);
+
+      const padL=56, padR=16, padT=14, padB=34;
+      const plotW=W-padL-padR, plotH=H-padT-padB;
+
+      // bg
+      ctx.fillStyle="#fff";
+      ctx.fillRect(0,0,W,H);
+
+      // border
+      ctx.strokeStyle="rgba(17,24,39,.08)";
+      ctx.lineWidth=1;
+      ctx.strokeRect(0.5,0.5,W-1,H-1);
+
+      ctx.fillStyle="rgba(17,24,39,.55)";
+      ctx.font="13px -apple-system, system-ui";
+
+      lastChartPoints = [];
+      if(data.length<2){
+        ctx.fillText("Ajoute 2 pesées pour afficher la courbe.", 16, 28);
+        chartSelectedIndex = null;
+        return;
+      }
+
+      const minX=data[0].x, maxX=data[data.length-1].x;
+      const ys=data.map(p=>p.y);
+      let minY=Math.min(...ys), maxY=Math.max(...ys);
+      const margin=Math.max(0.8,(maxY-minY)*0.20);
+      minY-=margin; maxY+=margin;
+
+      const xToPx=x=>padL+((x-minX)/(maxX-minX))*plotW;
+      const yToPx=y=>padT+(1-((y-minY)/(maxY-minY)))*plotH;
+
+      // grid
+      ctx.strokeStyle="rgba(17,24,39,.06)";
+      ctx.lineWidth=1;
+      ctx.font="12px -apple-system, system-ui";
+      ctx.fillStyle="rgba(17,24,39,.45)";
+      for(let i=0;i<=4;i++){
+        const t=i/4;
+        const yVal=maxY-t*(maxY-minY);
+        const y=yToPx(yVal);
+        ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+        ctx.fillText(yVal.toFixed(1), 12, y+4);
+      }
+
+      // target line
+      const tw = Number(profile.targetWeight);
+      if(!Number.isNaN(tw)){
+        const yT = yToPx(tw);
+        ctx.setLineDash([6,6]);
+        ctx.strokeStyle="rgba(255,45,85,.32)";
+        ctx.beginPath(); ctx.moveTo(padL,yT); ctx.lineTo(W-padR,yT); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // curve
+      ctx.strokeStyle="rgba(255,45,85,.95)";
+      ctx.lineWidth=2.8;
+      ctx.lineJoin="round";
+      ctx.lineCap="round";
+      ctx.beginPath();
+      data.forEach((p,i)=>{
+        const x=xToPx(p.x), y=yToPx(p.y);
+        if(i===0) ctx.moveTo(x,y);
+        else{
+          const prev=data[i-1];
+          const x0=xToPx(prev.x), y0=yToPx(prev.y);
+          const cx=(x0+x)/2;
+          ctx.quadraticCurveTo(cx,y0, x,y);
+        }
+      });
+      ctx.stroke();
+
+      // points
+      data.forEach((p,i)=>{
+        const x=xToPx(p.x), y=yToPx(p.y);
+        lastChartPoints.push({ xPx:x, yPx:y, date:p.d, weight:p.y });
+      });
+
+      ctx.fillStyle="rgba(255,45,85,1)";
+      lastChartPoints.forEach(p=>{
+        ctx.beginPath(); ctx.arc(p.xPx,p.yPx,3.2,0,Math.PI*2); ctx.fill();
+      });
+
+      // selection
+      if(chartSelectedIndex!=null && lastChartPoints[chartSelectedIndex]){
+        const sp = lastChartPoints[chartSelectedIndex];
+        // vertical guide
+        ctx.strokeStyle="rgba(17,24,39,.18)";
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(sp.xPx, padT);
+        ctx.lineTo(sp.xPx, H-padB);
+        ctx.stroke();
+
+        // highlight dot
+        ctx.fillStyle="#fff";
+        ctx.beginPath(); ctx.arc(sp.xPx, sp.yPx, 6.5, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle="rgba(255,45,85,1)";
+        ctx.lineWidth=2;
+        ctx.beginPath(); ctx.arc(sp.xPx, sp.yPx, 6.5, 0, Math.PI*2); ctx.stroke();
+      }
+    }
+
+    function pickClosestPoint(clientX){
+      const wrap = document.querySelector(".chartWrap");
+      const c = $("chart");
+      if(!wrap || !c || !lastChartPoints.length) return null;
+      const rect = c.getBoundingClientRect();
+      const x = clientX - rect.left;
+      // convert to canvas pixel scale
+      const scaleX = c.width / rect.width;
+      const xCanvas = x * scaleX;
+
+      let bestI = 0;
+      let bestD = Infinity;
+      for(let i=0;i<lastChartPoints.length;i++){
+        const d = Math.abs(lastChartPoints[i].xPx - xCanvas);
+        if(d<bestD){ bestD=d; bestI=i; }
+      }
+      return bestI;
+    }
+
+    function showHint(i){
+      const hint = $("chartHint");
+      if(!hint || i==null || !lastChartPoints[i]) return;
+      const p = lastChartPoints[i];
+      hint.textContent = `${p.date} • ${p.weight.toFixed(1)} kg`;
+      hint.classList.add("show");
+    }
+    function hideHint(){
+      $("chartHint")?.classList.remove("show");
+    }
+
+    function wireChartInteractions(){
+      const c = $("chart");
+      if(!c) return;
+
+      const onMove = (clientX)=>{
+        const i = pickClosestPoint(clientX);
+        if(i==null) return;
+        chartSelectedIndex = i;
+        showHint(i);
+        renderChartOnly();
+      };
+
+      const onDown = (e)=>{
+        if(!lastChartPoints.length) return;
+        e.preventDefault();
+        const x = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        onMove(x);
+      };
+
+      const onMoveEvt = (e)=>{
+        if(!lastChartPoints.length) return;
+        const x = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+        onMove(x);
+      };
+
+      const onUp = ()=>{
+        // on laisse la sélection visible mais on cache le hint après un délai
+        setTimeout(hideHint, 900);
+      };
+
+      c.addEventListener("mousedown", onDown);
+      c.addEventListener("mousemove", (e)=>{ if(e.buttons===1) onMoveEvt(e); });
+      window.addEventListener("mouseup", onUp);
+
+      c.addEventListener("touchstart", onDown, {passive:false});
+      c.addEventListener("touchmove", onMoveEvt, {passive:true});
+      c.addEventListener("touchend", onUp, {passive:true});
+    }
+
+    // ===== Range buttons =====
+    function setRangeUI(v){
+      const map = { "7":"range7", "30":"range30", "180":"range180", "365":"range365", "all":"rangeAll" };
+      Object.values(map).forEach(id=>$(id)?.classList.remove("active"));
+      const btnId = map[v] || "range7";
+      $(btnId)?.classList.add("active");
+      // using secondary buttons: apply active look by switching to primary-ish
+      ["range7","range30","range180","range365","rangeAll"].forEach(id=>{
+        const b = $(id);
+        if(!b) return;
+        const is = id===btnId;
+        b.style.borderColor = is ? "rgba(255,45,85,.25)" : "rgba(17,24,39,.08)";
+        b.style.background = is ? "rgba(255,45,85,.06)" : "#fff";
+        b.style.color = is ? "rgba(17,24,39,.88)" : "rgba(17,24,39,.78)";
+      });
+    }
+
+    function renderChartOnly(){
+      const profile = loadProfile();
+      const rows = loadWeights();
+      const range = loadRange();
+      drawWeightChart(profile, rows, range);
+    }
+
+    // ===== Categories list =====
+    function buildCategories(){
+      const list = $("catList");
+      if(!list) return;
+      const profile = loadProfile();
+      const rows = loadWeights();
+      const stats = computeStats(profile, rows);
+      const today = isoToday();
+      const moveMin = computeMoveMinutesToday(today);
+      const meals = computeMealsDone(today);
+
+      const items = [
+        { key:"weight", ico:"⚖️", title:"Poids", sub: stats.current!=null ? `Dernier : ${stats.current.toFixed(1)} kg` : "Ajoute une pesée", action:()=>openSheet("sheetWeight") },
+        { key:"trend", ico:"📈", title:"Tendances", sub: stats.avg7!=null ? `Moyenne 7j : ${stats.avg7.toFixed(1)} kg` : "Besoin de 7 pesées", action:()=>{ window.scrollTo({top:0,behavior:"smooth"}); } },
+        { key:"move", ico:"🚶", title:"Activité", sub: `${Math.round(moveMin)} min aujourd’hui`, action:()=>openSheet("sheetMove") },
+        { key:"meals", ico:"🍽️", title:"Repas", sub: `${meals.done}/${meals.total} cochés aujourd’hui`, action:()=>{ setTab("browse"); window.scrollTo({top:0,behavior:"smooth"}); } },
+        { key:"walk", ico:"🗺️", title:"Marche (carte)", sub:"Enregistrement + historique", action:()=>setTab("move") },
+        { key:"backup", ico:"💾", title:"Backup", sub:"Exporter / importer les données", action:()=>setTab("profile") },
+      ];
+
+      list.innerHTML = "";
+      items.forEach(it=>{
+        const row = document.createElement("div");
+        row.className = "listRow";
+        row.innerHTML = `
+          <div class="lrLeft">
+            <div class="lrIco">${it.ico}</div>
+            <div class="lrTxt">
+              <div class="lrTitle">${it.title}</div>
+              <div class="lrSub">${it.sub}</div>
+            </div>
+          </div>
+          <div class="lrRight">›</div>
+        `;
+        row.addEventListener("click", it.action);
+        list.appendChild(row);
+      });
+    }
+
+    // ===== Tab navigation =====
+    function setTab(which){
+      const map = {
+        summary: ["secSummary", "tabSummary"],
+        browse:  ["secBrowse",  "tabBrowse"],
+        move:    ["secMove",    "tabMove"],
+        profile: ["secProfile", "tabProfile"]
+      };
+
+      Object.values(map).forEach(([secId, tabId])=>{
+        $(secId)?.classList.remove("active");
+        $(tabId)?.classList.remove("active");
+      });
+
+      const [secId, tabId] = map[which] || map.summary;
+      $(secId)?.classList.add("active");
+      $(tabId)?.classList.add("active");
+
+      // bonus: si on va sur move -> refresh map UI
+      if(which==="move") setTimeout(()=>renderWalkUI(true), 50);
+    }
+
+    ["tabSummary","tabBrowse","tabMove","tabProfile"].forEach(id=>{
+      $(id)?.addEventListener("click", ()=>{
+        const k = id==="tabSummary" ? "summary" : id==="tabBrowse" ? "browse" : id==="tabMove" ? "move" : "profile";
+        setTab(k);
+      });
+      $(id)?.addEventListener("keydown", (e)=>{
+        if(e.key==="Enter" || e.key===" "){
+          e.preventDefault();
+          $(id).click();
+        }
+      });
+    });
+
+    // ===== Header + Rings + badges =====
+    function renderHeaderAndRings(){
+      const profile = loadProfile();
+      const rows = loadWeights();
+      const stats = computeStats(profile, rows);
+
+      const idx = Math.floor(Date.now()/(10*60*1000)) % MOTIVATION.length;
+      setText("headerSubtitle", MOTIVATION[idx]);
+      setText("headerPill", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
+
+      const sw = Number(profile.startWeight);
+      const tw = Number(profile.targetWeight);
+      let goalPct = 0;
+      if(!Number.isNaN(sw) && !Number.isNaN(tw) && stats.current!=null){
+        const total = (sw - tw);
+        const done  = (sw - stats.current);
+        goalPct = total>0 ? (done/total)*100 : 0;
+        goalPct = clamp(goalPct, 0, 100);
+      }
+
+      const streak = computeStreak(rows);
+      const streakPct = clamp((streak/21)*100, 0, 100);
+
+      const todayISO = isoToday();
+      const moveMin = computeMoveMinutesToday(todayISO);
+      const goalMin = Number(profile.moveGoalMin) || DEFAULT_PROFILE.moveGoalMin;
+      const movePct = clamp((moveMin/goalMin)*100, 0, 100);
+
+      updateRings({
+        goalPct,
+        streakPct,
+        movePct,
+        goalText: (stats.current!=null && !Number.isNaN(tw)) ? `${fmt(stats.current,1)} → ${fmt(tw,1)} kg` : "—",
+        streakText: streak ? `${streak} j` : "—",
+        moveText: `${Math.round(moveMin)} / ${goalMin} min`
+      });
+    }
+
+    function renderTodayBadges(){
+      const box = $("todayBadges");
+      if(!box) return;
+
+      const today = isoToday();
+      const profile = loadProfile();
+      const rows = loadWeights();
+      const wToday = rows.find(r=>r.date===today)?.weight ?? null;
+      const moveMin = computeMoveMinutesToday(today);
+      const meals = computeMealsDone(today);
+
+      const goalMin = Number(profile.moveGoalMin) || DEFAULT_PROFILE.moveGoalMin;
+
+      const badges = [];
+
+      badges.push(wToday!=null
+        ? `<span class="chip ok">✅ Pesée : <strong>${wToday.toFixed(1)} kg</strong></span>`
+        : `<span class="chip warn">⚠️ Pesée : <strong>à faire</strong></span>`
+      );
+
+      badges.push(moveMin>=goalMin
+        ? `<span class="chip ok">🚶 Activité : <strong>${Math.round(moveMin)} min</strong></span>`
+        : `<span class="chip warn">🚶 Activité : <strong>${Math.round(moveMin)}/${goalMin} min</strong></span>`
+      );
+
+      badges.push(meals.done===meals.total
+        ? `<span class="chip ok">🍽️ Repas : <strong>${meals.done}/${meals.total}</strong></span>`
+        : `<span class="chip warn">🍽️ Repas : <strong>${meals.done}/${meals.total}</strong></span>`
+      );
+
+      // “journée complète”
+      const complete = (wToday!=null) && (moveMin>=goalMin) && (meals.done===meals.total);
+      if(complete){
+        badges.unshift(`<span class="chip info">🏅 Journée complète</span>`);
+      }
+
+      box.innerHTML = badges.join("");
+      setText("todayMeta", complete ? "Objectif du jour : ✅" : "Objectif du jour : en cours");
+    }
+
+    // ===== Weight sheet list =====
+    function renderWeightList(){
+      const rows = loadWeights().filter(r=>typeof r.weight==="number").slice(-20).reverse();
+      const box = $("weightList");
+      const profile = loadProfile();
+      const stats = computeStats(profile, loadWeights());
+
+      setText("weightDetailsMeta",
+        stats.current!=null
+          ? `Dernier poids : ${stats.current.toFixed(1)} kg • Total : ${stats.lost!=null ? (stats.lost>=0?"+":"") + stats.lost.toFixed(1) : "—"} kg`
+          : "Ajoute une pesée pour démarrer l’historique."
+      );
+
+      if(!box) return;
+      if(!rows.length){
+        box.innerHTML = `<div class="listRow"><div class="lrLeft"><div class="lrIco">📭</div><div class="lrTxt"><div class="lrTitle">Aucune donnée</div><div class="lrSub">Ajoute ta première pesée.</div></div></div><div class="lrRight"></div></div>`;
+        return;
+      }
+
+      box.innerHTML = "";
+      rows.forEach(r=>{
+        const row = document.createElement("div");
+        row.className = "listRow";
+        row.innerHTML = `
+          <div class="lrLeft">
+            <div class="lrIco">⚖️</div>
+            <div class="lrTxt">
+              <div class="lrTitle">${r.date}</div>
+              <div class="lrSub">${Number(r.weight).toFixed(1)} kg</div>
+            </div>
+          </div>
+          <div class="lrRight"></div>
+        `;
+        row.addEventListener("click", ()=>{
+          // jump chart selection to this date
+          const range = loadRange();
+          const all = loadWeights().filter(x=>typeof x.weight==="number").map(x=>({date:x.date, weight:x.weight}));
+          const filtered = filterByRange(all.map(x=>({date:x.date, weight:x.weight})).map(x=>({date:x.date, weight:x.weight})), range);
+          // simpler: just set selected by nearest in current chart points
+          const idx = lastChartPoints.findIndex(p=>p.date===r.date);
+          if(idx>=0){
+            chartSelectedIndex = idx;
+            showHint(idx);
+            renderChartOnly();
+            toast("info","Graphique", "Point sélectionné.", 1200);
+            closeSheet("sheetWeight");
+            window.scrollTo({top:0,behavior:"smooth"});
+          }else{
+            toast("info","Graphique", "Change la période si le point n’apparaît pas.", 1800);
+          }
+        });
+        box.appendChild(row);
+      });
+    }
+
+    // ===== Move sheet =====
+    function renderMoveSheet(){
+      const today = isoToday();
+      const profile = loadProfile();
+      const goalMin = Number(profile.moveGoalMin) || DEFAULT_PROFILE.moveGoalMin;
+      const moveMin = computeMoveMinutesToday(today);
+
+      setText("moveDetailsMeta", `Aujourd’hui : ${Math.round(moveMin)} min • Objectif : ${goalMin} min`);
+
+      setText("chipMoveGoal", moveMin>=goalMin ? `✅ Objectif atteint` : `🎯 Reste ${Math.max(0, Math.round(goalMin-moveMin))} min`);
+      // speed: from active or last walk
+      const walks = loadWalks();
+      const w0 = walks[0];
+      let speed = "—";
+      if(w0?.elapsedMs && w0?.distanceM){
+        const h = (w0.elapsedMs/3600000);
+        speed = h>0 ? ((w0.distanceM/1000)/h).toFixed(1) + " km/h" : "—";
+      }
+      setText("chipMoveSpeed", `⚡ Dernière : ${speed}`);
+
+      // move streak (days with >=goal)
+      const days = {};
+      walks.forEach(w=>{
+        if(!w?.startedAt) return;
+        const d = new Date(w.startedAt);
+        const tz=d.getTimezoneOffset()*60000;
+        const iso = new Date(d - tz).toISOString().slice(0,10);
+        days[iso] = (days[iso]||0) + (w.elapsedMs||0)/60000;
+      });
+      const active = getActiveWalk();
+      if(active?.active && active?.startedAt){
+        const d = new Date(active.startedAt);
+        const tz=d.getTimezoneOffset()*60000;
+        const iso = new Date(d - tz).toISOString().slice(0,10);
+        days[iso] = (days[iso]||0) + (Date.now()-active.startedAt)/60000;
+      }
+      const dates = Object.keys(days).sort();
+      let moveStreak = 0;
+      // compute streak from today backwards
+      let cur = new Date(today+"T00:00:00");
+      for(;;){
+        const tz=cur.getTimezoneOffset()*60000;
+        const iso = new Date(cur - tz).toISOString().slice(0,10);
+        const m = days[iso] || 0;
+        if(m >= goalMin){
+          moveStreak++;
+          cur.setDate(cur.getDate()-1);
+        }else break;
+      }
+      setText("chipMoveStreak", moveStreak>0 ? `🔥 Série : ${moveStreak} j` : `🔥 Série : —`);
+    }
+
+    // ===== Main render =====
     function render(){
-      // profile
-      let profile=loadJSON(STORAGE.PROFILE, null);
-      if(!profile){ profile=DEFAULT_PROFILE; saveJSON(STORAGE.PROFILE, profile); }
+      const profile = loadProfile();
+      const rows = loadWeights();
+      const stats = computeStats(profile, rows);
 
-      // weights
-      const rows=loadWeights();
-      const dateISO = $("date")?.value || isoToday();
-      const current = rows.filter(r=>typeof r.weight==="number").slice(-1)[0]?.weight ?? null;
+      const todayISO = isoToday();
+      const selectedISO = $("date")?.value || todayISO;
 
-      // header subtitle motivant
-      if(exists("headerSubtitle")){
-        const idx = Math.floor(Date.now()/(10*60*1000)) % MOTIVATION.length;
-        setText("headerSubtitle", MOTIVATION[idx]);
+      // profile fields
+      if(exists("height")) $("height").value = profile.heightCm ?? "";
+      if(exists("startWeight")) $("startWeight").value = profile.startWeight ?? "";
+      if(exists("targetWeight")) $("targetWeight").value = profile.targetWeight ?? "";
+      if(exists("omegaTarget")) $("omegaTarget").value = String(profile.omegaTarget ?? 3);
+      if(exists("moveGoalMin")) $("moveGoalMin").value = String(profile.moveGoalMin ?? DEFAULT_PROFILE.moveGoalMin);
+
+      // KPIs
+      setText("kpiWeight", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
+      setHTML("kpiLost", stats.lost!=null ? `<span class="${stats.lost>=0?'pos':'neg'}">${fmt(stats.lost,1)} kg</span>` : "—");
+      setText("kpiAvg7", stats.avg7!=null ? `${fmt(stats.avg7,1)} kg` : "—");
+
+      const moveMin = computeMoveMinutesToday(todayISO);
+      setText("kpiMove", `${Math.round(moveMin)} min`);
+
+      // chips
+      const bmi = computeBMI(profile, stats.current);
+      setHTML("pillBMI", `IMC : <strong>${bmi!=null ? bmi.toFixed(1) : "—"}</strong>`);
+
+      const trend = (stats.avgPrev7!=null && stats.avg7!=null) ? (stats.avgPrev7 - stats.avg7) : null;
+      if(trend==null) setHTML("pillTrend", `Tendance : <strong>—</strong>`);
+      else{
+        const dir = trend>0.05 ? "⬇︎" : trend<-0.05 ? "⬆︎" : "→";
+        const lbl = trend>0 ? `baisse ${trend.toFixed(1)} kg/sem` : `hausse ${Math.abs(trend).toFixed(1)} kg/sem`;
+        setHTML("pillTrend", `Tendance : <strong>${dir} ${lbl}</strong>`);
       }
 
-      // header badge
-      if(exists("headerPill")){
-        setText("headerPill", current!=null ? `${fmt(current,1)} kg` : `${fmt(profile.targetWeight,1)} kg`);
-      }
-
-      // progress
-      if(exists("progressFill") && exists("progressPct") && exists("progressText")){
-        const sw=Number(profile.startWeight);
-        const tw=Number(profile.targetWeight);
-        if(!Number.isNaN(sw) && !Number.isNaN(tw) && current!=null){
-          const total=(sw-tw);
-          const done=(sw-current);
-          let pct = total>0 ? (done/total)*100 : 0;
-          pct = Math.max(0, Math.min(100, pct));
-          $("progressFill").style.width = pct.toFixed(0) + "%";
-          setText("progressPct", pct.toFixed(0) + "%");
-          setText("progressText", "Vers ton objectif");
+      const eta = estimateETA(profile, stats);
+      if(!eta) setHTML("pillETA", `Estimation : <strong>—</strong>`);
+      else{
+        if(eta.date){
+          const d = eta.date.toLocaleDateString("fr-FR", { year:"numeric", month:"short", day:"numeric" });
+          setHTML("pillETA", `Estimation : <strong>${eta.text} • ${d}</strong>`);
         }else{
-          $("progressFill").style.width = "0%";
-          setText("progressPct", "—");
-          setText("progressText", "Progression");
+          setHTML("pillETA", `Estimation : <strong>${eta.text}</strong>`);
         }
       }
 
-      const s=computeStats(profile, rows);
-      setText("kpiWeight", s.current!=null ? fmt(s.current,1)+" kg" : "—");
-      setHTML("kpiLost", s.lost!=null ? `<span class="${s.lost>=0?'pos':'neg'}">${fmt(s.lost,1)} kg</span>` : "—");
-      setText("kpiAvg7", s.avg7!=null ? fmt(s.avg7,1)+" kg" : "—");
-      setText("kpiTarget", fmt(profile.targetWeight,1)+" kg");
+      // coach note
+      const note = coachMessage(stats);
+      if(exists("coachNote")){
+        if(note){
+          $("coachNote").style.display="block";
+          $("coachNote").textContent = note;
+        }else{
+          $("coachNote").style.display="none";
+        }
+      }
 
-      // fill weight input if exists
-      const existing = rows.find(r=>r.date===dateISO);
+      // autofill weight input for selected date
+      const existing = rows.find(r=>r.date===selectedISO);
       if(existing && exists("weight")){
         if($("weight").value==="" || $("weight").dataset.autofill==="1"){
           $("weight").value = existing.weight;
@@ -892,39 +2252,40 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      drawChart(rows);
+      // chart
+      const range = loadRange();
+      setRangeUI(range);
+      drawWeightChart(profile, rows, range);
 
       // meals
       if(exists("todayMeals")){
         $("todayMeals").innerHTML="";
-        $("todayMeals").appendChild(mealCard(dateISO,"lunch"));
-        $("todayMeals").appendChild(mealCard(dateISO,"dinner"));
+        $("todayMeals").appendChild(mealCard(selectedISO,"lunch"));
+        $("todayMeals").appendChild(mealCard(selectedISO,"dinner"));
       }
       if(exists("weekMeals")){
         $("weekMeals").innerHTML="";
         for(let i=0;i<7;i++){
-          const d=addDays(isoToday(), i);
+          const d=addDays(todayISO, i);
           $("weekMeals").appendChild(mealCard(d,"lunch"));
           $("weekMeals").appendChild(mealCard(d,"dinner"));
         }
       }
 
-      // profile fields
-      if(exists("height")) $("height").value = profile.heightCm ?? "";
-      if(exists("startWeight")) $("startWeight").value = profile.startWeight ?? "";
-      if(exists("targetWeight")) $("targetWeight").value = profile.targetWeight ?? "";
-      if(exists("omegaTarget")) $("omegaTarget").value = String(profile.omegaTarget ?? 3);
+      // header rings + today badges + categories
+      renderHeaderAndRings();
+      renderTodayBadges();
+      buildCategories();
 
-      // walk refresh
-      renderWalkUI();
+      // walk UI
+      renderWalkUI(true);
+
+      // sheets content
+      renderWeightList();
+      renderMoveSheet();
     }
 
-    // ====== Events ======
-    $("tabToday")?.addEventListener("click", ()=>setTab("tabToday"));
-    $("tabMeals")?.addEventListener("click", ()=>setTab("tabMeals"));
-    $("tabWalk")?.addEventListener("click", ()=>{ setTab("tabWalk"); initWalkUI(); });
-    $("tabProfile")?.addEventListener("click", ()=>setTab("tabProfile"));
-
+    // ===== Events wiring =====
     $("date")?.addEventListener("change", ()=>{
       if(exists("weight")){
         $("weight").dataset.autofill="1";
@@ -936,12 +2297,13 @@ document.addEventListener("DOMContentLoaded", () => {
     $("saveWeightBtn")?.addEventListener("click", ()=>{
       const d=$("date")?.value;
       const w=$("weight")?.value ? Number($("weight").value) : null;
-      if(!d){ alert("Choisis une date."); return; }
-      if(w===null || Number.isNaN(w)){ alert("Entre ton poids."); return; }
+      if(!d){ toast("bad","Date","Choisis une date."); return; }
+      if(w===null || Number.isNaN(w)){ toast("bad","Poids","Entre ton poids."); return; }
+
       saveWeight(d,w);
       if(exists("weight")) $("weight").dataset.autofill="0";
       render();
-      alert("Poids enregistré ✅");
+      toast("good","Poids","Enregistré ✅", 1600);
     });
 
     $("saveProfileBtn")?.addEventListener("click", ()=>{
@@ -949,85 +2311,93 @@ document.addEventListener("DOMContentLoaded", () => {
         heightCm: $("height")?.value ? Number($("height").value) : null,
         startWeight: $("startWeight")?.value ? Number($("startWeight").value) : null,
         targetWeight: $("targetWeight")?.value ? Number($("targetWeight").value) : null,
-        omegaTarget: $("omegaTarget")?.value ? Number($("omegaTarget").value) : 3
+        omegaTarget: $("omegaTarget")?.value ? Number($("omegaTarget").value) : 3,
+        moveGoalMin: $("moveGoalMin")?.value ? Number($("moveGoalMin").value) : DEFAULT_PROFILE.moveGoalMin
       };
-      if(!p.startWeight || !p.targetWeight){ alert("Remplis poids de départ et objectif."); return; }
+      if(!p.startWeight || !p.targetWeight){
+        toast("bad","Profil","Remplis poids de départ et objectif.");
+        return;
+      }
+      if(!p.moveGoalMin || p.moveGoalMin<5) p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
+
       saveJSON(STORAGE.PROFILE, p);
       render();
-      setTab("tabToday");
-      alert("Profil enregistré ✅");
+      setTab("summary");
+      toast("good","Profil","Enregistré ✅", 1600);
     });
 
     $("resetChecksBtn")?.addEventListener("click", ()=>{
       if(!confirm("Réinitialiser toutes les coches repas ?")) return;
       del(STORAGE.MEAL_CHECKS);
+      toast("info","Repas","Coches réinitialisées.", 1600);
       render();
     });
 
-    $("exportBackupBtn")?.addEventListener("click", ()=>{
-      const payload={
-        version:3,
-        exportedAt:new Date().toISOString(),
-        profile: loadJSON(STORAGE.PROFILE, DEFAULT_PROFILE),
-        weights: loadWeights(),
-        mealChecks: loadJSON(STORAGE.MEAL_CHECKS, {}),
-        walks: loadWalks()
-      };
-      downloadText("defi30_backup_ultra_simple.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
-    });
+    $("walkStartBtn")?.addEventListener("click", startWalk);
+    $("walkStopBtn")?.addEventListener("click", stopWalk);
+    $("walkClearBtn")?.addEventListener("click", clearActiveTrace);
+    $("walkExportBtn")?.addEventListener("click", exportWalks);
+    $("walkClearAllBtn")?.addEventListener("click", clearAllWalks);
 
+    $("exportBackupBtn")?.addEventListener("click", exportBackup);
     $("importBackupBtn")?.addEventListener("click", ()=> $("importFile")?.click());
-
     $("importFile")?.addEventListener("change", async (e)=>{
       const f=e.target.files?.[0];
       if(!f) return;
-      const text=await f.text();
-      try{
-        const payload=JSON.parse(text);
-        if(!payload || !Array.isArray(payload.weights)) throw new Error("Format invalide");
-        if(!confirm("Importer ce backup et remplacer tes données ?")) return;
-
-        if(payload.profile) saveJSON(STORAGE.PROFILE, payload.profile);
-        saveJSON(STORAGE.WEIGHTS, payload.weights);
-        if(payload.mealChecks) saveJSON(STORAGE.MEAL_CHECKS, payload.mealChecks);
-        if(payload.walks) saveJSON(STORAGE.WALKS, payload.walks);
-
-        setActiveWalk(null);
-        stopWatchAndTimer();
-
-        render();
-        alert("Import terminé ✅");
-      }catch(err){
-        alert("Import échoué : " + err.message);
-      }finally{ e.target.value=""; }
+      try{ await importBackupFile(f); }
+      catch(err){ toast("bad","Import","Échec : " + (err?.message||""), 2600); }
+      finally{ e.target.value=""; }
     });
 
     $("clearAllBtn")?.addEventListener("click", ()=>{
-      if(!confirm("Tout effacer (profil + poids + coches + marches) ?")) return;
+      if(!confirm("Tout effacer (profil + poids + repas + marches) ?")) return;
       del(STORAGE.PROFILE);
       del(STORAGE.WEIGHTS);
       del(STORAGE.MEAL_CHECKS);
       del(STORAGE.WALKS);
-      setActiveWalk(null);
+      del(STORAGE.WALK_ACTIVE);
+      del(STORAGE.UI_RANGE);
       stopWatchAndTimer();
       if(exists("weight")) $("weight").value="";
       render();
-      alert("Données effacées.");
+      toast("info","Reset","Données effacées.", 1800);
     });
 
-    // ====== INIT ======
+    // range buttons
+    const setRange = (v)=>{
+      saveRange(v);
+      // keep selection visible if possible
+      chartSelectedIndex = null;
+      hideHint();
+      render();
+    };
+    $("range7")?.addEventListener("click", ()=>setRange("7"));
+    $("range30")?.addEventListener("click", ()=>setRange("30"));
+    $("range180")?.addEventListener("click", ()=>setRange("180"));
+    $("range365")?.addEventListener("click", ()=>setRange("365"));
+    $("rangeAll")?.addEventListener("click", ()=>setRange("all"));
+
+    // Open sheets
+    $("btnOpenWeight")?.addEventListener("click", ()=>{ renderWeightList(); openSheet("sheetWeight"); });
+    $("btnOpenMove")?.addEventListener("click", ()=>{ renderMoveSheet(); openSheet("sheetMove"); });
+
+    // INIT
     if(exists("date")) $("date").value = isoToday();
 
-    // bannière iOS (si présent)
+    // iOS banner
     try{
       const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
       if(isIOS && exists("safariBanner")) $("safariBanner").classList.add("show");
     }catch{}
 
+    // resume active walk
+    const aw = getActiveWalk();
+    if(aw?.active){ beginWatch(); ensureTimer(); }
+
+    wireChartInteractions();
     render();
   })();
 });
 </script>
-
 </body>
 </html>

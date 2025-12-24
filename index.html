@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Santé — Défi -30 kg</title>
+  <title>Santé — Défi</title>
   <meta name="theme-color" content="#FF2D55" />
 
   <!-- Leaflet / OSM -->
@@ -14,32 +14,33 @@
     :root{
       --bg:#F2F2F7;
       --card:rgba(255,255,255,.92);
-      --card2:rgba(255,255,255,.86);
       --text:#111827;
       --muted:rgba(17,24,39,.55);
-      --muted2:rgba(17,24,39,.40);
       --line:rgba(17,24,39,.08);
       --shadow: 0 12px 30px rgba(0,0,0,.08);
       --shadow2: 0 18px 60px rgba(0,0,0,.14);
-      --r:20px;
 
-      /* iOS-ish palette */
       --pink:#FF2D55;
       --red:#FF3B30;
       --orange:#FF9F0A;
-      --blue:#0A84FF;
-      --mint:#00C7BE;
-      --purple:#BF5AF2;
 
       --good:#16A34A;
       --bad:#DC2626;
 
       --safeTop: env(safe-area-inset-top, 0px);
       --safeBottom: env(safe-area-inset-bottom, 0px);
+      --safeLeft: env(safe-area-inset-left, 0px);
+      --safeRight: env(safe-area-inset-right, 0px);
+
+      /* Header spacer animé (évite les sauts) */
+      --headerSpace: 250px;
+
+      /* Bottom bar height (approx) */
+      --tabSpace: 82px;
     }
 
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
+    html,body{height:100%}
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
@@ -47,33 +48,28 @@
       color:var(--text);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      overflow-x:hidden; /* évite tout cut horizontal */
     }
 
-    /* ===== Header (sticky blur) ===== */
+    /* ===== HEADER FIXED + SPACER (pour scroll fluide) ===== */
     header{
-      position:sticky;
-      top:0;
-      z-index:10; /* IMPORTANT: pas au-dessus Leaflet */
-      padding: calc(10px + var(--safeTop)) 14px 12px;
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:30;
+      padding: calc(10px + var(--safeTop)) calc(14px + var(--safeRight)) 12px calc(14px + var(--safeLeft));
       background: rgba(242,242,247,.82);
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
       border-bottom:1px solid var(--line);
       transform: translateZ(0);
-      transition: padding .22s ease, background .22s ease;
-    }
-    header.shrink{
-      padding: calc(8px + var(--safeTop)) 14px 10px;
-      background: rgba(242,242,247,.92);
     }
 
-    .wrap{
-      max-width:980px;
-      margin:0 auto;
-      padding: 12px 14px calc(78px + var(--safeBottom));
+    .headerSpacer{
+      height: var(--headerSpace);
+      transition: height .22s ease;
     }
 
-    .topRow{
+    .headerTop{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
@@ -88,18 +84,12 @@
       line-height:1.05;
       transition: font-size .22s ease, letter-spacing .22s ease;
     }
-    header.shrink .title{
-      font-size:22px;
-      letter-spacing:-.2px;
-    }
     .subtitle{
       margin-top:6px;
       font-size:13px;
       color:var(--muted);
-      letter-spacing:.1px;
-      transition: margin-top .22s ease, opacity .22s ease;
+      transition: opacity .18s ease, transform .18s ease;
     }
-    header.shrink .subtitle{ margin-top:4px; opacity:.92; }
 
     .pill{
       min-width:154px;
@@ -109,24 +99,22 @@
       background: rgba(255,255,255,.86);
       border: 1px solid var(--line);
       box-shadow: 0 10px 22px rgba(0,0,0,.05);
-      transition: transform .22s ease, padding .22s ease;
     }
-    header.shrink .pill{ padding:8px 10px; transform:scale(.98); }
     .pillLabel{font-size:11px;color:var(--muted)}
     .pillValue{font-size:16px;font-weight:950;margin-top:3px}
 
-    /* Search bar (visuel) */
+    /* search bar (visuel) */
     .searchBar{
       margin-top:12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
+      display:flex; align-items:center; gap:10px;
       padding:10px 12px;
       border-radius:16px;
       border:1px solid var(--line);
       background: rgba(255,255,255,.86);
       box-shadow: 0 10px 22px rgba(0,0,0,.05);
-      transition: margin-top .22s ease, opacity .18s ease, transform .18s ease, max-height .22s ease;
+      transition: opacity .18s ease, transform .18s ease, max-height .22s ease, margin-top .22s ease;
+      max-height: 52px;
+      overflow:hidden;
     }
     .searchIcon{opacity:.55}
     .searchInput{
@@ -136,74 +124,22 @@
       font-size:15px !important;
       outline:none !important;
       color:rgba(17,24,39,.70);
-    }
-    header.shrink .searchBar{
-      opacity:0;
-      transform: translateY(-6px);
-      max-height:0;
-      overflow:hidden;
-      padding:0 12px;
-      border-width:0;
-      margin-top:0;
-      box-shadow:none;
+      width:100%;
     }
 
-    /* Rings row + miniSummary swap */
+    /* rings */
     .ringsRow{
       margin-top:12px;
       display:flex;
       gap:12px;
       flex-wrap:wrap;
       transition: opacity .18s ease, transform .18s ease, max-height .22s ease, margin-top .22s ease;
-      transform-origin: top;
-    }
-    .miniSummary{
-      display:none;
-      margin-top:10px;
-      padding:10px 12px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background: rgba(255,255,255,.88);
-      box-shadow: 0 10px 22px rgba(0,0,0,.05);
-      font-weight:950;
-      font-size:13px;
-      color:rgba(17,24,39,.78);
-      align-items:center;
-      justify-content:center;
-      white-space:nowrap;
+      max-height: 200px;
       overflow:hidden;
-      text-overflow:ellipsis;
-      gap:10px;
-      transition: opacity .18s ease, transform .18s ease, max-height .22s ease, margin-top .22s ease;
     }
-    .msDot{opacity:.35}
-    header.shrink .ringsRow{
-      opacity:0;
-      transform: translateY(-6px) scale(.98);
-      max-height:0;
-      overflow:hidden;
-      margin-top:0;
-    }
-    header.shrink .miniSummary{
-      display:flex;
-      opacity:1;
-      transform: translateY(0);
-      max-height:48px;
-    }
-    header:not(.shrink) .miniSummary{
-      opacity:0;
-      transform: translateY(-6px);
-      max-height:0;
-      overflow:hidden;
-      margin-top:0;
-    }
-
-    /* Ring cards */
     .ringCard{
-      flex:1 1 240px;
-      display:flex;
-      align-items:center;
-      gap:12px;
+      flex:1 1 220px;
+      display:flex; align-items:center; gap:12px;
       padding:12px;
       border-radius:20px;
       background: rgba(255,255,255,.88);
@@ -222,11 +158,11 @@
       text-overflow:ellipsis;
     }
 
-    /* Conic ring (cute) */
+    /* Cute conic rings (petits) */
     .miniRing{
-      width:54px;height:54px;border-radius:50%;
+      width:50px;height:50px;border-radius:50%;
       position:relative;
-      flex:0 0 54px;
+      flex:0 0 50px;
       --p:0%;
       --c1: var(--pink);
       --c2: #FF5B7A;
@@ -243,24 +179,15 @@
     .miniRing::before{
       content:"";
       position:absolute;
-      inset:7px;
+      inset:6px;
       background:#fff;
       border-radius:50%;
       box-shadow:0 6px 16px rgba(0,0,0,.06);
     }
-    .miniRing::after{
-      content:"";
-      position:absolute;
-      width:10px;height:10px;border-radius:50%;
-      top:6px; right:8px;
-      background:rgba(255,255,255,.85);
-      box-shadow:0 6px 14px rgba(0,0,0,.10);
-      opacity:.75;
-    }
     .ringIcon{
       position:absolute; inset:0;
       display:flex; align-items:center; justify-content:center;
-      font-size:18px;
+      font-size:17px;
       z-index:1;
       transform: translateY(1px);
     }
@@ -274,48 +201,74 @@
     .ringCard.streak .miniRing{ --c1: var(--red);    --c2:#FF7A70; }
     .ringCard.move   .miniRing{ --c1: var(--orange); --c2:#FFD36A; }
 
-    /* ===== Bottom tab bar ===== */
-    .tabBar{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      padding: 10px 14px calc(10px + var(--safeBottom));
-      background: rgba(242,242,247,.82);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-top:1px solid var(--line);
-      z-index:20;
-    }
-    .tabBarInner{
-      max-width:980px;
-      margin:0 auto;
+    /* mini summary (visible en compact) */
+    .miniSummary{
       display:flex;
       gap:10px;
-    }
-    .tbBtn{
-      flex:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      padding:12px 12px;
+      margin-top:10px;
+      padding:10px 12px;
       border-radius:16px;
       border:1px solid var(--line);
-      background: rgba(255,255,255,.86);
+      background: rgba(255,255,255,.88);
       box-shadow: 0 10px 22px rgba(0,0,0,.05);
-      color:rgba(17,24,39,.70);
       font-weight:950;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      user-select:none;
+      font-size:13px;
+      color:rgba(17,24,39,.78);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      opacity:0;
+      transform: translateY(-6px);
+      max-height:0;
+      transition: opacity .18s ease, transform .18s ease, max-height .22s ease, margin-top .22s ease;
+      margin-top:0;
     }
-    .tbBtn.active{
-      border-color: rgba(255,45,85,.25);
-      color: var(--text);
-      box-shadow: 0 14px 30px rgba(255,45,85,.10);
-    }
-    .tbIco{opacity:.9}
+    .msDot{opacity:.35}
 
-    /* ===== Content building blocks ===== */
+    /* compact mode (scroll) : on cache search + rings, on montre miniSummary */
+    header.compact .title{ font-size:22px; letter-spacing:-.2px; }
+    header.compact .searchBar{
+      opacity:0;
+      transform: translateY(-6px);
+      max-height:0;
+      margin-top:0;
+      padding-top:0; padding-bottom:0;
+      border-width:0;
+      box-shadow:none;
+    }
+    header.compact .ringsRow{
+      opacity:0;
+      transform: translateY(-6px) scale(.99);
+      max-height:0;
+      margin-top:0;
+    }
+    header.compact .miniSummary{
+      opacity:1;
+      transform: translateY(0);
+      max-height:48px;
+      margin-top:10px;
+    }
+
+    .banner{
+      display:none;
+      margin-top:10px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.85);
+      border-radius:16px;
+      padding:10px 12px;
+      font-size:12px;
+      line-height:1.35;
+      color:rgba(17,24,39,.70);
+    }
+    .banner.show{display:block}
+
+    /* ===== CONTENT ===== */
+    .wrap{
+      max-width:980px;
+      margin:0 auto;
+      padding: 12px calc(14px + var(--safeRight)) calc(var(--tabSpace) + var(--safeBottom) + 18px) calc(14px + var(--safeLeft));
+    }
+
     .stack{display:grid;gap:12px}
     .section{display:none}
     .section.active{display:block}
@@ -323,10 +276,11 @@
     .card{
       background: var(--card);
       border:1px solid var(--line);
-      border-radius: var(--r);
+      border-radius:20px;
       box-shadow: var(--shadow);
       padding:14px;
     }
+
     .cardTitleRow{
       display:flex;
       align-items:flex-start;
@@ -340,16 +294,6 @@
       font-weight:950;
       letter-spacing:-.15px;
     }
-    .chevBtn{
-      border:none;
-      background:transparent;
-      padding:6px 8px;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:950;
-      color:var(--muted);
-    }
-    .chevBtn:active{transform: translateY(1px)}
     .smallMeta{font-size:12px;color:var(--muted);line-height:1.35}
 
     .row{display:flex;gap:10px;flex-wrap:wrap}
@@ -418,7 +362,7 @@
     .chip.warn{border-color:rgba(255,159,10,.22);background:rgba(255,159,10,.08)}
     .chip.ok{border-color:rgba(22,163,74,.20);background:rgba(22,163,74,.06)}
 
-    /* Chart */
+    /* chart */
     .chartWrap{
       position:relative;
       border-radius:18px;
@@ -427,11 +371,7 @@
       overflow:hidden;
       touch-action: pan-y;
     }
-    canvas{
-      width:100%;
-      height:240px;
-      display:block;
-    }
+    canvas{width:100%;height:240px;display:block}
     .chartHint{
       position:absolute;
       top:10px; left:10px;
@@ -451,7 +391,7 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .chartHint.show{ opacity:1; transform: translateY(0); }
+    .chartHint.show{opacity:1;transform:translateY(0)}
 
     .note{
       border-left:4px solid var(--pink);
@@ -464,7 +404,7 @@
       margin-top:10px;
     }
 
-    /* iOS list (Catégories) */
+    /* list */
     .list{
       border:1px solid var(--line);
       border-radius:20px;
@@ -480,6 +420,7 @@
       border-top:1px solid rgba(17,24,39,.06);
       cursor:pointer;
       user-select:none;
+      min-width:0;
     }
     .listRow:first-child{border-top:none}
     .lrLeft{display:flex;align-items:center;gap:10px;min-width:0}
@@ -497,7 +438,7 @@
     .lrRight{color:rgba(17,24,39,.25);font-weight:950}
     .listRow:active{background:rgba(17,24,39,.03)}
 
-    /* Meals */
+    /* meals */
     .mealGrid{display:grid;gap:10px}
     @media(min-width:820px){.mealGrid{grid-template-columns:1fr 1fr}}
     .mealCard{border:1px solid var(--line);border-radius:20px;padding:12px;background:#fff}
@@ -519,31 +460,7 @@
     .footerBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .footerBtns button{flex:1 1 200px}
 
-    .banner{
-      display:none;
-      margin-top:10px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.85);
-      border-radius:16px;
-      padding:10px 12px;
-      font-size:12px;
-      line-height:1.35;
-      color:rgba(17,24,39,.70);
-    }
-    .banner.show{display:block}
-
-    .noscript{
-      margin:12px 0 0;
-      border:1px solid rgba(220,38,38,.25);
-      background:rgba(220,38,38,.06);
-      color:#7f1d1d;
-      border-radius:16px;
-      padding:12px;
-      font-size:13px;
-      line-height:1.4;
-    }
-
-    /* Walk / history */
+    /* walk history cards */
     .histCard{border:1px solid var(--line);border-radius:20px;padding:12px;background:#fff}
     .histTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
     .histTitle{font-weight:950}
@@ -551,16 +468,81 @@
     .histBtns{display:flex;gap:8px;margin-top:10px}
     .histBtns button{flex:1}
 
-    /* Leaflet z-index safety */
-    .leaflet-pane, .leaflet-top, .leaflet-bottom{ z-index: 1; }
-    .leaflet-control{ z-index: 2; }
+    /* ===== IMPORTANT: Leaflet z-index under UI ===== */
+    .leaflet-pane, .leaflet-top, .leaflet-bottom{ z-index: 1 !important; }
+    .leaflet-control{ z-index: 2 !important; }
+
+    /* ===== Bottom tab bar (pas coupée à droite) ===== */
+    .tabBar{
+      position:fixed;
+      left:0; right:0; bottom:0;
+      z-index:40;
+      padding:
+        10px
+        calc(14px + var(--safeRight))
+        calc(10px + var(--safeBottom))
+        calc(14px + var(--safeLeft));
+      background: rgba(242,242,247,.82);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-top:1px solid var(--line);
+      transform: translateZ(0);
+    }
+    .tabBarInner{
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      gap:10px;
+      width:100%;
+      min-width:0;
+    }
+    .tbBtn{
+      flex:1 1 0;
+      min-width:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding:12px 10px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      color:rgba(17,24,39,.70);
+      font-weight:950;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select:none;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tbBtn.active{
+      border-color: rgba(255,45,85,.25);
+      color: var(--text);
+      box-shadow: 0 14px 30px rgba(255,45,85,.10);
+      background: rgba(255,45,85,.06);
+    }
+    .tbIco{opacity:.9}
+
+    @media(max-width:380px){
+      .tbBtn{gap:6px;font-size:13px}
+      .pill{min-width:140px}
+    }
+    @media(max-width:350px){
+      /* sur très petits écrans : on cache le texte (icônes only) */
+      .tbBtn{padding:12px 8px}
+      .tbBtn span:last-child{display:none}
+    }
 
     /* Toasts */
     .toasts{
-      position:fixed; right:14px; bottom:calc(82px + var(--safeBottom));
+      position:fixed;
+      right: calc(14px + var(--safeRight));
+      bottom: calc(var(--tabSpace) + var(--safeBottom) + 10px);
       z-index:9999;
       display:flex; flex-direction:column; gap:10px;
-      width:min(380px, calc(100vw - 28px));
+      width:min(380px, calc(100vw - 28px - var(--safeLeft) - var(--safeRight)));
       pointer-events:none;
     }
     .toast{
@@ -594,25 +576,28 @@
     .toast.good .ico{background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.18)}
     .toast.bad  .ico{background:rgba(220,38,38,.10);border-color:rgba(220,38,38,.18)}
 
-    /* ===== Sheets (slide-up) ===== */
+    /* Sheets */
     .sheetBackdrop{
       position:fixed; inset:0;
       background:rgba(0,0,0,.28);
       opacity:0;
       pointer-events:none;
       transition: opacity .18s ease;
-      z-index:50;
+      z-index:70;
     }
     .sheetBackdrop.show{ opacity:1; pointer-events:auto; }
-
     .sheet{
       position:fixed;
       left:0; right:0;
       bottom:0;
       transform: translateY(110%);
       transition: transform .22s ease;
-      z-index:60;
-      padding: 0 14px calc(14px + var(--safeBottom));
+      z-index:80;
+      padding:
+        0
+        calc(14px + var(--safeRight))
+        calc(14px + var(--safeBottom))
+        calc(14px + var(--safeLeft));
     }
     .sheet.show{ transform: translateY(0); }
 
@@ -648,8 +633,8 @@
 </head>
 
 <body>
-<header>
-  <div class="topRow">
+<header id="appHeader">
+  <div class="headerTop">
     <div class="titleStack">
       <h1 class="title" id="headerTitle">Santé</h1>
       <div class="subtitle" id="headerSubtitle">Aperçu : poids, régularité, activité.</div>
@@ -697,7 +682,7 @@
     </div>
   </div>
 
-  <div class="miniSummary" id="miniSummary" aria-hidden="true">
+  <div class="miniSummary" id="miniSummary">
     <span id="msGoal">🎯 —</span>
     <span class="msDot">•</span>
     <span id="msStreak">🔥 —</span>
@@ -710,14 +695,8 @@
   </div>
 </header>
 
-<noscript>
-  <div class="wrap">
-    <div class="noscript">
-      JavaScript est désactivé : les boutons et le graphique ne peuvent pas fonctionner.
-      Ouvre ce fichier dans Safari et active JavaScript.
-    </div>
-  </div>
-</noscript>
+<!-- Spacer (évite les sauts quand le header change) -->
+<div class="headerSpacer" id="headerSpacer"></div>
 
 <div class="toasts" id="toasts"></div>
 
@@ -765,13 +744,13 @@
 </div>
 
 <div class="wrap">
-  <!-- ===== Résumé (Health-like) ===== -->
+  <!-- Résumé -->
   <section class="section active" id="secSummary">
     <div class="stack">
       <div class="card">
         <div class="cardTitleRow">
           <h2 class="cardTitle">Highlights</h2>
-          <button class="chevBtn" id="btnOpenWeight" type="button">Poids ›</button>
+          <button class="secondary" id="btnOpenWeight" type="button">Poids</button>
         </div>
 
         <div class="row" style="align-items:flex-end">
@@ -796,7 +775,7 @@
       <div class="card">
         <div class="cardTitleRow">
           <h2 class="cardTitle">Tendances</h2>
-          <button class="chevBtn" id="btnOpenMove" type="button">Activité ›</button>
+          <button class="secondary" id="btnOpenMove" type="button">Activité</button>
         </div>
 
         <div class="kpis">
@@ -835,9 +814,7 @@
           <h2 class="cardTitle">Aujourd’hui</h2>
           <div class="smallMeta" id="todayMeta">—</div>
         </div>
-
         <div class="pillRow" id="todayBadges"></div>
-
         <div class="smallMeta" style="margin-top:10px">
           Mini plan : <b>1 pesée</b> + <b>marche</b> + <b>repas cochés</b> = journée “complète”.
         </div>
@@ -852,7 +829,7 @@
     </div>
   </section>
 
-  <!-- ===== Catégories ===== -->
+  <!-- Parcourir -->
   <section class="section" id="secBrowse">
     <div class="stack">
       <div class="card">
@@ -860,14 +837,7 @@
           <h2 class="cardTitle">Catégories</h2>
           <div class="smallMeta">Style iOS</div>
         </div>
-
-        <div class="list" id="catList">
-          <!-- injected -->
-        </div>
-
-        <div class="note" style="margin-top:12px">
-          ⚠️ Rappel : vise une perte progressive et durable. Si fatigue importante, douleurs, malaise ou troubles alimentaires → parle à un professionnel.
-        </div>
+        <div class="list" id="catList"></div>
       </div>
 
       <div class="card">
@@ -883,7 +853,7 @@
     </div>
   </section>
 
-  <!-- ===== Activité (Marche) ===== -->
+  <!-- Activité -->
   <section class="section" id="secMove">
     <div class="stack">
       <div class="card">
@@ -921,7 +891,7 @@
         </div>
 
         <div class="tiny" style="margin-top:8px">
-          L’activité “aujourd’hui” = minutes totalisées (marche enregistrée + marche en cours).
+          “Aujourd’hui” = minutes totalisées (historique + marche en cours).
         </div>
       </div>
 
@@ -950,7 +920,7 @@
     </div>
   </section>
 
-  <!-- ===== Profil ===== -->
+  <!-- Profil -->
   <section class="section" id="secProfile">
     <div class="stack">
       <div class="card">
@@ -1010,12 +980,12 @@
 </div>
 
 <!-- Bottom tabs -->
-<div class="tabBar">
+<div class="tabBar" id="tabBar">
   <div class="tabBarInner">
-    <div class="tbBtn active" id="tabSummary" role="button" tabindex="0"><span class="tbIco">❤️</span> Résumé</div>
-    <div class="tbBtn" id="tabBrowse" role="button" tabindex="0"><span class="tbIco">📚</span> Parcourir</div>
-    <div class="tbBtn" id="tabMove" role="button" tabindex="0"><span class="tbIco">🚶</span> Activité</div>
-    <div class="tbBtn" id="tabProfile" role="button" tabindex="0"><span class="tbIco">👤</span> Profil</div>
+    <div class="tbBtn active" id="tabSummary" role="button" tabindex="0"><span class="tbIco">❤️</span><span>Résumé</span></div>
+    <div class="tbBtn" id="tabBrowse" role="button" tabindex="0"><span class="tbIco">📚</span><span>Parcourir</span></div>
+    <div class="tbBtn" id="tabMove" role="button" tabindex="0"><span class="tbIco">🚶</span><span>Activité</span></div>
+    <div class="tbBtn" id="tabProfile" role="button" tabindex="0"><span class="tbIco">👤</span><span>Profil</span></div>
   </div>
 </div>
 
@@ -1028,15 +998,17 @@ document.addEventListener("DOMContentLoaded", () => {
   (function(){
     "use strict";
 
+    // ====== STORAGE ======
     const STORAGE = {
-      PROFILE: "health30_profile_v2",
-      WEIGHTS: "health30_weights_v2",
-      MEAL_CHECKS: "health30_meal_checks_v2",
-      WALKS: "health30_walks_v2",
-      WALK_ACTIVE: "health30_walk_active_v2",
-      UI_RANGE: "health30_ui_range_v2",
+      PROFILE: "health30_profile_v3",
+      WEIGHTS: "health30_weights_v3",
+      MEAL_CHECKS: "health30_meal_checks_v3",
+      WALKS: "health30_walks_v3",
+      WALK_ACTIVE: "health30_walk_active_v3",
+      UI_RANGE: "health30_ui_range_v3",
     };
 
+    // ====== DEFAULTS ======
     const DEFAULT_PROFILE = {
       heightCm: 173,
       startWeight: 115.0,
@@ -1054,14 +1026,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const MOTIVATION = [
       "Aperçu : poids, régularité, activité.",
-      "Une donnée par jour. Une tendance par semaine.",
-      "Simple, régulier, mesurable.",
-      "Aujourd’hui compte. Demain aussi.",
       "Constance > perfection.",
+      "Une donnée par jour. Une tendance par semaine.",
+      "Tu construis une habitude.",
+      "Marche + protéines + sommeil = combo gagnant.",
     ];
 
     const GPS_OPTS = { enableHighAccuracy:true, maximumAge:1000, timeout:20000 };
 
+    // ====== DOM ======
     const $ = (id)=>document.getElementById(id);
     const exists = (id)=>!!document.getElementById(id);
 
@@ -1069,24 +1042,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function setHTML(id, html){ const el=$(id); if(el) el.innerHTML = html; }
     function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-    // ===== Header shrink =====
-    (function initHeaderScroll(){
-      const h = document.querySelector("header");
-      if(!h) return;
-      let ticking=false;
-      const onScroll=()=>{
-        if(ticking) return;
-        ticking=true;
-        requestAnimationFrame(()=>{
-          h.classList.toggle("shrink", (window.scrollY||0) > 24);
-          ticking=false;
-        });
-      };
-      window.addEventListener("scroll", onScroll, {passive:true});
-      onScroll();
-    })();
-
-    // ===== Toasts =====
+    // ====== Toasts ======
     function toast(type, title, msg, ms=2200){
       const box = $("toasts");
       if(!box) return;
@@ -1113,7 +1069,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }catch{}
     }
 
-    // ===== Sheet =====
+    // ====== Sheets ======
     function openSheet(id){
       const b = $("sheetBackdrop");
       const s = $(id);
@@ -1126,11 +1082,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const s = $(id);
       if(!b || !s) return;
       s.classList.remove("show");
-      // on ferme backdrop si plus aucune sheet ouverte
       setTimeout(()=>{
         const anyOpen = document.querySelector(".sheet.show");
         if(!anyOpen) b.classList.remove("show");
-      }, 50);
+      }, 60);
     }
     $("sheetBackdrop")?.addEventListener("click", ()=>{
       document.querySelectorAll(".sheet.show").forEach(x=>x.classList.remove("show"));
@@ -1140,7 +1095,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", ()=> closeSheet(btn.getAttribute("data-close")));
     });
 
-    // ===== JSON helpers =====
+    // ====== JSON helpers ======
     function loadJSON(key, fallback){
       try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
       catch{ return fallback; }
@@ -1155,7 +1110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
-    // ===== Date utils =====
+    // ====== Date utils ======
     function isoToday(){
       const d=new Date();
       const tz=d.getTimezoneOffset()*60000;
@@ -1191,7 +1146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return x.toFixed(d);
     }
 
-    // ===== Profile =====
+    // ====== Profile ======
     function loadProfile(){
       let p = loadJSON(STORAGE.PROFILE, null);
       if(!p){ p = DEFAULT_PROFILE; saveJSON(STORAGE.PROFILE, p); }
@@ -1199,7 +1154,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return p;
     }
 
-    // ===== Weights =====
+    // ====== Weights ======
     function loadWeights(){
       const rows = loadJSON(STORAGE.WEIGHTS, []);
       return Array.isArray(rows)
@@ -1265,7 +1220,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if(stats.avg7==null || stats.avgPrev7==null) return { text:"Ajoute plus de données", date:null };
 
-      const weeklyLoss = (stats.avgPrev7 - stats.avg7); // baisse => positif
+      const weeklyLoss = (stats.avgPrev7 - stats.avg7);
       if(weeklyLoss <= 0.05) return { text:"Tendance stable", date:null };
 
       const weeks = remaining / weeklyLoss;
@@ -1280,11 +1235,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if(stats.avg7==null) return "Ajoute 7 pesées pour obtenir une tendance fiable.";
       const diff = stats.current - stats.avg7;
       if(diff < -0.2) return "Sous la moyenne 7 jours — bon signal. Continue.";
-      if(diff >  0.2) return "Au-dessus de la moyenne 7 jours — possible rebond (sel, sommeil, eau).";
+      if(diff >  0.2) return "Au-dessus de la moyenne 7 jours — rebond possible (eau/sel/sommeil).";
       return "Tendance régulière — vise la constance.";
     }
 
-    // ===== Chart range =====
+    // ====== Range ======
     function loadRange(){ return loadJSON(STORAGE.UI_RANGE, "7") || "7"; }
     function saveRange(v){ saveJSON(STORAGE.UI_RANGE, v); }
 
@@ -1301,7 +1256,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // ===== Rings =====
+    // ====== Rings ======
     function setRingProgressEl(id, pct){
       const el = document.getElementById(id);
       if(!el) return;
@@ -1327,7 +1282,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setText("msMove", `🚶 ${moveText || "—"}`);
     }
 
-    // ===== Meals =====
+    // ====== Meals ======
     function mealKey(dateISO, mealType){ return dateISO + "_" + mealType; }
     function loadMealChecks(){ return loadJSON(STORAGE.MEAL_CHECKS, {}); }
     function saveMealChecks(obj){ saveJSON(STORAGE.MEAL_CHECKS, obj); }
@@ -1401,7 +1356,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return { done, total:2 };
     }
 
-    // ===== Walk =====
+    // ====== Walk ======
     let watchId=null, timerId=null;
     let walkMap=null, walkLine=null, walkMarker=null;
 
@@ -1527,7 +1482,7 @@ document.addEventListener("DOMContentLoaded", () => {
           const w=loadWalks().find(x=>x.id===id);
           if(!w?.points?.length){ toast("bad","Carte","Aucun point GPS."); return; }
           setTab("move");
-          setTimeout(()=>renderWalkOnMap(w.points,true), 60);
+          setTimeout(()=>renderWalkOnMap(w.points,true), 80);
           toast("info","Carte","Trace chargée.", 1400);
         });
       });
@@ -1675,14 +1630,13 @@ document.addEventListener("DOMContentLoaded", () => {
       if(active?.active && active?.startedAt && sameIsoDay(active.startedAt, todayISO)){
         min += (Date.now() - active.startedAt)/60000;
       }
-
       return min;
     }
 
     // ===== Backup =====
     function exportBackup(){
       const payload={
-        version:2,
+        version:3,
         exportedAt:new Date().toISOString(),
         profile: loadProfile(),
         weights: loadWeights(),
@@ -1715,7 +1669,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===== Chart (interactive) =====
-    let lastChartPoints = []; // [{xPx,yPx,date,weight}]
+    let lastChartPoints = [];
     let chartSelectedIndex = null;
 
     function drawWeightChart(profile, rows, range){
@@ -1733,20 +1687,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const padL=56, padR=16, padT=14, padB=34;
       const plotW=W-padL-padR, plotH=H-padT-padB;
 
-      // bg
       ctx.fillStyle="#fff";
       ctx.fillRect(0,0,W,H);
 
-      // border
       ctx.strokeStyle="rgba(17,24,39,.08)";
       ctx.lineWidth=1;
       ctx.strokeRect(0.5,0.5,W-1,H-1);
 
-      ctx.fillStyle="rgba(17,24,39,.55)";
-      ctx.font="13px -apple-system, system-ui";
-
       lastChartPoints = [];
       if(data.length<2){
+        ctx.fillStyle="rgba(17,24,39,.55)";
+        ctx.font="13px -apple-system, system-ui";
         ctx.fillText("Ajoute 2 pesées pour afficher la courbe.", 16, 28);
         chartSelectedIndex = null;
         return;
@@ -1802,8 +1753,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       ctx.stroke();
 
-      // points
-      data.forEach((p,i)=>{
+      data.forEach((p)=>{
         const x=xToPx(p.x), y=yToPx(p.y);
         lastChartPoints.push({ xPx:x, yPx:y, date:p.d, weight:p.y });
       });
@@ -1813,10 +1763,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.beginPath(); ctx.arc(p.xPx,p.yPx,3.2,0,Math.PI*2); ctx.fill();
       });
 
-      // selection
       if(chartSelectedIndex!=null && lastChartPoints[chartSelectedIndex]){
         const sp = lastChartPoints[chartSelectedIndex];
-        // vertical guide
         ctx.strokeStyle="rgba(17,24,39,.18)";
         ctx.lineWidth=1;
         ctx.beginPath();
@@ -1824,7 +1772,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.lineTo(sp.xPx, H-padB);
         ctx.stroke();
 
-        // highlight dot
         ctx.fillStyle="#fff";
         ctx.beginPath(); ctx.arc(sp.xPx, sp.yPx, 6.5, 0, Math.PI*2); ctx.fill();
         ctx.strokeStyle="rgba(255,45,85,1)";
@@ -1834,17 +1781,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function pickClosestPoint(clientX){
-      const wrap = document.querySelector(".chartWrap");
       const c = $("chart");
-      if(!wrap || !c || !lastChartPoints.length) return null;
+      if(!c || !lastChartPoints.length) return null;
       const rect = c.getBoundingClientRect();
       const x = clientX - rect.left;
-      // convert to canvas pixel scale
       const scaleX = c.width / rect.width;
       const xCanvas = x * scaleX;
 
-      let bestI = 0;
-      let bestD = Infinity;
+      let bestI = 0, bestD = Infinity;
       for(let i=0;i<lastChartPoints.length;i++){
         const d = Math.abs(lastChartPoints[i].xPx - xCanvas);
         if(d<bestD){ bestD=d; bestI=i; }
@@ -1859,8 +1803,13 @@ document.addEventListener("DOMContentLoaded", () => {
       hint.textContent = `${p.date} • ${p.weight.toFixed(1)} kg`;
       hint.classList.add("show");
     }
-    function hideHint(){
-      $("chartHint")?.classList.remove("show");
+    function hideHint(){ $("chartHint")?.classList.remove("show"); }
+
+    function renderChartOnly(){
+      const profile = loadProfile();
+      const rows = loadWeights();
+      const range = loadRange();
+      drawWeightChart(profile, rows, range);
     }
 
     function wireChartInteractions(){
@@ -1888,10 +1837,7 @@ document.addEventListener("DOMContentLoaded", () => {
         onMove(x);
       };
 
-      const onUp = ()=>{
-        // on laisse la sélection visible mais on cache le hint après un délai
-        setTimeout(hideHint, 900);
-      };
+      const onUp = ()=>{ setTimeout(hideHint, 900); };
 
       c.addEventListener("mousedown", onDown);
       c.addEventListener("mousemove", (e)=>{ if(e.buttons===1) onMoveEvt(e); });
@@ -1902,34 +1848,24 @@ document.addEventListener("DOMContentLoaded", () => {
       c.addEventListener("touchend", onUp, {passive:true});
     }
 
-    // ===== Range buttons =====
     function setRangeUI(v){
-      const map = { "7":"range7", "30":"range30", "180":"range180", "365":"range365", "all":"rangeAll" };
-      Object.values(map).forEach(id=>$(id)?.classList.remove("active"));
-      const btnId = map[v] || "range7";
-      $(btnId)?.classList.add("active");
-      // using secondary buttons: apply active look by switching to primary-ish
-      ["range7","range30","range180","range365","rangeAll"].forEach(id=>{
-        const b = $(id);
+      const ids=["range7","range30","range180","range365","rangeAll"];
+      const chosen = v==="7" ? "range7" : v==="30" ? "range30" : v==="180" ? "range180" : v==="365" ? "range365" : "rangeAll";
+      ids.forEach(id=>{
+        const b=$(id);
         if(!b) return;
-        const is = id===btnId;
+        const is = id===chosen;
         b.style.borderColor = is ? "rgba(255,45,85,.25)" : "rgba(17,24,39,.08)";
-        b.style.background = is ? "rgba(255,45,85,.06)" : "#fff";
-        b.style.color = is ? "rgba(17,24,39,.88)" : "rgba(17,24,39,.78)";
+        b.style.background  = is ? "rgba(255,45,85,.06)" : "#fff";
+        b.style.color       = is ? "rgba(17,24,39,.88)" : "rgba(17,24,39,.78)";
       });
-    }
-
-    function renderChartOnly(){
-      const profile = loadProfile();
-      const rows = loadWeights();
-      const range = loadRange();
-      drawWeightChart(profile, rows, range);
     }
 
     // ===== Categories list =====
     function buildCategories(){
       const list = $("catList");
       if(!list) return;
+
       const profile = loadProfile();
       const rows = loadWeights();
       const stats = computeStats(profile, rows);
@@ -1938,18 +1874,18 @@ document.addEventListener("DOMContentLoaded", () => {
       const meals = computeMealsDone(today);
 
       const items = [
-        { key:"weight", ico:"⚖️", title:"Poids", sub: stats.current!=null ? `Dernier : ${stats.current.toFixed(1)} kg` : "Ajoute une pesée", action:()=>openSheet("sheetWeight") },
-        { key:"trend", ico:"📈", title:"Tendances", sub: stats.avg7!=null ? `Moyenne 7j : ${stats.avg7.toFixed(1)} kg` : "Besoin de 7 pesées", action:()=>{ window.scrollTo({top:0,behavior:"smooth"}); } },
-        { key:"move", ico:"🚶", title:"Activité", sub: `${Math.round(moveMin)} min aujourd’hui`, action:()=>openSheet("sheetMove") },
-        { key:"meals", ico:"🍽️", title:"Repas", sub: `${meals.done}/${meals.total} cochés aujourd’hui`, action:()=>{ setTab("browse"); window.scrollTo({top:0,behavior:"smooth"}); } },
-        { key:"walk", ico:"🗺️", title:"Marche (carte)", sub:"Enregistrement + historique", action:()=>setTab("move") },
-        { key:"backup", ico:"💾", title:"Backup", sub:"Exporter / importer les données", action:()=>setTab("profile") },
+        { ico:"⚖️", title:"Poids", sub: stats.current!=null ? `Dernier : ${stats.current.toFixed(1)} kg` : "Ajoute une pesée", action:()=>openSheet("sheetWeight") },
+        { ico:"📈", title:"Tendances", sub: stats.avg7!=null ? `Moyenne 7j : ${stats.avg7.toFixed(1)} kg` : "Besoin de 7 pesées", action:()=>{ window.scrollTo({top:0,behavior:"smooth"}); } },
+        { ico:"🚶", title:"Activité", sub: `${Math.round(moveMin)} min aujourd’hui`, action:()=>openSheet("sheetMove") },
+        { ico:"🍽️", title:"Repas", sub: `${meals.done}/${meals.total} cochés aujourd’hui`, action:()=>{ setTab("browse"); } },
+        { ico:"🗺️", title:"Carte marche", sub:"Enregistrement + historique", action:()=>setTab("move") },
+        { ico:"💾", title:"Backup", sub:"Exporter / importer tes données", action:()=>setTab("profile") },
       ];
 
       list.innerHTML = "";
       items.forEach(it=>{
         const row = document.createElement("div");
-        row.className = "listRow";
+        row.className="listRow";
         row.innerHTML = `
           <div class="lrLeft">
             <div class="lrIco">${it.ico}</div>
@@ -1965,7 +1901,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // ===== Tab navigation =====
+    // ===== Tabs =====
     function setTab(which){
       const map = {
         summary: ["secSummary", "tabSummary"],
@@ -1983,8 +1919,12 @@ document.addEventListener("DOMContentLoaded", () => {
       $(secId)?.classList.add("active");
       $(tabId)?.classList.add("active");
 
-      // bonus: si on va sur move -> refresh map UI
-      if(which==="move") setTimeout(()=>renderWalkUI(true), 50);
+      if(which==="move"){
+        setTimeout(()=>{
+          renderWalkUI(true);
+          try{ walkMap?.invalidateSize?.(); }catch{}
+        }, 80);
+      }
     }
 
     ["tabSummary","tabBrowse","tabMove","tabProfile"].forEach(id=>{
@@ -1999,6 +1939,43 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     });
+
+    // ===== Header compact + spacer height (bug scroll FIX) =====
+    function setHeaderSpace(px){
+      document.documentElement.style.setProperty("--headerSpace", Math.max(160, Math.round(px)) + "px");
+      $("headerSpacer")?.style.setProperty("height", `var(--headerSpace)`);
+    }
+
+    function measureHeader(){
+      const h = $("appHeader");
+      if(!h) return;
+      const rect = h.getBoundingClientRect();
+      // rect.height = hauteur réelle du header
+      setHeaderSpace(rect.height);
+    }
+
+    let compact = false;
+    let ticking = false;
+    function onScroll(){
+      if(ticking) return;
+      ticking = true;
+      requestAnimationFrame(()=>{
+        const y = window.scrollY || 0;
+        const shouldCompact = y > 24;
+        if(shouldCompact !== compact){
+          compact = shouldCompact;
+          $("appHeader")?.classList.toggle("compact", compact);
+          // re-mesure après transition pour éviter les artefacts
+          setTimeout(measureHeader, 60);
+          setTimeout(measureHeader, 260);
+        }
+        ticking = false;
+      });
+    }
+
+    window.addEventListener("scroll", onScroll, {passive:true});
+    window.addEventListener("resize", ()=>{ measureHeader(); }, {passive:true});
+    window.addEventListener("orientationchange", ()=>{ setTimeout(measureHeader, 250); }, {passive:true});
 
     // ===== Header + Rings + badges =====
     function renderHeaderAndRings(){
@@ -2048,7 +2025,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const wToday = rows.find(r=>r.date===today)?.weight ?? null;
       const moveMin = computeMoveMinutesToday(today);
       const meals = computeMealsDone(today);
-
       const goalMin = Number(profile.moveGoalMin) || DEFAULT_PROFILE.moveGoalMin;
 
       const badges = [];
@@ -2068,17 +2044,14 @@ document.addEventListener("DOMContentLoaded", () => {
         : `<span class="chip warn">🍽️ Repas : <strong>${meals.done}/${meals.total}</strong></span>`
       );
 
-      // “journée complète”
       const complete = (wToday!=null) && (moveMin>=goalMin) && (meals.done===meals.total);
-      if(complete){
-        badges.unshift(`<span class="chip info">🏅 Journée complète</span>`);
-      }
+      if(complete) badges.unshift(`<span class="chip info">🏅 Journée complète</span>`);
 
       box.innerHTML = badges.join("");
       setText("todayMeta", complete ? "Objectif du jour : ✅" : "Objectif du jour : en cours");
     }
 
-    // ===== Weight sheet list =====
+    // ===== Weight sheet =====
     function renderWeightList(){
       const rows = loadWeights().filter(r=>typeof r.weight==="number").slice(-20).reverse();
       const box = $("weightList");
@@ -2112,11 +2085,6 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="lrRight"></div>
         `;
         row.addEventListener("click", ()=>{
-          // jump chart selection to this date
-          const range = loadRange();
-          const all = loadWeights().filter(x=>typeof x.weight==="number").map(x=>({date:x.date, weight:x.weight}));
-          const filtered = filterByRange(all.map(x=>({date:x.date, weight:x.weight})).map(x=>({date:x.date, weight:x.weight})), range);
-          // simpler: just set selected by nearest in current chart points
           const idx = lastChartPoints.findIndex(p=>p.date===r.date);
           if(idx>=0){
             chartSelectedIndex = idx;
@@ -2141,9 +2109,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const moveMin = computeMoveMinutesToday(today);
 
       setText("moveDetailsMeta", `Aujourd’hui : ${Math.round(moveMin)} min • Objectif : ${goalMin} min`);
-
       setText("chipMoveGoal", moveMin>=goalMin ? `✅ Objectif atteint` : `🎯 Reste ${Math.max(0, Math.round(goalMin-moveMin))} min`);
-      // speed: from active or last walk
+
       const walks = loadWalks();
       const w0 = walks[0];
       let speed = "—";
@@ -2153,7 +2120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       setText("chipMoveSpeed", `⚡ Dernière : ${speed}`);
 
-      // move streak (days with >=goal)
+      // streak jours avec >= objectif
       const days = {};
       walks.forEach(w=>{
         if(!w?.startedAt) return;
@@ -2169,9 +2136,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const iso = new Date(d - tz).toISOString().slice(0,10);
         days[iso] = (days[iso]||0) + (Date.now()-active.startedAt)/60000;
       }
-      const dates = Object.keys(days).sort();
+
       let moveStreak = 0;
-      // compute streak from today backwards
       let cur = new Date(today+"T00:00:00");
       for(;;){
         const tz=cur.getTimezoneOffset()*60000;
@@ -2190,7 +2156,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const profile = loadProfile();
       const rows = loadWeights();
       const stats = computeStats(profile, rows);
-
       const todayISO = isoToday();
       const selectedISO = $("date")?.value || todayISO;
 
@@ -2232,15 +2197,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // coach note
       const note = coachMessage(stats);
       if(exists("coachNote")){
-        if(note){
-          $("coachNote").style.display="block";
-          $("coachNote").textContent = note;
-        }else{
-          $("coachNote").style.display="none";
-        }
+        if(note){ $("coachNote").style.display="block"; $("coachNote").textContent = note; }
+        else{ $("coachNote").style.display="none"; }
       }
 
       // autofill weight input for selected date
@@ -2272,20 +2232,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // header rings + today badges + categories
       renderHeaderAndRings();
       renderTodayBadges();
       buildCategories();
-
-      // walk UI
       renderWalkUI(true);
-
-      // sheets content
       renderWeightList();
       renderMoveSheet();
+      measureHeader();
     }
 
-    // ===== Events wiring =====
+    // ===== Events =====
     $("date")?.addEventListener("change", ()=>{
       if(exists("weight")){
         $("weight").dataset.autofill="1";
@@ -2363,10 +2319,9 @@ document.addEventListener("DOMContentLoaded", () => {
       toast("info","Reset","Données effacées.", 1800);
     });
 
-    // range buttons
+    // range
     const setRange = (v)=>{
       saveRange(v);
-      // keep selection visible if possible
       chartSelectedIndex = null;
       hideHint();
       render();
@@ -2377,11 +2332,11 @@ document.addEventListener("DOMContentLoaded", () => {
     $("range365")?.addEventListener("click", ()=>setRange("365"));
     $("rangeAll")?.addEventListener("click", ()=>setRange("all"));
 
-    // Open sheets
+    // open sheets
     $("btnOpenWeight")?.addEventListener("click", ()=>{ renderWeightList(); openSheet("sheetWeight"); });
     $("btnOpenMove")?.addEventListener("click", ()=>{ renderMoveSheet(); openSheet("sheetMove"); });
 
-    // INIT
+    // ===== INIT =====
     if(exists("date")) $("date").value = isoToday();
 
     // iOS banner
@@ -2396,6 +2351,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     wireChartInteractions();
     render();
+    onScroll(); // init compact state
+    measureHeader();
   })();
 });
 </script>

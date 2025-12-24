@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Suivi Défi -30 kg — Ultra simple</title>
   <meta name="theme-color" content="#F97316" />
+
+  <!-- Carte (Leaflet + OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <style>
     :root{
       --orange:#F97316;
@@ -47,6 +52,7 @@
       -webkit-tap-highlight-color:transparent;
     }
     button.secondary{background:#fff;color:var(--text);border:1px solid var(--line);font-weight:800}
+    button:disabled{opacity:.55;cursor:not-allowed}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.18);color:#fff;font-size:12px}
     .pill b{color:#fff}
     .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -102,6 +108,14 @@
       line-height:1.35;
     }
     .banner.show{display:block}
+
+    /* Historique marche */
+    .histCard{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}
+    .histTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .histTitle{font-weight:950}
+    .histMeta{font-size:12px;color:var(--muted);line-height:1.35;margin-top:4px}
+    .histBtns{display:flex;gap:8px;margin-top:10px}
+    .histBtns button{flex:1}
   </style>
 </head>
 <body>
@@ -131,6 +145,7 @@
   <div class="tabs">
     <button class="tabBtn active" id="tabToday" type="button">Aujourd’hui</button>
     <button class="tabBtn" id="tabMeals" type="button">Repas</button>
+    <button class="tabBtn" id="tabWalk" type="button">Marche</button>
     <button class="tabBtn" id="tabProfile" type="button">Profil</button>
   </div>
 
@@ -185,6 +200,64 @@
       </div>
     </section>
 
+    <!-- NOUVEL ONGLET : MARCHE -->
+    <section class="section" id="secWalk">
+      <div class="card">
+        <h2 style="margin:0 0 10px;font-size:15px">🚶 Marche (suivi réel)</h2>
+
+        <div class="row" style="align-items:flex-end">
+          <div>
+            <label>Statut</label>
+            <input id="walkStatus" type="text" value="Prêt" readonly />
+          </div>
+          <div>
+            <label>Temps</label>
+            <input id="walkTime" type="text" value="00:00:00" readonly />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>Distance</label>
+            <input id="walkDistance" type="text" value="0.00 km" readonly />
+          </div>
+          <div>
+            <label>Vitesse moy.</label>
+            <input id="walkSpeed" type="text" value="0.0 km/h" readonly />
+          </div>
+        </div>
+
+        <div class="footerBtns" style="margin-top:10px">
+          <button id="walkStartBtn" type="button">▶️ Début</button>
+          <button class="secondary" id="walkStopBtn" type="button" disabled>⏹ Fin</button>
+          <button class="secondary" id="walkClearBtn" type="button">🗑 Effacer la trace</button>
+        </div>
+
+        <div class="note" style="margin-top:10px">
+          iPhone : ouvre dans Safari, accepte “Position”. Idéalement : ajoute “Sur l’écran d’accueil”.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px;font-size:15px">🗺️ Carte</h2>
+        <div id="walkMap" style="height:320px;border-radius:14px;border:1px solid var(--line);background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center">
+          <div class="tiny" style="padding:14px;text-align:center;max-width:520px">
+            La carte utilise OpenStreetMap (Leaflet) chargé en ligne.
+            Hors connexion : le suivi temps/distance marche, mais sans fond de carte.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px;font-size:15px">🧾 Historique</h2>
+        <div id="walkHistory" class="mealGrid"></div>
+        <div class="footerBtns">
+          <button class="secondary" id="walkExportBtn" type="button">Exporter (JSON)</button>
+          <button class="secondary" id="walkClearAllBtn" type="button">Tout effacer (marches)</button>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="secProfile">
       <div class="card">
         <h2 style="margin:0 0 10px;font-size:15px">👤 Profil (1 fois)</h2>
@@ -204,7 +277,7 @@
             <input id="targetWeight" type="number" step="0.1" inputmode="decimal" placeholder="85" />
           </div>
           <div>
-            <label>Ω‑3 / semaine</label>
+            <label>Ω-3 / semaine</label>
             <select id="omegaTarget">
               <option value="2">2 fois</option>
               <option value="3" selected>3 fois</option>
@@ -235,6 +308,10 @@
   const K_WEIGHTS = "defi30_ultra_weights_v2";
   const K_MEAL_CHECKS = "defi30_ultra_meal_checks_v2";
 
+  // Marche
+  const K_WALKS = "defi30_ultra_walks_v1";
+  const K_WALK_ACTIVE = "defi30_ultra_walk_active_v1";
+
   const $ = (id)=>document.getElementById(id);
 
   const DEFAULT_PROFILE = { heightCm:173, startWeight:115.0, targetWeight:85.0, omegaTarget:3 };
@@ -261,8 +338,15 @@
     return ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][d.getDay()];
   }
 
-  // Show Safari banner if in iOS file preview / standalone uncertain:
-  // Heuristic: if not https and not standalone, still okay; banner helpful anyway on iPhone.
+  // Download helper (unique)
+  function downloadText(filename, text, mime){
+    const blob=new Blob([text], {type:mime||"text/plain;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download=filename;
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  }
+
+  // Show Safari banner on iOS
   try{
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     if(isIOS) $("safariBanner").classList.add("show");
@@ -422,22 +506,14 @@
 
   // ===== Tabs =====
   function setTab(which){
-    const tabs=[["tabToday","secToday"],["tabMeals","secMeals"],["tabProfile","secProfile"]];
+    const tabs=[["tabToday","secToday"],["tabMeals","secMeals"],["tabWalk","secWalk"],["tabProfile","secProfile"]];
     tabs.forEach(([t,s])=>{
       $(t).classList.toggle("active", t===which);
       $(s).classList.toggle("active", t===which);
     });
   }
 
-  // ===== Backup =====
-  function downloadText(filename, text, mime){
-    const blob=new Blob([text], {type:mime||"text/plain;charset=utf-8"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download=filename;
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
-
-  // ===== Render =====
+  // ===== Render main =====
   function render(){
     // Ensure profile exists
     let profile = loadJSON(K_PROFILE, null);
@@ -480,11 +556,413 @@
     $("startWeight").value = profile.startWeight ?? "";
     $("targetWeight").value = profile.targetWeight ?? "";
     $("omegaTarget").value = String(profile.omegaTarget ?? 3);
+
+    // walk tab quick refresh (safe)
+    renderWalkUI();
+  }
+
+  // =========================
+  // ===== Walk tracking =====
+  // =========================
+  let walkWatchId = null;
+  let walkTimer = null;
+  let walkMap = null;
+  let walkLine = null;
+  let walkMarker = null;
+
+  function pad2(n){ return String(n).padStart(2,"0"); }
+  function fmtHMS(ms){
+    const s=Math.max(0, Math.floor(ms/1000));
+    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+    return `${pad2(h)}:${pad2(m)}:${pad2(ss)}`;
+  }
+  function haversineMeters(a,b){
+    const R=6371000;
+    const toRad=(x)=>x*Math.PI/180;
+    const dLat=toRad(b.lat-a.lat);
+    const dLon=toRad(b.lng-a.lng);
+    const lat1=toRad(a.lat), lat2=toRad(b.lat);
+    const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
+    const h=s1*s1 + Math.cos(lat1)*Math.cos(lat2)*s2*s2;
+    return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  function getActiveWalk(){ return loadJSON(K_WALK_ACTIVE, null); }
+  function setActiveWalk(w){
+    if(!w) localStorage.removeItem(K_WALK_ACTIVE);
+    else saveJSON(K_WALK_ACTIVE, w);
+  }
+  function loadWalks(){
+    const rows = loadJSON(K_WALKS, []);
+    return Array.isArray(rows) ? rows : [];
+  }
+  function saveWalks(rows){ saveJSON(K_WALKS, rows); }
+
+  function ensureLeafletMap(){
+    const box = $("walkMap");
+    if(!box) return;
+
+    // Si Leaflet pas chargé (offline), on n'initialise pas la carte.
+    if(typeof L === "undefined") return;
+
+    if(walkMap) return;
+
+    walkMap = L.map(box, { zoomControl:true });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(walkMap);
+
+    walkLine = L.polyline([], { weight:5 }).addTo(walkMap);
+  }
+
+  function renderWalkStats(w){
+    if(!$("walkStatus")) return;
+
+    const now = Date.now();
+    const elapsedActive = w?.startedAt ? (now - w.startedAt) : 0;
+    const elapsed = w?.active ? elapsedActive : (w?.elapsedMs || 0);
+    const distM = w?.distanceM || 0;
+
+    $("walkStatus").value = w?.active ? "En cours…" : "Prêt";
+    $("walkTime").value = fmtHMS(elapsed);
+    $("walkDistance").value = (distM/1000).toFixed(2) + " km";
+
+    const hours = elapsed / 3600000;
+    const km = distM/1000;
+    const speed = (hours>0) ? (km/hours) : 0;
+    $("walkSpeed").value = speed.toFixed(1) + " km/h";
+
+    $("walkStartBtn").disabled = !!w?.active;
+    $("walkStopBtn").disabled  = !w?.active;
+  }
+
+  function renderWalkOnMap(points){
+    ensureLeafletMap();
+    if(!walkMap || typeof L==="undefined") return;
+
+    const latlngs = points.map(p=>[p.lat,p.lng]);
+    walkLine.setLatLngs(latlngs);
+
+    if(points.length){
+      const last = points[points.length-1];
+      if(!walkMarker) walkMarker = L.circleMarker([last.lat,last.lng], { radius:6, weight:2 }).addTo(walkMap);
+      walkMarker.setLatLng([last.lat,last.lng]);
+
+      // Ajuster vue
+      try{
+        const bounds = L.latLngBounds(latlngs);
+        walkMap.fitBounds(bounds, { padding:[20,20] });
+      }catch{}
+    }
+  }
+
+  function stopWatchAndTimer(){
+    if(walkWatchId!=null){
+      try{ navigator.geolocation.clearWatch(walkWatchId); }catch{}
+      walkWatchId=null;
+    }
+    if(walkTimer!=null){
+      clearInterval(walkTimer);
+      walkTimer=null;
+    }
+  }
+
+  function startWalk(){
+    if(!navigator.geolocation){
+      alert("Géolocalisation non disponible sur cet appareil.");
+      return;
+    }
+
+    const active = getActiveWalk();
+    if(active?.active){
+      alert("Une marche est déjà en cours.");
+      return;
+    }
+
+    const w = {
+      id: "walk_" + Date.now(),
+      active: true,
+      startedAt: Date.now(),
+      elapsedMs: 0,
+      distanceM: 0,
+      points: []
+    };
+    setActiveWalk(w);
+    renderWalkUI();
+
+    // Options GPS (iPhone)
+    const opts = {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 20000
+    };
+
+    walkWatchId = navigator.geolocation.watchPosition((pos)=>{
+      const cur = getActiveWalk();
+      if(!cur?.active) return;
+
+      const p = {
+        t: Date.now(),
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        acc: pos.coords.accuracy
+      };
+
+      // Filtre léger : ignore si précision trop mauvaise
+      if(typeof p.acc==="number" && p.acc > 60){
+        // on garde quand même le point si on n'en a pas
+        if(cur.points.length>0) return;
+      }
+
+      const last = cur.points[cur.points.length-1];
+      if(last){
+        const d = haversineMeters({lat:last.lat,lng:last.lng},{lat:p.lat,lng:p.lng});
+        // filtre anti "sauts" GPS : ignore si saut énorme
+        if(d > 150) return;
+        cur.distanceM += d;
+      }
+      cur.points.push(p);
+
+      setActiveWalk(cur);
+      renderWalkUI(true);
+    }, (err)=>{
+      let msg = "Erreur GPS.";
+      if(err?.code===1) msg="Permission refusée : autorise Position dans Safari.";
+      if(err?.code===2) msg="Position indisponible (essaie dehors / active GPS).";
+      if(err?.code===3) msg="Timeout GPS (réessaie).";
+      alert(msg);
+      // On laisse la marche "active" (l'utilisateur peut retenter)
+      renderWalkUI();
+    }, opts);
+
+    walkTimer = setInterval(()=>{
+      const cur = getActiveWalk();
+      if(!cur?.active) return;
+      renderWalkUI(true);
+    }, 1000);
+  }
+
+  function stopWalk(){
+    const cur = getActiveWalk();
+    if(!cur?.active){
+      alert("Aucune marche en cours.");
+      return;
+    }
+
+    cur.active = false;
+    cur.endedAt = Date.now();
+    cur.elapsedMs = cur.endedAt - cur.startedAt;
+
+    // Sauvegarde dans l'historique
+    const walks = loadWalks();
+    walks.unshift(cur);
+    saveWalks(walks);
+
+    setActiveWalk(null);
+    stopWatchAndTimer();
+    renderWalkUI();
+    alert("Marche enregistrée ✅");
+  }
+
+  function clearActiveTrace(){
+    const cur = getActiveWalk();
+    if(cur?.active){
+      if(!confirm("Effacer la trace de la marche en cours ?")) return;
+      cur.points = [];
+      cur.distanceM = 0;
+      setActiveWalk(cur);
+      renderWalkUI();
+      return;
+    }
+
+    // pas active : on efface juste l'affichage carte (pas l'historique)
+    if(!confirm("Effacer la trace affichée sur la carte (sans toucher à l’historique) ?")) return;
+    if(walkLine) walkLine.setLatLngs([]);
+    if(walkMarker){ try{ walkMap.removeLayer(walkMarker); }catch{} walkMarker=null; }
+    renderWalkUI();
+  }
+
+  function exportWalks(){
+    const payload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      walks: loadWalks()
+    };
+    downloadText("defi30_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+  }
+
+  function clearAllWalks(){
+    if(!confirm("Tout effacer : historique des marches ?")) return;
+    localStorage.removeItem(K_WALKS);
+    setActiveWalk(null);
+    stopWatchAndTimer();
+    renderWalkUI();
+  }
+
+  function viewWalk(w){
+    // affiche une marche de l'historique sur la carte
+    ensureLeafletMap();
+    if(typeof L==="undefined"){
+      alert("Carte indisponible (offline).");
+      return;
+    }
+    if(!w?.points?.length){
+      alert("Aucun point GPS dans cette marche.");
+      return;
+    }
+    // bascule sur onglet marche
+    setTab("tabWalk");
+    setTimeout(()=>{
+      ensureLeafletMap();
+      renderWalkOnMap(w.points);
+    }, 50);
+  }
+
+  function deleteWalk(id){
+    if(!confirm("Supprimer cette marche ?")) return;
+    const walks = loadWalks().filter(w=>w.id!==id);
+    saveWalks(walks);
+    renderWalkUI();
+  }
+
+  function renderWalkHistory(){
+    const box = $("walkHistory");
+    if(!box) return;
+
+    const walks = loadWalks();
+    if(!walks.length){
+      box.innerHTML = `<div class="tiny">Aucune marche enregistrée pour l’instant.</div>`;
+      return;
+    }
+
+    box.innerHTML = "";
+    walks.slice(0,20).forEach(w=>{
+      const date = new Date(w.startedAt || Date.now());
+      const d = date.toLocaleDateString("fr-FR", { weekday:"short", year:"numeric", month:"short", day:"numeric" });
+      const t = date.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
+
+      const km = ((w.distanceM||0)/1000);
+      const h = ((w.elapsedMs||0)/3600000);
+      const v = (h>0) ? (km/h) : 0;
+
+      const el = document.createElement("div");
+      el.className = "histCard";
+      el.innerHTML = `
+        <div class="histTop">
+          <div>
+            <div class="histTitle">Marche • ${d}</div>
+            <div class="histMeta">
+              Début : ${t}<br>
+              Durée : ${fmtHMS(w.elapsedMs||0)} • Distance : ${km.toFixed(2)} km • Vitesse moy : ${v.toFixed(1)} km/h
+            </div>
+          </div>
+          <div class="tiny">${(w.points?.length||0)} pts</div>
+        </div>
+        <div class="histBtns">
+          <button class="secondary" type="button" data-view="${w.id}">Voir</button>
+          <button class="secondary" type="button" data-del="${w.id}">Supprimer</button>
+        </div>
+      `;
+      box.appendChild(el);
+    });
+
+    // wire
+    box.querySelectorAll("[data-view]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-view");
+        const w = loadWalks().find(x=>x.id===id);
+        viewWalk(w);
+      });
+    });
+    box.querySelectorAll("[data-del]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        const id = btn.getAttribute("data-del");
+        deleteWalk(id);
+      });
+    });
+  }
+
+  function renderWalkUI(skipMapFit){
+    const cur = getActiveWalk();
+
+    // stats
+    renderWalkStats(cur || { active:false, elapsedMs:0, distanceM:0 });
+
+    // map
+    ensureLeafletMap();
+    if(cur?.points?.length){
+      if(!skipMapFit) renderWalkOnMap(cur.points);
+      else {
+        // update line without forcing fitBounds every second
+        if(walkLine && typeof L!=="undefined"){
+          const latlngs = cur.points.map(p=>[p.lat,p.lng]);
+          walkLine.setLatLngs(latlngs);
+          const last = cur.points[cur.points.length-1];
+          if(last){
+            if(!walkMarker) walkMarker = L.circleMarker([last.lat,last.lng], { radius:6, weight:2 }).addTo(walkMap);
+            walkMarker.setLatLng([last.lat,last.lng]);
+          }
+        }
+      }
+    }
+
+    // history
+    renderWalkHistory();
+  }
+
+  function initWalkUI(){
+    // buttons
+    if($("walkStartBtn")){
+      $("walkStartBtn").onclick = startWalk;
+      $("walkStopBtn").onclick = stopWalk;
+      $("walkClearBtn").onclick = clearActiveTrace;
+      $("walkExportBtn").onclick = exportWalks;
+      $("walkClearAllBtn").onclick = clearAllWalks;
+    }
+
+    // resume if active walk exists
+    const cur = getActiveWalk();
+    if(cur?.active){
+      // (re)start timer + watch if not running
+      if(walkTimer==null){
+        walkTimer = setInterval(()=>{
+          const c = getActiveWalk();
+          if(!c?.active) return;
+          renderWalkUI(true);
+        }, 1000);
+      }
+      if(walkWatchId==null && navigator.geolocation){
+        const opts = { enableHighAccuracy:true, maximumAge:1000, timeout:20000 };
+        walkWatchId = navigator.geolocation.watchPosition((pos)=>{
+          const a = getActiveWalk();
+          if(!a?.active) return;
+          const p = { t: Date.now(), lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
+          if(typeof p.acc==="number" && p.acc > 60){
+            if(a.points.length>0) return;
+          }
+          const last = a.points[a.points.length-1];
+          if(last){
+            const d = haversineMeters({lat:last.lat,lng:last.lng},{lat:p.lat,lng:p.lng});
+            if(d > 150) return;
+            a.distanceM += d;
+          }
+          a.points.push(p);
+          setActiveWalk(a);
+          renderWalkUI(true);
+        }, ()=>{}, opts);
+      }
+    } else {
+      stopWatchAndTimer();
+    }
+
+    renderWalkUI();
   }
 
   // ===== Wire events =====
   $("tabToday").addEventListener("click", ()=>setTab("tabToday"));
   $("tabMeals").addEventListener("click", ()=>setTab("tabMeals"));
+  $("tabWalk").addEventListener("click", ()=>{ setTab("tabWalk"); initWalkUI(); });
   $("tabProfile").addEventListener("click", ()=>setTab("tabProfile"));
 
   $("date").addEventListener("change", ()=>{
@@ -533,7 +1011,8 @@
       exportedAt:new Date().toISOString(),
       profile: loadJSON(K_PROFILE, DEFAULT_PROFILE),
       weights: loadWeights(),
-      mealChecks: loadJSON(K_MEAL_CHECKS, {})
+      mealChecks: loadJSON(K_MEAL_CHECKS, {}),
+      walks: loadWalks()
     };
     downloadText("defi30_backup_ultra_simple.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
   });
@@ -552,6 +1031,11 @@
       if(payload.profile) saveJSON(K_PROFILE, payload.profile);
       saveJSON(K_WEIGHTS, payload.weights);
       if(payload.mealChecks) saveJSON(K_MEAL_CHECKS, payload.mealChecks);
+      if(payload.walks) saveJSON(K_WALKS, payload.walks);
+
+      setActiveWalk(null);
+      stopWatchAndTimer();
+
       render();
       alert("Import terminé ✅");
     }catch(err){
@@ -560,10 +1044,13 @@
   });
 
   $("clearAllBtn").addEventListener("click", ()=>{
-    if(!confirm("Tout effacer (profil + poids + coches) ?")) return;
+    if(!confirm("Tout effacer (profil + poids + coches + marches) ?")) return;
     localStorage.removeItem(K_PROFILE);
     localStorage.removeItem(K_WEIGHTS);
     localStorage.removeItem(K_MEAL_CHECKS);
+    localStorage.removeItem(K_WALKS);
+    setActiveWalk(null);
+    stopWatchAndTimer();
     $("weight").value="";
     render();
     alert("Données effacées.");
@@ -572,6 +1059,15 @@
   // ===== Init =====
   $("date").value = isoToday();
   render();
+
+  // Si une marche était en cours, on la reprend
+  try{
+    const aw = getActiveWalk();
+    if(aw?.active){
+      // on n'ouvre pas l'onglet automatiquement, mais on reprend le suivi
+      initWalkUI();
+    }
+  }catch{}
 })();
 </script>
 </body>

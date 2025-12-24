@@ -29,12 +29,12 @@
     header{
       position:sticky; top:0; z-index:50;
       background:linear-gradient(90deg,var(--orange),var(--orange2));
-      color:#fff; padding:14px 14px 12px;
+      color:#fff; padding:16px 14px 14px;
       box-shadow: 0 10px 22px rgba(249,115,22,.25);
     }
-    header .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    header .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
     header h1{margin:0;font-size:18px;letter-spacing:.2px}
-    header .sub{margin-top:4px;font-size:12px;opacity:.95}
+
     .wrap{max-width:900px;margin:0 auto;padding:12px 14px 40px}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px}
     .stack{display:grid;gap:12px}
@@ -53,8 +53,7 @@
     }
     button.secondary{background:#fff;color:var(--text);border:1px solid var(--line);font-weight:800}
     button:disabled{opacity:.55;cursor:not-allowed}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.18);color:#fff;font-size:12px}
-    .pill b{color:#fff}
+
     .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     @media(min-width:720px){.kpis{grid-template-columns:repeat(4,1fr)}}
     .kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
@@ -62,6 +61,7 @@
     .kpi .v{margin-top:6px;font-size:18px;font-weight:950}
     .pos{color:var(--good)} .neg{color:var(--bad)}
     canvas{width:100%;height:220px;border-radius:14px;border:1px solid var(--line);background:#fff}
+
     .tabs{display:flex;gap:10px;margin:12px 0 0}
     .tabBtn{
       flex:1;padding:10px 12px;border-radius:14px;border:1px solid var(--line);
@@ -70,6 +70,7 @@
     .tabBtn.active{border-color:rgba(249,115,22,.35);color:var(--text);box-shadow:0 8px 18px rgba(249,115,22,.10)}
     .section{display:none}
     .section.active{display:block}
+
     .mealGrid{display:grid;gap:10px}
     @media(min-width:720px){.mealGrid{grid-template-columns:1fr 1fr}}
     .mealCard{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}
@@ -87,6 +88,7 @@
     .note{border-left:4px solid var(--orange);background:#FFF7ED;border-radius:12px;padding:10px 12px;color:#7C2D12;font-size:13px;line-height:1.4}
     .footerBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
     .footerBtns button{flex:1 1 200px}
+
     .noscript{
       margin:12px 0 0;
       border:1px solid rgba(220,38,38,.25);
@@ -109,6 +111,37 @@
     }
     .banner.show{display:block}
 
+    /* Header motivant */
+    .titleLine{display:flex;flex-direction:column;gap:4px}
+    .subtitle{font-size:12px;opacity:.95;letter-spacing:.2px}
+    .badgeRight{
+      min-width:120px;
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.32);
+      background:rgba(255,255,255,.18);
+      backdrop-filter: blur(8px);
+      text-align:right;
+    }
+    .badgeLabel{font-size:11px;opacity:.9}
+    .badgeValue{font-size:16px;font-weight:950;margin-top:3px}
+    .progressWrap{margin-top:12px}
+    .progressTop{display:flex;justify-content:space-between;gap:10px;font-size:12px;opacity:.95}
+    .progressBar{
+      margin-top:8px;
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.22);
+      border:1px solid rgba(255,255,255,.25);
+      overflow:hidden;
+    }
+    .progressFill{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background:rgba(255,255,255,.9);
+    }
+
     /* Historique marche */
     .histCard{border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff}
     .histTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
@@ -118,14 +151,30 @@
     .histBtns button{flex:1}
   </style>
 </head>
+
 <body>
 <header>
   <div class="top">
-    <h1>Suivi Défi -30 kg</h1>
-    <span class="pill" id="headerPill"><b>—</b></span>
-  </div>
-  <div class="sub">1 fois : profil • Tous les jours : <b>ton poids</b> • + repas (midi/soir)</div>
+    <div class="titleLine">
+      <h1 id="headerTitle">🔥 Défi -30 kg</h1>
+      <div class="subtitle" id="headerSubtitle">Chaque jour compte. Tu avances. 💪</div>
+    </div>
 
+    <div class="badgeRight">
+      <div class="badgeLabel">Poids actuel</div>
+      <div class="badgeValue" id="headerPill">—</div>
+    </div>
+  </div>
+
+  <div class="progressWrap">
+    <div class="progressTop">
+      <span id="progressText">Progression</span>
+      <span id="progressPct">—</span>
+    </div>
+    <div class="progressBar"><div class="progressFill" id="progressFill"></div></div>
+  </div>
+
+  <!-- IMPORTANT: tu avais supprimé cet élément, mais ton JS le référence -->
   <div class="banner" id="safariBanner">
     ⚠️ Si tu ouvres ce fichier dans l’aperçu “Fichiers” (Quick Look), les boutons peuvent ne pas marcher.
     Ouvre-le dans <b>Safari</b> (Partager → <b>Ouvrir dans Safari</b>) puis “Sur l’écran d’accueil”.
@@ -183,9 +232,6 @@
       <div class="card">
         <h2 style="margin:0 0 10px;font-size:15px">🍽️ Tes repas d’aujourd’hui</h2>
         <div class="mealGrid" id="todayMeals"></div>
-        <div class="tiny" style="margin-top:10px">
-          Plan : Midi → <b>Soupe 700 ml</b> + <b>Protéines</b> • Soir → <b>Soupe 450 ml</b> + protéines légères.
-        </div>
       </div>
     </section>
 
@@ -200,7 +246,6 @@
       </div>
     </section>
 
-    <!-- NOUVEL ONGLET : MARCHE -->
     <section class="section" id="secWalk">
       <div class="card">
         <h2 style="margin:0 0 10px;font-size:15px">🚶 Marche (suivi réel)</h2>
@@ -231,10 +276,6 @@
           <button id="walkStartBtn" type="button">▶️ Début</button>
           <button class="secondary" id="walkStopBtn" type="button" disabled>⏹ Fin</button>
           <button class="secondary" id="walkClearBtn" type="button">🗑 Effacer la trace</button>
-        </div>
-
-        <div class="note" style="margin-top:10px">
-          iPhone : ouvre dans Safari, accepte “Position”. Idéalement : ajoute “Sur l’écran d’accueil”.
         </div>
       </div>
 
@@ -293,782 +334,700 @@
         </div>
 
         <input id="importFile" type="file" accept="application/json" style="display:none" />
-        <div class="note" style="margin-top:10px">
-          iPhone : ouvre dans Safari → “Partager” → “Sur l’écran d’accueil” (comme une app).
-        </div>
       </div>
     </section>
   </div>
 </div>
 
 <script>
-(function(){
-  // ===== Storage Keys =====
-  const K_PROFILE = "defi30_ultra_profile_v2";
-  const K_WEIGHTS = "defi30_ultra_weights_v2";
-  const K_MEAL_CHECKS = "defi30_ultra_meal_checks_v2";
+/* ✅ Script robuste "anti page blanche" */
+document.addEventListener("DOMContentLoaded", () => {
+  // Affiche une alerte claire si une erreur JS arrive
+  window.addEventListener("error", (e) => {
+    alert("Erreur dans le script :\n" + (e?.message || "inconnue"));
+  });
 
-  // Marche
-  const K_WALKS = "defi30_ultra_walks_v1";
-  const K_WALK_ACTIVE = "defi30_ultra_walk_active_v1";
+  (function () {
+    "use strict";
 
-  const $ = (id)=>document.getElementById(id);
+    // ====== CONFIG ======
+    const STORAGE = {
+      PROFILE: "defi30_ultra_profile_v2",
+      WEIGHTS: "defi30_ultra_weights_v2",
+      MEAL_CHECKS: "defi30_ultra_meal_checks_v2",
+      WALKS: "defi30_ultra_walks_v1",
+      WALK_ACTIVE: "defi30_ultra_walk_active_v1",
+    };
 
-  const DEFAULT_PROFILE = { heightCm:173, startWeight:115.0, targetWeight:85.0, omegaTarget:3 };
+    const DEFAULT_PROFILE = { heightCm: 173, startWeight: 115.0, targetWeight: 85.0, omegaTarget: 3 };
 
-  function isoToday(){
-    const d=new Date(); const tz=d.getTimezoneOffset()*60000;
-    return new Date(d - tz).toISOString().slice(0,10);
-  }
-  function fmt(n,d=1){
-    if(n===null||n===undefined||n==="") return "—";
-    const x=Number(n); if(Number.isNaN(x)) return "—";
-    return x.toFixed(d);
-  }
-  function loadJSON(key,fallback){
-    try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch{ return fallback; }
-  }
-  function saveJSON(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
-  function addDays(iso,n){
-    const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n);
-    const tz=d.getTimezoneOffset()*60000; return new Date(d - tz).toISOString().slice(0,10);
-  }
-  function dayName(iso){
-    const d=new Date(iso+"T00:00:00");
-    return ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][d.getDay()];
-  }
+    const PROTEINS = ["Poulet","Œufs","Thon","Skyr","Sardines"];
+    const WEEK_PLAN = {
+      lunch:  ["Poulet","Poulet","Thon","Poulet","Poulet","Sardines","Poulet"],
+      dinner: ["Œufs","Skyr","Œufs","Thon","Skyr","Œufs","Sardines"]
+    };
+    const MEAL_DEFAULTS = { lunchSoupMl:700, dinnerSoupMl:450 };
 
-  // Download helper (unique)
-  function downloadText(filename, text, mime){
-    const blob=new Blob([text], {type:mime||"text/plain;charset=utf-8"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download=filename;
-    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-  }
+    const MOTIVATION = [
+      "Chaque jour compte. Tu avances. 💪",
+      "Discipline aujourd’hui. Fierté demain. 🔥",
+      "Pas besoin d’être parfait, juste constant. ✅",
+      "1% mieux chaque jour. 🚀",
+    ];
 
-  // Show Safari banner on iOS
-  try{
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if(isIOS) $("safariBanner").classList.add("show");
-  }catch{}
+    const GPS_OPTS = { enableHighAccuracy:true, maximumAge:1000, timeout:20000 };
 
-  // ===== Meal plan =====
-  const PROTEINS = ["Poulet","Œufs","Thon","Skyr","Sardines"];
-  const WEEK_PLAN = {
-    lunch:  ["Poulet","Poulet","Thon","Poulet","Poulet","Sardines","Poulet"],
-    dinner: ["Œufs","Skyr","Œufs","Thon","Skyr","Œufs","Sardines"]
-  };
-  const MEAL_DEFAULTS = { lunchSoupMl:700, dinnerSoupMl:450 };
+    // ====== UI helpers ======
+    const $ = (id)=>document.getElementById(id);
+    const exists = (id)=>!!document.getElementById(id);
 
-  function mealCard(dateISO, mealType){
-    const checks = loadJSON(K_MEAL_CHECKS, {});
-    const key = dateISO + "_" + mealType;
-    const done = !!checks[key];
+    function setText(id, txt){ const el=$(id); if(el) el.textContent = txt; }
+    function setHTML(id, html){ const el=$(id); if(el) el.innerHTML = html; }
+    function toggleActive(id, on){ const el=$(id); if(el) el.classList.toggle("active", !!on); }
 
-    const weekday = new Date(dateISO+"T00:00:00").getDay();
-    const protein = mealType==="lunch" ? WEEK_PLAN.lunch[weekday] : WEEK_PLAN.dinner[weekday];
-    const title = mealType==="lunch" ? "Midi" : "Soir";
-    const soupMl = mealType==="lunch" ? MEAL_DEFAULTS.lunchSoupMl : MEAL_DEFAULTS.dinnerSoupMl;
+    // ====== data helpers ======
+    function loadJSON(key, fallback){
+      try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+      catch{ return fallback; }
+    }
+    function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+    function del(key){ localStorage.removeItem(key); }
 
-    const el=document.createElement("div");
-    el.className="mealCard";
-    el.innerHTML = `
-      <div class="mealHead">
-        <div>
-          <div class="mealTitle">${title}</div>
-          <div class="dayLabel">${dayName(dateISO)} • ${dateISO}</div>
-        </div>
-        <label class="check"><input type="checkbox" ${done?"checked":""}/>fait</label>
-      </div>
-
-      <div class="item">
-        <div class="left">
-          <div class="icon">🥣</div>
-          <div><b>Soupe maison</b><div class="muted">${soupMl} ml</div></div>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="left">
-          <div class="icon">🍗</div>
-          <div><b>Protéines</b><div class="muted">${mealType==="lunch" ? "≈ 200 g" : "portion légère"}</div></div>
-        </div>
-        <div style="min-width:120px">
-          <select aria-label="Protéines">
-            ${PROTEINS.map(p=>`<option value="${p}" ${p===protein?"selected":""}>${p}</option>`).join("")}
-          </select>
-        </div>
-      </div>
-
-      ${mealType==="lunch" ? `
-      <div class="item">
-        <div class="left">
-          <div class="icon">🫒</div>
-          <div><b>Huile d’olive</b><div class="muted">1 c. à café</div></div>
-        </div>
-      </div>` : ""}
-    `;
-
-    const cb = el.querySelector('input[type="checkbox"]');
-    cb.addEventListener("change", ()=>{
-      const st=loadJSON(K_MEAL_CHECKS,{});
-      st[key]=cb.checked;
-      saveJSON(K_MEAL_CHECKS, st);
-    });
-    return el;
-  }
-
-  // ===== Weights =====
-  function loadWeights(){
-    const rows = loadJSON(K_WEIGHTS, []);
-    return Array.isArray(rows) ? rows.filter(r=>r && r.date).sort((a,b)=>a.date.localeCompare(b.date)) : [];
-  }
-  function saveWeight(dateISO, weight){
-    const rows = loadWeights();
-    const idx = rows.findIndex(r=>r.date===dateISO);
-    const row = {date:dateISO, weight:Number(weight)};
-    if(idx>=0) rows[idx]=row; else rows.push(row);
-    rows.sort((a,b)=>a.date.localeCompare(b.date));
-    saveJSON(K_WEIGHTS, rows);
-  }
-
-  function computeStats(profile, rows){
-    const withW=rows.filter(r=>typeof r.weight==="number");
-    const current=withW.length ? withW[withW.length-1].weight : null;
-    const lost=(current!=null) ? (profile.startWeight - current) : null;
-
-    const last7=withW.slice(-7).map(r=>r.weight);
-    const avg7=last7.length ? last7.reduce((a,b)=>a+b,0)/last7.length : null;
-
-    return {current, lost, avg7};
-  }
-
-  // ===== Chart =====
-  function drawChart(rows){
-    const c=$("chart"); const ctx=c.getContext("2d");
-    const W=c.width, H=c.height; ctx.clearRect(0,0,W,H);
-
-    const pts=rows.filter(r=>typeof r.weight==="number")
-      .map(r=>({x:new Date(r.date).getTime(), y:r.weight}))
-      .sort((a,b)=>a.x-b.x);
-
-    const padL=52,padR=14,padT=16,padB=30;
-    ctx.strokeStyle="rgba(229,231,235,1)";
-    ctx.lineWidth=1;
-    ctx.strokeRect(padL,padT,W-padL-padR,H-padT-padB);
-
-    ctx.fillStyle="rgba(107,114,128,1)";
-    ctx.font="14px system-ui";
-    if(pts.length<2){
-      ctx.fillText("Ajoute 2 pesées pour voir la courbe.", padL+12, padT+28);
-      return;
+    function downloadText(filename, text, mime){
+      const blob=new Blob([text], {type:mime||"text/plain;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download=filename;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
-    const minX=pts[0].x, maxX=pts[pts.length-1].x;
-    const ys=pts.map(p=>p.y);
-    let minY=Math.min(...ys), maxY=Math.max(...ys);
-    const margin=Math.max(0.8,(maxY-minY)*0.15);
-    minY-=margin; maxY+=margin;
-
-    const plotW=W-padL-padR, plotH=H-padT-padB;
-    const xToPx=x=>padL+((x-minX)/(maxX-minX))*plotW;
-    const yToPx=y=>padT+(1-((y-minY)/(maxY-minY)))*plotH;
-
-    // grid y
-    ctx.strokeStyle="rgba(229,231,235,1)";
-    ctx.fillStyle="rgba(107,114,128,1)";
-    ctx.font="12px system-ui";
-    for(let i=0;i<=4;i++){
-      const t=i/4;
-      const yVal=maxY-t*(maxY-minY);
-      const y=yToPx(yVal);
-      ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
-      ctx.fillText(yVal.toFixed(1), 10, y+4);
+    // ====== small utils ======
+    function isoToday(){
+      const d=new Date(); const tz=d.getTimezoneOffset()*60000;
+      return new Date(d - tz).toISOString().slice(0,10);
+    }
+    function addDays(iso,n){
+      const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n);
+      const tz=d.getTimezoneOffset()*60000;
+      return new Date(d - tz).toISOString().slice(0,10);
+    }
+    function dayName(iso){
+      const d=new Date(iso+"T00:00:00");
+      return ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][d.getDay()];
+    }
+    function fmt(n,d=1){
+      if(n===null||n===undefined||n==="") return "—";
+      const x=Number(n); if(Number.isNaN(x)) return "—";
+      return x.toFixed(d);
+    }
+    function pad2(n){ return String(n).padStart(2,"0"); }
+    function fmtHMS(ms){
+      const s=Math.max(0, Math.floor(ms/1000));
+      const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
+      return `${pad2(h)}:${pad2(m)}:${pad2(ss)}`;
     }
 
-    // line
-    ctx.strokeStyle="rgba(249,115,22,1)";
-    ctx.lineWidth=2.6;
-    ctx.beginPath();
-    pts.forEach((p,i)=>{
-      const x=xToPx(p.x), y=yToPx(p.y);
-      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-
-    // dots
-    ctx.fillStyle="rgba(249,115,22,1)";
-    pts.forEach(p=>{
-      const x=xToPx(p.x), y=yToPx(p.y);
-      ctx.beginPath(); ctx.arc(x,y,3.2,0,Math.PI*2); ctx.fill();
-    });
-  }
-
-  // ===== Tabs =====
-  function setTab(which){
-    const tabs=[["tabToday","secToday"],["tabMeals","secMeals"],["tabWalk","secWalk"],["tabProfile","secProfile"]];
-    tabs.forEach(([t,s])=>{
-      $(t).classList.toggle("active", t===which);
-      $(s).classList.toggle("active", t===which);
-    });
-  }
-
-  // ===== Render main =====
-  function render(){
-    // Ensure profile exists
-    let profile = loadJSON(K_PROFILE, null);
-    if(!profile){ profile = DEFAULT_PROFILE; saveJSON(K_PROFILE, profile); }
-
-    const rows=loadWeights();
-    const dateISO=$("date").value;
-
-    const current = rows.filter(r=>typeof r.weight==="number").slice(-1)[0]?.weight ?? null;
-    $("headerPill").innerHTML = current!=null ? `<b>${fmt(current,1)} kg</b>` : `<b>Objectif</b> ${fmt(profile.targetWeight,1)} kg`;
-
-    const s=computeStats(profile, rows);
-    $("kpiWeight").textContent = s.current!=null ? fmt(s.current,1)+" kg" : "—";
-    $("kpiLost").innerHTML = s.lost!=null ? `<span class="${s.lost>=0?'pos':'neg'}">${fmt(s.lost,1)} kg</span>` : "—";
-    $("kpiAvg7").textContent = s.avg7!=null ? fmt(s.avg7,1)+" kg" : "—";
-    $("kpiTarget").textContent = fmt(profile.targetWeight,1)+" kg";
-
-    const existing = rows.find(r=>r.date===dateISO);
-    if(existing && ($("weight").value==="" || $("weight").dataset.autofill==="1")){
-      $("weight").value = existing.weight;
-      $("weight").dataset.autofill="1";
+    function haversineMeters(a,b){
+      const R=6371000;
+      const toRad=(x)=>x*Math.PI/180;
+      const dLat=toRad(b.lat-a.lat);
+      const dLon=toRad(b.lng-a.lng);
+      const lat1=toRad(a.lat), lat2=toRad(b.lat);
+      const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
+      const h=s1*s1 + Math.cos(lat1)*Math.cos(lat2)*s2*s2;
+      return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
     }
 
-    drawChart(rows);
-
-    // meals
-    $("todayMeals").innerHTML="";
-    $("todayMeals").appendChild(mealCard(dateISO,"lunch"));
-    $("todayMeals").appendChild(mealCard(dateISO,"dinner"));
-
-    $("weekMeals").innerHTML="";
-    for(let i=0;i<7;i++){
-      const d=addDays(isoToday(), i);
-      $("weekMeals").appendChild(mealCard(d,"lunch"));
-      $("weekMeals").appendChild(mealCard(d,"dinner"));
+    // ====== Tabs ======
+    function setTab(which){
+      const tabs=[["tabToday","secToday"],["tabMeals","secMeals"],["tabWalk","secWalk"],["tabProfile","secProfile"]];
+      tabs.forEach(([t,s])=>{
+        toggleActive(t, t===which);
+        toggleActive(s, t===which);
+      });
     }
 
-    // profile fields
-    $("height").value = profile.heightCm ?? "";
-    $("startWeight").value = profile.startWeight ?? "";
-    $("targetWeight").value = profile.targetWeight ?? "";
-    $("omegaTarget").value = String(profile.omegaTarget ?? 3);
+    // ====== Meals ======
+    function mealCard(dateISO, mealType){
+      const checks = loadJSON(STORAGE.MEAL_CHECKS, {});
+      const key = dateISO + "_" + mealType;
+      const done = !!checks[key];
 
-    // walk tab quick refresh (safe)
-    renderWalkUI();
-  }
+      const weekday = new Date(dateISO+"T00:00:00").getDay();
+      const protein = mealType==="lunch" ? WEEK_PLAN.lunch[weekday] : WEEK_PLAN.dinner[weekday];
+      const title = mealType==="lunch" ? "Midi" : "Soir";
+      const soupMl = mealType==="lunch" ? MEAL_DEFAULTS.lunchSoupMl : MEAL_DEFAULTS.dinnerSoupMl;
 
-  // =========================
-  // ===== Walk tracking =====
-  // =========================
-  let walkWatchId = null;
-  let walkTimer = null;
-  let walkMap = null;
-  let walkLine = null;
-  let walkMarker = null;
+      const el=document.createElement("div");
+      el.className="mealCard";
+      el.innerHTML = `
+        <div class="mealHead">
+          <div>
+            <div class="mealTitle">${title}</div>
+            <div class="dayLabel">${dayName(dateISO)} • ${dateISO}</div>
+          </div>
+          <label class="check"><input type="checkbox" ${done?"checked":""}/>fait</label>
+        </div>
 
-  function pad2(n){ return String(n).padStart(2,"0"); }
-  function fmtHMS(ms){
-    const s=Math.max(0, Math.floor(ms/1000));
-    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
-    return `${pad2(h)}:${pad2(m)}:${pad2(ss)}`;
-  }
-  function haversineMeters(a,b){
-    const R=6371000;
-    const toRad=(x)=>x*Math.PI/180;
-    const dLat=toRad(b.lat-a.lat);
-    const dLon=toRad(b.lng-a.lng);
-    const lat1=toRad(a.lat), lat2=toRad(b.lat);
-    const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
-    const h=s1*s1 + Math.cos(lat1)*Math.cos(lat2)*s2*s2;
-    return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
-  }
+        <div class="item">
+          <div class="left">
+            <div class="icon">🥣</div>
+            <div><b>Soupe maison</b><div class="muted">${soupMl} ml</div></div>
+          </div>
+        </div>
 
-  function getActiveWalk(){ return loadJSON(K_WALK_ACTIVE, null); }
-  function setActiveWalk(w){
-    if(!w) localStorage.removeItem(K_WALK_ACTIVE);
-    else saveJSON(K_WALK_ACTIVE, w);
-  }
-  function loadWalks(){
-    const rows = loadJSON(K_WALKS, []);
-    return Array.isArray(rows) ? rows : [];
-  }
-  function saveWalks(rows){ saveJSON(K_WALKS, rows); }
+        <div class="item">
+          <div class="left">
+            <div class="icon">🍗</div>
+            <div><b>Protéines</b><div class="muted">${mealType==="lunch" ? "≈ 200 g" : "portion légère"}</div></div>
+          </div>
+          <div style="min-width:120px">
+            <select aria-label="Protéines">
+              ${PROTEINS.map(p=>`<option value="${p}" ${p===protein?"selected":""}>${p}</option>`).join("")}
+            </select>
+          </div>
+        </div>
 
-  function ensureLeafletMap(){
-    const box = $("walkMap");
-    if(!box) return;
+        ${mealType==="lunch" ? `
+        <div class="item">
+          <div class="left">
+            <div class="icon">🫒</div>
+            <div><b>Huile d’olive</b><div class="muted">1 c. à café</div></div>
+          </div>
+        </div>` : ""}
+      `;
 
-    // Si Leaflet pas chargé (offline), on n'initialise pas la carte.
-    if(typeof L === "undefined") return;
+      const cb = el.querySelector('input[type="checkbox"]');
+      cb.addEventListener("change", ()=>{
+        const st=loadJSON(STORAGE.MEAL_CHECKS,{});
+        st[key]=cb.checked;
+        saveJSON(STORAGE.MEAL_CHECKS, st);
+      });
+      return el;
+    }
 
-    if(walkMap) return;
+    // ====== Weights ======
+    function loadWeights(){
+      const rows = loadJSON(STORAGE.WEIGHTS, []);
+      return Array.isArray(rows) ? rows.filter(r=>r && r.date).sort((a,b)=>a.date.localeCompare(b.date)) : [];
+    }
+    function saveWeight(dateISO, weight){
+      const rows = loadWeights();
+      const idx = rows.findIndex(r=>r.date===dateISO);
+      const row = {date:dateISO, weight:Number(weight)};
+      if(idx>=0) rows[idx]=row; else rows.push(row);
+      rows.sort((a,b)=>a.date.localeCompare(b.date));
+      saveJSON(STORAGE.WEIGHTS, rows);
+    }
+    function computeStats(profile, rows){
+      const withW=rows.filter(r=>typeof r.weight==="number");
+      const current=withW.length ? withW[withW.length-1].weight : null;
+      const lost=(current!=null) ? (profile.startWeight - current) : null;
+      const last7=withW.slice(-7).map(r=>r.weight);
+      const avg7=last7.length ? last7.reduce((a,b)=>a+b,0)/last7.length : null;
+      return {current, lost, avg7};
+    }
 
-    walkMap = L.map(box, { zoomControl:true });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap"
-    }).addTo(walkMap);
+    function drawChart(rows){
+      const c=$("chart");
+      if(!c) return;
+      const ctx=c.getContext("2d");
+      const W=c.width, H=c.height; ctx.clearRect(0,0,W,H);
 
-    walkLine = L.polyline([], { weight:5 }).addTo(walkMap);
-  }
+      const pts=rows.filter(r=>typeof r.weight==="number")
+        .map(r=>({x:new Date(r.date).getTime(), y:r.weight}))
+        .sort((a,b)=>a.x-b.x);
 
-  function renderWalkStats(w){
-    if(!$("walkStatus")) return;
+      const padL=52,padR=14,padT=16,padB=30;
+      ctx.strokeStyle="rgba(229,231,235,1)";
+      ctx.lineWidth=1;
+      ctx.strokeRect(padL,padT,W-padL-padR,H-padT-padB);
 
-    const now = Date.now();
-    const elapsedActive = w?.startedAt ? (now - w.startedAt) : 0;
-    const elapsed = w?.active ? elapsedActive : (w?.elapsedMs || 0);
-    const distM = w?.distanceM || 0;
+      ctx.fillStyle="rgba(107,114,128,1)";
+      ctx.font="14px system-ui";
+      if(pts.length<2){
+        ctx.fillText("Ajoute 2 pesées pour voir la courbe.", padL+12, padT+28);
+        return;
+      }
 
-    $("walkStatus").value = w?.active ? "En cours…" : "Prêt";
-    $("walkTime").value = fmtHMS(elapsed);
-    $("walkDistance").value = (distM/1000).toFixed(2) + " km";
+      const minX=pts[0].x, maxX=pts[pts.length-1].x;
+      const ys=pts.map(p=>p.y);
+      let minY=Math.min(...ys), maxY=Math.max(...ys);
+      const margin=Math.max(0.8,(maxY-minY)*0.15);
+      minY-=margin; maxY+=margin;
 
-    const hours = elapsed / 3600000;
-    const km = distM/1000;
-    const speed = (hours>0) ? (km/hours) : 0;
-    $("walkSpeed").value = speed.toFixed(1) + " km/h";
+      const plotW=W-padL-padR, plotH=H-padT-padB;
+      const xToPx=x=>padL+((x-minX)/(maxX-minX))*plotW;
+      const yToPx=y=>padT+(1-((y-minY)/(maxY-minY)))*plotH;
 
-    $("walkStartBtn").disabled = !!w?.active;
-    $("walkStopBtn").disabled  = !w?.active;
-  }
+      ctx.strokeStyle="rgba(229,231,235,1)";
+      ctx.fillStyle="rgba(107,114,128,1)";
+      ctx.font="12px system-ui";
+      for(let i=0;i<=4;i++){
+        const t=i/4;
+        const yVal=maxY-t*(maxY-minY);
+        const y=yToPx(yVal);
+        ctx.beginPath(); ctx.moveTo(padL,y); ctx.lineTo(W-padR,y); ctx.stroke();
+        ctx.fillText(yVal.toFixed(1), 10, y+4);
+      }
 
-  function renderWalkOnMap(points){
-    ensureLeafletMap();
-    if(!walkMap || typeof L==="undefined") return;
+      ctx.strokeStyle="rgba(249,115,22,1)";
+      ctx.lineWidth=2.6;
+      ctx.beginPath();
+      pts.forEach((p,i)=>{
+        const x=xToPx(p.x), y=yToPx(p.y);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke();
 
-    const latlngs = points.map(p=>[p.lat,p.lng]);
-    walkLine.setLatLngs(latlngs);
+      ctx.fillStyle="rgba(249,115,22,1)";
+      pts.forEach(p=>{
+        const x=xToPx(p.x), y=yToPx(p.y);
+        ctx.beginPath(); ctx.arc(x,y,3.2,0,Math.PI*2); ctx.fill();
+      });
+    }
 
-    if(points.length){
-      const last = points[points.length-1];
+    // ====== Walk ======
+    let watchId=null, timerId=null;
+    let walkMap=null, walkLine=null, walkMarker=null;
+
+    function getActiveWalk(){ return loadJSON(STORAGE.WALK_ACTIVE, null); }
+    function setActiveWalk(w){ if(!w) del(STORAGE.WALK_ACTIVE); else saveJSON(STORAGE.WALK_ACTIVE, w); }
+    function loadWalks(){ const rows = loadJSON(STORAGE.WALKS, []); return Array.isArray(rows)?rows:[]; }
+    function saveWalks(rows){ saveJSON(STORAGE.WALKS, rows); }
+
+    function stopWatchAndTimer(){
+      if(watchId!=null){ try{ navigator.geolocation.clearWatch(watchId); }catch{} watchId=null; }
+      if(timerId!=null){ clearInterval(timerId); timerId=null; }
+    }
+
+    function ensureLeafletMap(){
+      const box = $("walkMap");
+      if(!box) return;
+      if(typeof L==="undefined") return; // offline / bloqué
+      if(walkMap) return;
+
+      walkMap = L.map(box, { zoomControl:true });
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom:19,
+        attribution:"&copy; OpenStreetMap"
+      }).addTo(walkMap);
+
+      walkLine = L.polyline([], { weight:5 }).addTo(walkMap);
+    }
+
+    function renderWalkOnMap(points, fit=true){
+      ensureLeafletMap();
+      if(!walkMap || typeof L==="undefined") return;
+      if(!points?.length) return;
+
+      const latlngs = points.map(p=>[p.lat,p.lng]);
+      walkLine.setLatLngs(latlngs);
+
+      const last=points[points.length-1];
       if(!walkMarker) walkMarker = L.circleMarker([last.lat,last.lng], { radius:6, weight:2 }).addTo(walkMap);
       walkMarker.setLatLng([last.lat,last.lng]);
 
-      // Ajuster vue
-      try{
-        const bounds = L.latLngBounds(latlngs);
-        walkMap.fitBounds(bounds, { padding:[20,20] });
-      }catch{}
-    }
-  }
-
-  function stopWatchAndTimer(){
-    if(walkWatchId!=null){
-      try{ navigator.geolocation.clearWatch(walkWatchId); }catch{}
-      walkWatchId=null;
-    }
-    if(walkTimer!=null){
-      clearInterval(walkTimer);
-      walkTimer=null;
-    }
-  }
-
-  function startWalk(){
-    if(!navigator.geolocation){
-      alert("Géolocalisation non disponible sur cet appareil.");
-      return;
+      if(fit){
+        try{
+          const bounds = L.latLngBounds(latlngs);
+          walkMap.fitBounds(bounds, { padding:[20,20] });
+        }catch{}
+      }
     }
 
-    const active = getActiveWalk();
-    if(active?.active){
-      alert("Une marche est déjà en cours.");
-      return;
+    function renderWalkStats(w){
+      if(!exists("walkStatus")) return;
+      const now=Date.now();
+      const elapsed = w?.active ? (now - w.startedAt) : (w?.elapsedMs || 0);
+      const distM = w?.distanceM || 0;
+
+      $("walkStatus").value = w?.active ? "En cours…" : "Prêt";
+      $("walkTime").value = fmtHMS(elapsed);
+      $("walkDistance").value = (distM/1000).toFixed(2) + " km";
+
+      const hours = elapsed/3600000;
+      const km = distM/1000;
+      const speed = hours>0 ? (km/hours) : 0;
+      $("walkSpeed").value = speed.toFixed(1) + " km/h";
+
+      $("walkStartBtn").disabled = !!w?.active;
+      $("walkStopBtn").disabled  = !w?.active;
     }
 
-    const w = {
-      id: "walk_" + Date.now(),
-      active: true,
-      startedAt: Date.now(),
-      elapsedMs: 0,
-      distanceM: 0,
-      points: []
-    };
-    setActiveWalk(w);
-    renderWalkUI();
+    function renderWalkHistory(){
+      const box=$("walkHistory");
+      if(!box) return;
 
-    // Options GPS (iPhone)
-    const opts = {
-      enableHighAccuracy: true,
-      maximumAge: 1000,
-      timeout: 20000
-    };
-
-    walkWatchId = navigator.geolocation.watchPosition((pos)=>{
-      const cur = getActiveWalk();
-      if(!cur?.active) return;
-
-      const p = {
-        t: Date.now(),
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        acc: pos.coords.accuracy
-      };
-
-      // Filtre léger : ignore si précision trop mauvaise
-      if(typeof p.acc==="number" && p.acc > 60){
-        // on garde quand même le point si on n'en a pas
-        if(cur.points.length>0) return;
+      const walks=loadWalks();
+      if(!walks.length){
+        box.innerHTML = `<div class="tiny">Aucune marche enregistrée pour l’instant.</div>`;
+        return;
       }
 
-      const last = cur.points[cur.points.length-1];
-      if(last){
-        const d = haversineMeters({lat:last.lat,lng:last.lng},{lat:p.lat,lng:p.lng});
-        // filtre anti "sauts" GPS : ignore si saut énorme
-        if(d > 150) return;
-        cur.distanceM += d;
-      }
-      cur.points.push(p);
+      box.innerHTML = "";
+      walks.slice(0,20).forEach(w=>{
+        const date = new Date(w.startedAt || Date.now());
+        const d = date.toLocaleDateString("fr-FR", { weekday:"short", year:"numeric", month:"short", day:"numeric" });
+        const t = date.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
 
-      setActiveWalk(cur);
-      renderWalkUI(true);
-    }, (err)=>{
-      let msg = "Erreur GPS.";
-      if(err?.code===1) msg="Permission refusée : autorise Position dans Safari.";
-      if(err?.code===2) msg="Position indisponible (essaie dehors / active GPS).";
-      if(err?.code===3) msg="Timeout GPS (réessaie).";
-      alert(msg);
-      // On laisse la marche "active" (l'utilisateur peut retenter)
-      renderWalkUI();
-    }, opts);
+        const km = ((w.distanceM||0)/1000);
+        const h = ((w.elapsedMs||0)/3600000);
+        const v = (h>0) ? (km/h) : 0;
 
-    walkTimer = setInterval(()=>{
-      const cur = getActiveWalk();
-      if(!cur?.active) return;
-      renderWalkUI(true);
-    }, 1000);
-  }
-
-  function stopWalk(){
-    const cur = getActiveWalk();
-    if(!cur?.active){
-      alert("Aucune marche en cours.");
-      return;
-    }
-
-    cur.active = false;
-    cur.endedAt = Date.now();
-    cur.elapsedMs = cur.endedAt - cur.startedAt;
-
-    // Sauvegarde dans l'historique
-    const walks = loadWalks();
-    walks.unshift(cur);
-    saveWalks(walks);
-
-    setActiveWalk(null);
-    stopWatchAndTimer();
-    renderWalkUI();
-    alert("Marche enregistrée ✅");
-  }
-
-  function clearActiveTrace(){
-    const cur = getActiveWalk();
-    if(cur?.active){
-      if(!confirm("Effacer la trace de la marche en cours ?")) return;
-      cur.points = [];
-      cur.distanceM = 0;
-      setActiveWalk(cur);
-      renderWalkUI();
-      return;
-    }
-
-    // pas active : on efface juste l'affichage carte (pas l'historique)
-    if(!confirm("Effacer la trace affichée sur la carte (sans toucher à l’historique) ?")) return;
-    if(walkLine) walkLine.setLatLngs([]);
-    if(walkMarker){ try{ walkMap.removeLayer(walkMarker); }catch{} walkMarker=null; }
-    renderWalkUI();
-  }
-
-  function exportWalks(){
-    const payload = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      walks: loadWalks()
-    };
-    downloadText("defi30_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
-  }
-
-  function clearAllWalks(){
-    if(!confirm("Tout effacer : historique des marches ?")) return;
-    localStorage.removeItem(K_WALKS);
-    setActiveWalk(null);
-    stopWatchAndTimer();
-    renderWalkUI();
-  }
-
-  function viewWalk(w){
-    // affiche une marche de l'historique sur la carte
-    ensureLeafletMap();
-    if(typeof L==="undefined"){
-      alert("Carte indisponible (offline).");
-      return;
-    }
-    if(!w?.points?.length){
-      alert("Aucun point GPS dans cette marche.");
-      return;
-    }
-    // bascule sur onglet marche
-    setTab("tabWalk");
-    setTimeout(()=>{
-      ensureLeafletMap();
-      renderWalkOnMap(w.points);
-    }, 50);
-  }
-
-  function deleteWalk(id){
-    if(!confirm("Supprimer cette marche ?")) return;
-    const walks = loadWalks().filter(w=>w.id!==id);
-    saveWalks(walks);
-    renderWalkUI();
-  }
-
-  function renderWalkHistory(){
-    const box = $("walkHistory");
-    if(!box) return;
-
-    const walks = loadWalks();
-    if(!walks.length){
-      box.innerHTML = `<div class="tiny">Aucune marche enregistrée pour l’instant.</div>`;
-      return;
-    }
-
-    box.innerHTML = "";
-    walks.slice(0,20).forEach(w=>{
-      const date = new Date(w.startedAt || Date.now());
-      const d = date.toLocaleDateString("fr-FR", { weekday:"short", year:"numeric", month:"short", day:"numeric" });
-      const t = date.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
-
-      const km = ((w.distanceM||0)/1000);
-      const h = ((w.elapsedMs||0)/3600000);
-      const v = (h>0) ? (km/h) : 0;
-
-      const el = document.createElement("div");
-      el.className = "histCard";
-      el.innerHTML = `
-        <div class="histTop">
-          <div>
-            <div class="histTitle">Marche • ${d}</div>
-            <div class="histMeta">
-              Début : ${t}<br>
-              Durée : ${fmtHMS(w.elapsedMs||0)} • Distance : ${km.toFixed(2)} km • Vitesse moy : ${v.toFixed(1)} km/h
+        const el=document.createElement("div");
+        el.className="histCard";
+        el.innerHTML = `
+          <div class="histTop">
+            <div>
+              <div class="histTitle">Marche • ${d}</div>
+              <div class="histMeta">
+                Début : ${t}<br>
+                Durée : ${fmtHMS(w.elapsedMs||0)} • Distance : ${km.toFixed(2)} km • Vitesse moy : ${v.toFixed(1)} km/h
+              </div>
             </div>
+            <div class="tiny">${(w.points?.length||0)} pts</div>
           </div>
-          <div class="tiny">${(w.points?.length||0)} pts</div>
-        </div>
-        <div class="histBtns">
-          <button class="secondary" type="button" data-view="${w.id}">Voir</button>
-          <button class="secondary" type="button" data-del="${w.id}">Supprimer</button>
-        </div>
-      `;
-      box.appendChild(el);
-    });
-
-    // wire
-    box.querySelectorAll("[data-view]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const id = btn.getAttribute("data-view");
-        const w = loadWalks().find(x=>x.id===id);
-        viewWalk(w);
+          <div class="histBtns">
+            <button class="secondary" type="button" data-view="${w.id}">Voir</button>
+            <button class="secondary" type="button" data-del="${w.id}">Supprimer</button>
+          </div>
+        `;
+        box.appendChild(el);
       });
-    });
-    box.querySelectorAll("[data-del]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const id = btn.getAttribute("data-del");
-        deleteWalk(id);
+
+      box.querySelectorAll("[data-view]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id=btn.getAttribute("data-view");
+          const w=loadWalks().find(x=>x.id===id);
+          if(!w?.points?.length){ alert("Aucun point GPS."); return; }
+          setTab("tabWalk");
+          setTimeout(()=>renderWalkOnMap(w.points,true), 50);
+        });
       });
-    });
-  }
+      box.querySelectorAll("[data-del]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id=btn.getAttribute("data-del");
+          if(!confirm("Supprimer cette marche ?")) return;
+          saveWalks(loadWalks().filter(w=>w.id!==id));
+          renderWalkUI();
+        });
+      });
+    }
 
-  function renderWalkUI(skipMapFit){
-    const cur = getActiveWalk();
+    function renderWalkUI(skipFit=false){
+      const cur=getActiveWalk();
+      renderWalkStats(cur || {active:false, elapsedMs:0, distanceM:0});
+      if(cur?.points?.length) renderWalkOnMap(cur.points, !skipFit);
+      renderWalkHistory();
+    }
 
-    // stats
-    renderWalkStats(cur || { active:false, elapsedMs:0, distanceM:0 });
+    function startWalk(){
+      if(!navigator.geolocation){ alert("Géolocalisation non disponible."); return; }
+      if(getActiveWalk()?.active){ alert("Une marche est déjà en cours."); return; }
 
-    // map
-    ensureLeafletMap();
-    if(cur?.points?.length){
-      if(!skipMapFit) renderWalkOnMap(cur.points);
-      else {
-        // update line without forcing fitBounds every second
-        if(walkLine && typeof L!=="undefined"){
-          const latlngs = cur.points.map(p=>[p.lat,p.lng]);
-          walkLine.setLatLngs(latlngs);
-          const last = cur.points[cur.points.length-1];
-          if(last){
-            if(!walkMarker) walkMarker = L.circleMarker([last.lat,last.lng], { radius:6, weight:2 }).addTo(walkMap);
-            walkMarker.setLatLng([last.lat,last.lng]);
-          }
+      const w={ id:"walk_"+Date.now(), active:true, startedAt:Date.now(), elapsedMs:0, distanceM:0, points:[] };
+      setActiveWalk(w);
+      renderWalkUI();
+
+      watchId = navigator.geolocation.watchPosition((pos)=>{
+        const cur=getActiveWalk();
+        if(!cur?.active) return;
+
+        const p={ t:Date.now(), lat:pos.coords.latitude, lng:pos.coords.longitude, acc:pos.coords.accuracy };
+
+        if(typeof p.acc==="number" && p.acc>60){
+          if(cur.points.length>0) return;
         }
-      }
+
+        const last=cur.points[cur.points.length-1];
+        if(last){
+          const d=haversineMeters({lat:last.lat,lng:last.lng},{lat:p.lat,lng:p.lng});
+          if(d>150) return;
+          cur.distanceM += d;
+        }
+        cur.points.push(p);
+        setActiveWalk(cur);
+        renderWalkUI(true);
+      }, (err)=>{
+        let msg="Erreur GPS.";
+        if(err?.code===1) msg="Permission refusée : autorise Position dans Safari.";
+        if(err?.code===2) msg="Position indisponible (essaie dehors).";
+        if(err?.code===3) msg="Timeout GPS (réessaie).";
+        alert(msg);
+        renderWalkUI();
+      }, GPS_OPTS);
+
+      timerId = setInterval(()=>{
+        if(getActiveWalk()?.active) renderWalkUI(true);
+      }, 1000);
     }
 
-    // history
-    renderWalkHistory();
-  }
+    function stopWalk(){
+      const cur=getActiveWalk();
+      if(!cur?.active){ alert("Aucune marche en cours."); return; }
 
-  function initWalkUI(){
-    // buttons
-    if($("walkStartBtn")){
-      $("walkStartBtn").onclick = startWalk;
-      $("walkStopBtn").onclick = stopWalk;
-      $("walkClearBtn").onclick = clearActiveTrace;
-      $("walkExportBtn").onclick = exportWalks;
-      $("walkClearAllBtn").onclick = clearAllWalks;
-    }
+      cur.active=false;
+      cur.endedAt=Date.now();
+      cur.elapsedMs = cur.endedAt - cur.startedAt;
 
-    // resume if active walk exists
-    const cur = getActiveWalk();
-    if(cur?.active){
-      // (re)start timer + watch if not running
-      if(walkTimer==null){
-        walkTimer = setInterval(()=>{
-          const c = getActiveWalk();
-          if(!c?.active) return;
-          renderWalkUI(true);
-        }, 1000);
-      }
-      if(walkWatchId==null && navigator.geolocation){
-        const opts = { enableHighAccuracy:true, maximumAge:1000, timeout:20000 };
-        walkWatchId = navigator.geolocation.watchPosition((pos)=>{
-          const a = getActiveWalk();
-          if(!a?.active) return;
-          const p = { t: Date.now(), lat: pos.coords.latitude, lng: pos.coords.longitude, acc: pos.coords.accuracy };
-          if(typeof p.acc==="number" && p.acc > 60){
-            if(a.points.length>0) return;
-          }
-          const last = a.points[a.points.length-1];
-          if(last){
-            const d = haversineMeters({lat:last.lat,lng:last.lng},{lat:p.lat,lng:p.lng});
-            if(d > 150) return;
-            a.distanceM += d;
-          }
-          a.points.push(p);
-          setActiveWalk(a);
-          renderWalkUI(true);
-        }, ()=>{}, opts);
-      }
-    } else {
-      stopWatchAndTimer();
-    }
-
-    renderWalkUI();
-  }
-
-  // ===== Wire events =====
-  $("tabToday").addEventListener("click", ()=>setTab("tabToday"));
-  $("tabMeals").addEventListener("click", ()=>setTab("tabMeals"));
-  $("tabWalk").addEventListener("click", ()=>{ setTab("tabWalk"); initWalkUI(); });
-  $("tabProfile").addEventListener("click", ()=>setTab("tabProfile"));
-
-  $("date").addEventListener("change", ()=>{
-    $("weight").dataset.autofill="1";
-    $("weight").value="";
-    render();
-  });
-
-  $("saveWeightBtn").addEventListener("click", ()=>{
-    const d=$("date").value;
-    const w=$("weight").value ? Number($("weight").value) : null;
-    if(!d){ alert("Choisis une date."); return; }
-    if(w===null || Number.isNaN(w)){ alert("Entre ton poids."); return; }
-    saveWeight(d,w);
-    $("weight").dataset.autofill="0";
-    render();
-    alert("Poids enregistré ✅");
-  });
-
-  $("saveProfileBtn").addEventListener("click", ()=>{
-    const p={
-      heightCm: $("height").value ? Number($("height").value) : null,
-      startWeight: $("startWeight").value ? Number($("startWeight").value) : null,
-      targetWeight: $("targetWeight").value ? Number($("targetWeight").value) : null,
-      omegaTarget: $("omegaTarget").value ? Number($("omegaTarget").value) : 3
-    };
-    if(!p.startWeight || !p.targetWeight){
-      alert("Remplis poids de départ et objectif.");
-      return;
-    }
-    saveJSON(K_PROFILE, p);
-    render();
-    setTab("tabToday");
-    alert("Profil enregistré ✅");
-  });
-
-  $("resetChecksBtn").addEventListener("click", ()=>{
-    if(!confirm("Réinitialiser toutes les coches repas ?")) return;
-    localStorage.removeItem(K_MEAL_CHECKS);
-    render();
-  });
-
-  $("exportBackupBtn").addEventListener("click", ()=>{
-    const payload={
-      version:2,
-      exportedAt:new Date().toISOString(),
-      profile: loadJSON(K_PROFILE, DEFAULT_PROFILE),
-      weights: loadWeights(),
-      mealChecks: loadJSON(K_MEAL_CHECKS, {}),
-      walks: loadWalks()
-    };
-    downloadText("defi30_backup_ultra_simple.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
-  });
-
-  $("importBackupBtn").addEventListener("click", ()=> $("importFile").click());
-
-  $("importFile").addEventListener("change", async (e)=>{
-    const f=e.target.files?.[0];
-    if(!f) return;
-    const text=await f.text();
-    try{
-      const payload=JSON.parse(text);
-      if(!payload || !Array.isArray(payload.weights)) throw new Error("Format invalide");
-      if(!confirm("Importer ce backup et remplacer tes données ?")) return;
-
-      if(payload.profile) saveJSON(K_PROFILE, payload.profile);
-      saveJSON(K_WEIGHTS, payload.weights);
-      if(payload.mealChecks) saveJSON(K_MEAL_CHECKS, payload.mealChecks);
-      if(payload.walks) saveJSON(K_WALKS, payload.walks);
+      const walks=loadWalks();
+      walks.unshift(cur);
+      saveWalks(walks);
 
       setActiveWalk(null);
       stopWatchAndTimer();
-
-      render();
-      alert("Import terminé ✅");
-    }catch(err){
-      alert("Import échoué : " + err.message);
-    }finally{ e.target.value=""; }
-  });
-
-  $("clearAllBtn").addEventListener("click", ()=>{
-    if(!confirm("Tout effacer (profil + poids + coches + marches) ?")) return;
-    localStorage.removeItem(K_PROFILE);
-    localStorage.removeItem(K_WEIGHTS);
-    localStorage.removeItem(K_MEAL_CHECKS);
-    localStorage.removeItem(K_WALKS);
-    setActiveWalk(null);
-    stopWatchAndTimer();
-    $("weight").value="";
-    render();
-    alert("Données effacées.");
-  });
-
-  // ===== Init =====
-  $("date").value = isoToday();
-  render();
-
-  // Si une marche était en cours, on la reprend
-  try{
-    const aw = getActiveWalk();
-    if(aw?.active){
-      // on n'ouvre pas l'onglet automatiquement, mais on reprend le suivi
-      initWalkUI();
+      renderWalkUI();
+      alert("Marche enregistrée ✅");
     }
-  }catch{}
-})();
+
+    function clearActiveTrace(){
+      const cur=getActiveWalk();
+      if(cur?.active){
+        if(!confirm("Effacer la trace de la marche en cours ?")) return;
+        cur.points=[]; cur.distanceM=0;
+        setActiveWalk(cur);
+        renderWalkUI();
+        return;
+      }
+      if(!confirm("Effacer la trace affichée sur la carte (sans toucher à l’historique) ?")) return;
+      if(walkLine) walkLine.setLatLngs([]);
+      if(walkMarker && walkMap){ try{ walkMap.removeLayer(walkMarker);}catch{} walkMarker=null; }
+      renderWalkUI();
+    }
+
+    function exportWalks(){
+      const payload={ version:1, exportedAt:new Date().toISOString(), walks:loadWalks() };
+      downloadText("defi30_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+    }
+
+    function clearAllWalks(){
+      if(!confirm("Tout effacer : historique des marches ?")) return;
+      del(STORAGE.WALKS);
+      setActiveWalk(null);
+      stopWatchAndTimer();
+      renderWalkUI();
+    }
+
+    function initWalkUI(){
+      if(exists("walkStartBtn")){
+        $("walkStartBtn").onclick = startWalk;
+        $("walkStopBtn").onclick  = stopWalk;
+        $("walkClearBtn").onclick = clearActiveTrace;
+        $("walkExportBtn").onclick = exportWalks;
+        $("walkClearAllBtn").onclick = clearAllWalks;
+      }
+
+      // reprise si marche active
+      const cur=getActiveWalk();
+      if(cur?.active && navigator.geolocation){
+        if(timerId==null){
+          timerId=setInterval(()=>{ if(getActiveWalk()?.active) renderWalkUI(true); }, 1000);
+        }
+        if(watchId==null){
+          watchId = navigator.geolocation.watchPosition(()=>{}, ()=>{}, GPS_OPTS);
+          // ⚠️ on ne duplique pas la logique ici : startWalk gère le vrai suivi.
+          // Si tu veux une reprise parfaite après refresh, dis-moi et je te le fais.
+          try{ navigator.geolocation.clearWatch(watchId); }catch{}
+          watchId=null;
+          // On relance proprement en demandant au user de retoucher "Début"
+        }
+      }
+
+      renderWalkUI();
+    }
+
+    // ====== Render global ======
+    function render(){
+      // profile
+      let profile=loadJSON(STORAGE.PROFILE, null);
+      if(!profile){ profile=DEFAULT_PROFILE; saveJSON(STORAGE.PROFILE, profile); }
+
+      // weights
+      const rows=loadWeights();
+      const dateISO = $("date")?.value || isoToday();
+      const current = rows.filter(r=>typeof r.weight==="number").slice(-1)[0]?.weight ?? null;
+
+      // header subtitle motivant
+      if(exists("headerSubtitle")){
+        const idx = Math.floor(Date.now()/(10*60*1000)) % MOTIVATION.length;
+        setText("headerSubtitle", MOTIVATION[idx]);
+      }
+
+      // header badge
+      if(exists("headerPill")){
+        setText("headerPill", current!=null ? `${fmt(current,1)} kg` : `${fmt(profile.targetWeight,1)} kg`);
+      }
+
+      // progress
+      if(exists("progressFill") && exists("progressPct") && exists("progressText")){
+        const sw=Number(profile.startWeight);
+        const tw=Number(profile.targetWeight);
+        if(!Number.isNaN(sw) && !Number.isNaN(tw) && current!=null){
+          const total=(sw-tw);
+          const done=(sw-current);
+          let pct = total>0 ? (done/total)*100 : 0;
+          pct = Math.max(0, Math.min(100, pct));
+          $("progressFill").style.width = pct.toFixed(0) + "%";
+          setText("progressPct", pct.toFixed(0) + "%");
+          setText("progressText", "Vers ton objectif");
+        }else{
+          $("progressFill").style.width = "0%";
+          setText("progressPct", "—");
+          setText("progressText", "Progression");
+        }
+      }
+
+      const s=computeStats(profile, rows);
+      setText("kpiWeight", s.current!=null ? fmt(s.current,1)+" kg" : "—");
+      setHTML("kpiLost", s.lost!=null ? `<span class="${s.lost>=0?'pos':'neg'}">${fmt(s.lost,1)} kg</span>` : "—");
+      setText("kpiAvg7", s.avg7!=null ? fmt(s.avg7,1)+" kg" : "—");
+      setText("kpiTarget", fmt(profile.targetWeight,1)+" kg");
+
+      // fill weight input if exists
+      const existing = rows.find(r=>r.date===dateISO);
+      if(existing && exists("weight")){
+        if($("weight").value==="" || $("weight").dataset.autofill==="1"){
+          $("weight").value = existing.weight;
+          $("weight").dataset.autofill="1";
+        }
+      }
+
+      drawChart(rows);
+
+      // meals
+      if(exists("todayMeals")){
+        $("todayMeals").innerHTML="";
+        $("todayMeals").appendChild(mealCard(dateISO,"lunch"));
+        $("todayMeals").appendChild(mealCard(dateISO,"dinner"));
+      }
+      if(exists("weekMeals")){
+        $("weekMeals").innerHTML="";
+        for(let i=0;i<7;i++){
+          const d=addDays(isoToday(), i);
+          $("weekMeals").appendChild(mealCard(d,"lunch"));
+          $("weekMeals").appendChild(mealCard(d,"dinner"));
+        }
+      }
+
+      // profile fields
+      if(exists("height")) $("height").value = profile.heightCm ?? "";
+      if(exists("startWeight")) $("startWeight").value = profile.startWeight ?? "";
+      if(exists("targetWeight")) $("targetWeight").value = profile.targetWeight ?? "";
+      if(exists("omegaTarget")) $("omegaTarget").value = String(profile.omegaTarget ?? 3);
+
+      // walk refresh
+      renderWalkUI();
+    }
+
+    // ====== Events ======
+    $("tabToday")?.addEventListener("click", ()=>setTab("tabToday"));
+    $("tabMeals")?.addEventListener("click", ()=>setTab("tabMeals"));
+    $("tabWalk")?.addEventListener("click", ()=>{ setTab("tabWalk"); initWalkUI(); });
+    $("tabProfile")?.addEventListener("click", ()=>setTab("tabProfile"));
+
+    $("date")?.addEventListener("change", ()=>{
+      if(exists("weight")){
+        $("weight").dataset.autofill="1";
+        $("weight").value="";
+      }
+      render();
+    });
+
+    $("saveWeightBtn")?.addEventListener("click", ()=>{
+      const d=$("date")?.value;
+      const w=$("weight")?.value ? Number($("weight").value) : null;
+      if(!d){ alert("Choisis une date."); return; }
+      if(w===null || Number.isNaN(w)){ alert("Entre ton poids."); return; }
+      saveWeight(d,w);
+      if(exists("weight")) $("weight").dataset.autofill="0";
+      render();
+      alert("Poids enregistré ✅");
+    });
+
+    $("saveProfileBtn")?.addEventListener("click", ()=>{
+      const p={
+        heightCm: $("height")?.value ? Number($("height").value) : null,
+        startWeight: $("startWeight")?.value ? Number($("startWeight").value) : null,
+        targetWeight: $("targetWeight")?.value ? Number($("targetWeight").value) : null,
+        omegaTarget: $("omegaTarget")?.value ? Number($("omegaTarget").value) : 3
+      };
+      if(!p.startWeight || !p.targetWeight){ alert("Remplis poids de départ et objectif."); return; }
+      saveJSON(STORAGE.PROFILE, p);
+      render();
+      setTab("tabToday");
+      alert("Profil enregistré ✅");
+    });
+
+    $("resetChecksBtn")?.addEventListener("click", ()=>{
+      if(!confirm("Réinitialiser toutes les coches repas ?")) return;
+      del(STORAGE.MEAL_CHECKS);
+      render();
+    });
+
+    $("exportBackupBtn")?.addEventListener("click", ()=>{
+      const payload={
+        version:3,
+        exportedAt:new Date().toISOString(),
+        profile: loadJSON(STORAGE.PROFILE, DEFAULT_PROFILE),
+        weights: loadWeights(),
+        mealChecks: loadJSON(STORAGE.MEAL_CHECKS, {}),
+        walks: loadWalks()
+      };
+      downloadText("defi30_backup_ultra_simple.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+    });
+
+    $("importBackupBtn")?.addEventListener("click", ()=> $("importFile")?.click());
+
+    $("importFile")?.addEventListener("change", async (e)=>{
+      const f=e.target.files?.[0];
+      if(!f) return;
+      const text=await f.text();
+      try{
+        const payload=JSON.parse(text);
+        if(!payload || !Array.isArray(payload.weights)) throw new Error("Format invalide");
+        if(!confirm("Importer ce backup et remplacer tes données ?")) return;
+
+        if(payload.profile) saveJSON(STORAGE.PROFILE, payload.profile);
+        saveJSON(STORAGE.WEIGHTS, payload.weights);
+        if(payload.mealChecks) saveJSON(STORAGE.MEAL_CHECKS, payload.mealChecks);
+        if(payload.walks) saveJSON(STORAGE.WALKS, payload.walks);
+
+        setActiveWalk(null);
+        stopWatchAndTimer();
+
+        render();
+        alert("Import terminé ✅");
+      }catch(err){
+        alert("Import échoué : " + err.message);
+      }finally{ e.target.value=""; }
+    });
+
+    $("clearAllBtn")?.addEventListener("click", ()=>{
+      if(!confirm("Tout effacer (profil + poids + coches + marches) ?")) return;
+      del(STORAGE.PROFILE);
+      del(STORAGE.WEIGHTS);
+      del(STORAGE.MEAL_CHECKS);
+      del(STORAGE.WALKS);
+      setActiveWalk(null);
+      stopWatchAndTimer();
+      if(exists("weight")) $("weight").value="";
+      render();
+      alert("Données effacées.");
+    });
+
+    // ====== INIT ======
+    if(exists("date")) $("date").value = isoToday();
+
+    // bannière iOS (si présent)
+    try{
+      const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if(isIOS && exists("safariBanner")) $("safariBanner").classList.add("show");
+    }catch{}
+
+    render();
+  })();
+});
 </script>
+
 </body>
 </html>

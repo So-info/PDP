@@ -2,412 +2,362 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <!-- IMPORTANT pour iPhone : safe-area -->
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Santé — Défi -30 kg</title>
-  <meta name="theme-color" content="#FF2D55" />
+  <title>Santé — Défi</title>
+  <meta name="theme-color" content="#000000" />
 
-  <!-- Carte (Leaflet + OpenStreetMap) -->
+  <!-- Leaflet (carte) -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
     :root{
-      --bg:#F2F2F7;
-      --card:#FFFFFF;
-      --text:#111827;
-      --muted:rgba(17,24,39,.55);
-      --line:rgba(17,24,39,.08);
-      --shadow: 0 10px 28px rgba(0,0,0,.06);
-      --r:18px;
+      --bg:#000;
+      --text:#fff;
+      --muted:rgba(255,255,255,.60);
+      --muted2:rgba(255,255,255,.35);
 
-      --accent:#FF2D55;
-      --accent2:#FF3B30;
-      --accent3:#FF9F0A;
+      --card:#1C1C1E;
+      --card2:#121214;
+      --stroke:rgba(255,255,255,.08);
+      --shadow: 0 18px 50px rgba(0,0,0,.55);
 
-      --good:#16A34A;
-      --bad:#DC2626;
+      --pink:#ff2d55;     /* move */
+      --orange:#ff9f0a;   /* goal */
+      --red:#ff3b30;      /* streak */
+      --cyan:#32d7ff;     /* distance */
+      --purple:#bf5af2;   /* steps */
 
-      --tabH: 72px;
+      --r:22px;
+
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBot: env(safe-area-inset-bottom, 0px);
+
+      --navH: 76px;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-      background:
-        radial-gradient(1200px 800px at 20% -10%, rgba(255,45,85,.10), transparent 55%),
-        radial-gradient(1200px 900px at 100% 10%, rgba(255,159,10,.10), transparent 60%),
-        var(--bg);
+      background:var(--bg);
       color:var(--text);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding-bottom: calc(var(--navH) + var(--safeBot) + 12px);
       overflow-x:hidden;
     }
 
-    /* ===== Safe-area helpers ===== */
-    .safeX{
-      padding-left:max(14px, env(safe-area-inset-left));
-      padding-right:max(14px, env(safe-area-inset-right));
-    }
-    .safeTop{
-      padding-top: env(safe-area-inset-top);
-    }
-    .safeBottomPad{
-      padding-bottom: calc(var(--tabH) + env(safe-area-inset-bottom) + 18px);
+    /* ===== Sticky Header (expanded -> compact) ===== */
+    header{
+      position:sticky; top:0; z-index:60;
+      padding: calc(14px + var(--safeTop)) 16px 12px;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom:1px solid rgba(255,255,255,.08);
     }
 
-    /* ===== Top compact nav (sticky, mais propre) ===== */
-    .navBar{
-      position:sticky;
-      top:0;
-      z-index:60;
-      background:rgba(242,242,247,.78);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom:1px solid var(--line);
-    }
-    .navInner{
-      height:44px;
+    .topRow{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap:12px;
     }
-    .navSmallTitle{
-      font-weight:900;
-      letter-spacing:-.2px;
-      opacity:0;
-      transform: translateY(4px);
-      transition: .18s ease;
-      user-select:none;
+    .titleBlock{min-width:0}
+    .title{
+      margin:0;
+      font-size:34px;
+      font-weight:950;
+      letter-spacing:-.6px;
+      line-height:1.05;
     }
-    .navPill{
-      opacity:0;
-      transform: translateY(4px);
-      transition: .18s ease;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.92);
-      border-radius:999px;
-      padding:8px 10px;
-      box-shadow:0 10px 22px rgba(0,0,0,.05);
-      white-space:nowrap;
-      user-select:none;
+    .subtitle{
+      margin-top:6px;
+      font-size:14px;
+      color:var(--muted);
+      letter-spacing:.1px;
     }
-    .navPill .k{font-size:11px;color:var(--muted)}
-    .navPill .v{font-weight:950}
 
-    .navBar.compact .navSmallTitle,
-    .navBar.compact .navPill{
-      opacity:1;
-      transform: translateY(0);
+    .pill{
+      flex:0 0 auto;
+      display:flex; flex-direction:column; justify-content:center;
+      min-width:140px;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.08);
+      box-shadow: 0 14px 30px rgba(0,0,0,.55);
+      text-align:right;
+    }
+    .pill .lbl{font-size:11px;color:var(--muted)}
+    .pill .val{font-size:16px;font-weight:950;margin-top:2px}
+
+    /* Rings row (expanded view) */
+    .ringsRow{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width:390px){
+      .ringsRow{grid-template-columns:1fr; }
+    }
+
+    .ringCard{
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:20px;
+      padding:12px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .ringSvg{width:44px;height:44px;flex:0 0 44px}
+    .ringMeta{min-width:0}
+    .ringMeta .t{font-size:12px;color:var(--muted);margin:0}
+    .ringMeta .v{
+      margin-top:3px;
+      font-size:16px;
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* Compact header: subtitle hides, rings collapse into a mini strip */
+    .miniRings{
+      display:none;
+      margin-top:10px;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .miniRings .miniLeft{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.1px;
+    }
+    .miniStrip{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      flex:0 0 auto;
+    }
+    .miniRing{
+      width:26px;height:26px;
+      border-radius:999px;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+    }
+    .miniRing svg{width:26px;height:26px;display:block}
+
+    body.compact header{
+      padding-bottom:10px;
+    }
+    body.compact .subtitle{display:none;}
+    body.compact .ringsRow{display:none;}
+    body.compact .miniRings{display:flex;}
+
+    /* Smooth transitions */
+    .ringsRow, .miniRings, .subtitle{
+      transition: opacity .18s ease, transform .18s ease;
     }
 
     /* ===== Layout ===== */
     .wrap{
       max-width:980px;
       margin:0 auto;
-    }
-    main{
-      position:relative;
+      padding:14px 16px 22px;
     }
 
-    /* ===== Hero (large title) ===== */
-    .hero{
-      padding-top: 10px;
-      padding-bottom: 12px;
-    }
-    .heroTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .largeTitle{
-      margin:6px 0 0;
-      font-size:38px;
-      letter-spacing:-.8px;
-      font-weight:950;
-      line-height:1.02;
-    }
-    .subtitle{
-      margin-top:8px;
-      font-size:14px;
-      color:var(--muted);
-      letter-spacing:.1px;
-      max-width:520px;
-    }
+    .section{display:none}
+    .section.active{display:block}
 
-    .bigPill{
-      min-width:140px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.92);
-      border-radius:999px;
-      padding:10px 12px;
-      box-shadow:0 10px 22px rgba(0,0,0,.05);
-      text-align:right;
-    }
-    .bigPill .k{font-size:11px;color:var(--muted)}
-    .bigPill .v{font-size:16px;font-weight:950;margin-top:2px}
+    .stack{display:grid;gap:12px}
 
-    /* Search bar (visuel type Santé) */
-    .searchCard{
-      margin-top:12px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.85);
-      box-shadow:0 10px 22px rgba(0,0,0,.04);
-      padding:12px 12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .searchIcon{
-      width:32px;height:32px;border-radius:12px;
-      display:flex;align-items:center;justify-content:center;
-      border:1px solid var(--line);
-      background:#fff;
-    }
-    .searchText{
-      color:rgba(17,24,39,.55);
-      font-weight:700;
-      font-size:14px;
-      user-select:none;
-    }
-
-    /* ===== Mini rings (plus petits + plus cute) ===== */
-    .rings{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-top:12px;
-    }
-    @media(min-width:720px){
-      .rings{grid-template-columns:1fr 1fr 1fr;}
-    }
-    .ringRow{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:12px 12px;
-      border-radius:18px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.90);
-      box-shadow:0 10px 22px rgba(0,0,0,.05);
-    }
-    .ringBadge{
-      width:42px;height:42px;border-radius:16px;
-      display:flex;align-items:center;justify-content:center;
-      background:rgba(17,24,39,.03);
-      border:1px solid rgba(17,24,39,.08);
-      flex:0 0 42px;
-      position:relative;
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      background-color: var(--card);
+      border:1px solid var(--stroke);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .ringBadge .emo{
-      position:absolute;
-      inset:0;
+    .pad{padding:16px}
+
+    .sectionHeader{
       display:flex;
       align-items:center;
-      justify-content:center;
-      font-size:18px;
-      filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
-    }
-    .ringSvg{
-      width:42px;height:42px;
-      transform: rotate(-90deg);
-    }
-    .ringTrack{
-      stroke: rgba(17,24,39,.10);
-      stroke-width: 6;
-      fill:none;
-    }
-    .ringProg{
-      stroke-width: 6;
-      fill:none;
-      stroke-linecap: round;
-      stroke-dasharray: 113.1;
-      stroke-dashoffset: 113.1;
-      transition: stroke-dashoffset .45s ease;
-    }
-    .ringMeta{min-width:0}
-    .ringTitle{font-size:12px;color:var(--muted);font-weight:800}
-    .ringValue{margin-top:3px;font-size:16px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-    /* ===== Cards / controls ===== */
-    .stack{display:grid;gap:12px}
-    .card{
-      background:rgba(255,255,255,.92);
-      border:1px solid var(--line);
-      border-radius:var(--r);
-      box-shadow:var(--shadow);
-      padding:14px;
-    }
-    .cardTitleRow{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
       margin-bottom:10px;
     }
-    .cardTitle{
+    .hTitle{
       margin:0;
-      font-size:18px;
+      font-size:22px;
       font-weight:950;
-      letter-spacing:-.3px;
+      letter-spacing:-.2px;
     }
-
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .row > *{flex:1 1 160px}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:800}
-
-    input, button, select, textarea{
-      width:100%;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:#fff;
-      padding:11px 12px;
-      font-size:16px;
-      outline:none;
-    }
-    input:focus, select:focus, textarea:focus{
-      border-color:rgba(255,45,85,.45);
-      box-shadow:0 0 0 3px rgba(255,45,85,.12);
-    }
-    textarea{resize:vertical}
-
-    button{
-      background:var(--accent);
-      color:#fff;
-      font-weight:950;
-      cursor:pointer;
-      border:none;
-      box-shadow:0 12px 22px rgba(255,45,85,.18);
-      -webkit-tap-highlight-color: transparent;
-    }
-    button:active{transform: translateY(1px)}
-    button.secondary{
-      background:#fff;color:var(--text);
-      border:1px solid var(--line);
-      box-shadow:none;
-      font-weight:900;
-    }
-    button:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
-
-    .tiny{font-size:12px;color:var(--muted);line-height:1.35}
-    .muted{color:var(--muted)}
-
-    .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media(min-width:820px){.kpis{grid-template-columns:repeat(4,1fr)}}
-    .kpi{
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-      background:#fff;
-    }
-    .kpi .t{font-size:12px;color:var(--muted);font-weight:800}
-    .kpi .v{margin-top:6px;font-size:18px;font-weight:950}
-    .pos{color:var(--good)} .neg{color:var(--bad)}
-
-    .pillRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:7px 10px;border-radius:999px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-size:12px;
-      color:var(--muted);
-      font-weight:800;
-    }
-    .pill strong{color:var(--text)}
-    .pill.ok{border-color:rgba(22,163,74,.22);background:rgba(22,163,74,.06)}
-    .pill.warn{border-color:rgba(255,159,10,.22);background:rgba(255,159,10,.08)}
-    .pill.info{border-color:rgba(255,45,85,.22);background:rgba(255,45,85,.06)}
 
     /* Segmented */
     .segmented{
       display:flex; gap:6px;
-      background:rgba(255,255,255,.85);
-      border:1px solid var(--line);
-      border-radius:14px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
       padding:6px;
-      box-shadow:0 8px 18px rgba(0,0,0,.04);
+      width: min(360px, 100%);
+      box-shadow: 0 14px 30px rgba(0,0,0,.35);
     }
     .segBtn{
       flex:1;
-      padding:10px 10px;
-      border-radius:12px;
       border:none;
       background:transparent;
+      color: rgba(255,255,255,.60);
+      padding:10px 10px;
+      border-radius:12px;
       font-weight:950;
-      color:rgba(17,24,39,.55);
-      text-align:center;
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
+      text-align:center;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
     .segBtn.active{
-      background:#fff;
-      color:var(--text);
-      box-shadow:0 10px 18px rgba(0,0,0,.06);
+      background: rgba(255,255,255,.12);
+      color: rgba(255,255,255,.92);
+      border:1px solid rgba(255,255,255,.12);
     }
 
+    /* Form */
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .row > *{flex:1 1 160px}
+
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+
+    input, select, textarea{
+      width:100%;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.95);
+      padding:12px 12px;
+      font-size:16px;
+      outline:none;
+    }
+    input::placeholder{color: rgba(255,255,255,.35)}
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(255,45,85,.45);
+      box-shadow: 0 0 0 3px rgba(255,45,85,.12);
+    }
+    textarea{resize:vertical}
+
+    button{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      padding:13px 12px;
+      font-size:16px;
+      font-weight:950;
+      cursor:pointer;
+      color:#fff;
+      background: rgba(255,45,85,.95);
+      box-shadow: 0 18px 40px rgba(255,45,85,.18);
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active{transform: translateY(1px)}
+    button.secondary{
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:none;
+      color: rgba(255,255,255,.90);
+    }
+    button:disabled{opacity:.55;cursor:not-allowed}
+
+    .tiny{font-size:12px;color:var(--muted);line-height:1.35}
+    .muted{font-size:12px;color:var(--muted)}
+    .pos{color:rgba(90,255,120,.95)}
+    .neg{color:rgba(255,90,90,.95)}
+
+    /* KPIs */
+    .kpis{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    @media(min-width:860px){.kpis{grid-template-columns:repeat(4,1fr)}}
+    .kpi{
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:20px;
+      padding:14px;
+    }
+    .kpi .t{font-size:12px;color:var(--muted)}
+    .kpi .v{margin-top:8px;font-size:22px;font-weight:950;letter-spacing:-.2px}
+
+    /* Chart */
     canvas{
       width:100%;
       height:260px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:#fff;
-    }
-
-    .note{
-      border-left:4px solid var(--accent);
-      background:rgba(255,45,85,.06);
-      border-radius:14px;
-      padding:10px 12px;
-      color:rgba(17,24,39,.78);
-      font-size:13px;
-      line-height:1.4;
-      margin-top:10px;
-      font-weight:700;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
     }
 
     /* Meals */
-    .mealGrid{display:grid;gap:10px}
-    @media(min-width:820px){.mealGrid{grid-template-columns:1fr 1fr}}
-    .mealCard{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fff}
-    .mealHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-    .mealTitle{font-weight:950}
-    .dayLabel{font-size:12px;color:var(--muted);font-weight:800}
-    .check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);user-select:none;font-weight:900}
+    .mealGrid{display:grid;gap:12px}
+    @media(min-width:860px){.mealGrid{grid-template-columns:1fr 1fr}}
+    .mealCard{
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:22px;
+      padding:14px;
+    }
+    .mealHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .mealTitle{font-weight:950;font-size:16px}
+    .dayLabel{font-size:12px;color:var(--muted)}
+    .check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);user-select:none}
     .check input{width:22px;height:22px}
-    .item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed rgba(17,24,39,.10)}
+    .item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px dashed rgba(255,255,255,.10)}
     .item:first-of-type{border-top:none}
     .left{display:flex;gap:10px}
     .icon{
-      width:36px;height:36px;border-radius:14px;
-      background:rgba(255,45,85,.08);
+      width:38px;height:38px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      background: rgba(255,45,85,.10);
       border:1px solid rgba(255,45,85,.14);
-      display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 36px
+      flex:0 0 38px;
+      font-size:18px;
     }
 
-    /* Walk history */
-    .histCard{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fff}
-    .histTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .histTitle{font-weight:950}
-    .histMeta{font-size:12px;color:var(--muted);line-height:1.35;margin-top:4px;font-weight:800}
-    .histBtns{display:flex;gap:8px;margin-top:10px}
-    .histBtns button{flex:1}
+    /* Walk map */
+    #walkMap{
+      height:320px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+      background: rgba(255,255,255,.04);
+    }
+
+    .footerBtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .footerBtns button{flex:1 1 200px}
 
     /* Toasts */
     .toasts{
       position:fixed;
-      right:max(14px, env(safe-area-inset-right));
-      bottom:calc(var(--tabH) + env(safe-area-inset-bottom) + 12px);
-      z-index:9999;
+      right:14px;
+      bottom: calc(var(--navH) + var(--safeBot) + 14px);
+      z-index:120;
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -418,240 +368,227 @@
       pointer-events:auto;
       border-radius:18px;
       padding:12px 12px;
-      background:#fff;
-      border:1px solid var(--line);
-      box-shadow: 0 18px 50px rgba(0,0,0,.12);
+      background: rgba(20,20,22,.92);
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 50px rgba(0,0,0,.60);
       display:flex; gap:10px; align-items:flex-start;
       transform: translateY(8px);
       opacity:0;
       animation: toastIn .18s ease forwards;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
     @keyframes toastIn{ to{ transform: translateY(0); opacity:1; } }
     .toast .ico{
       width:36px;height:36px;border-radius:14px;
       display:flex;align-items:center;justify-content:center;
-      background:rgba(255,45,85,.08);
+      background: rgba(255,45,85,.10);
       border:1px solid rgba(255,45,85,.14);
       flex:0 0 36px;
     }
     .toast .title{font-weight:950}
-    .toast .msg{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35;font-weight:800}
+    .toast .msg{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
     .toast .x{
       margin-left:auto;
       background:transparent;border:none;width:auto;padding:0;
       color:var(--muted);font-weight:950;cursor:pointer;
       box-shadow:none;
     }
-    .toast.good .ico{background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.18)}
-    .toast.bad  .ico{background:rgba(220,38,38,.10);border-color:rgba(220,38,38,.18)}
+    .toast.good .ico{background:rgba(90,255,120,.10);border-color:rgba(90,255,120,.18)}
+    .toast.bad  .ico{background:rgba(255,90,90,.10);border-color:rgba(255,90,90,.18)}
 
-    /* Screens */
-    .screen{display:none}
-    .screen.active{display:block}
-
-    /* Bottom tab bar (100% visible, safe-area OK) */
-    .tabBar{
-      position:fixed;
-      left:0; right:0; bottom:0;
-      z-index:80;
-      background:rgba(242,242,247,.82);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-top:1px solid var(--line);
-      padding-bottom: env(safe-area-inset-bottom);
+    /* ===== Bottom nav (safe + not cut) ===== */
+    .bottomNav{
+      position:fixed;left:0;right:0;bottom:0;
+      z-index:90;
+      padding: 10px 12px calc(10px + var(--safeBot));
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-top:1px solid rgba(255,255,255,.08);
     }
-    .tabInner{
-      height:var(--tabH);
-      display:flex;
+    .tabs{
+      max-width:980px;margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
       align-items:center;
-      justify-content:space-between;
-      gap:6px;
     }
-    .tabBtn{
-      flex:1;
-      min-width:0;
+    .tab{
+      border:none;
+      background: transparent;
+      color: rgba(255,255,255,.55);
+      padding:10px 8px;
+      border-radius:18px;
       display:flex;
       flex-direction:column;
       align-items:center;
-      justify-content:center;
       gap:6px;
-      border:none;
-      background:transparent;
-      padding:10px 6px;
-      border-radius:16px;
-      color:rgba(17,24,39,.55);
-      font-weight:950;
       cursor:pointer;
       -webkit-tap-highlight-color: transparent;
     }
-    .tabBtn .ico{font-size:18px;line-height:1}
-    .tabBtn .lbl{
-      font-size:11px;
-      line-height:1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width:100%;
+    .tab .ico{
+      width:34px;height:26px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:18px;
     }
-    .tabBtn.active{
-      color:var(--text);
-      background:rgba(255,45,85,.10);
-      border:1px solid rgba(255,45,85,.18);
+    .tab .lbl{font-size:12px;font-weight:950;letter-spacing:.1px}
+    .tab.active{
+      color: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.10);
     }
 
-    .banner{
-      margin-top:10px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.85);
-      border-radius:14px;
-      padding:10px 12px;
-      font-size:12px;
-      line-height:1.35;
-      color:rgba(17,24,39,.70);
-      display:none;
-      font-weight:800;
-    }
-    .banner.show{display:block}
-
-    .noscript{
-      margin:12px 0 0;
-      border:1px solid rgba(220,38,38,.25);
-      background:rgba(220,38,38,.06);
-      color:#7f1d1d;
-      border-radius:14px;
-      padding:12px;
-      font-size:13px;
-      line-height:1.4;
-    }
+    /* Small helper for Leaflet controls in dark */
+    .leaflet-control-attribution{filter: invert(1) opacity(.8);}
   </style>
 </head>
 
 <body>
-  <!-- Sticky compact nav -->
-  <div class="navBar safeTop">
-    <div class="wrap safeX">
-      <div class="navInner">
-        <div class="navSmallTitle" id="navSmallTitle">Santé</div>
-        <div class="navPill" id="navPill" aria-hidden="true">
-          <span class="k">Poids</span>
-          <span class="v" id="navPillVal">—</span>
-        </div>
+
+<header>
+  <div class="topRow">
+    <div class="titleBlock">
+      <h1 class="title" id="headerTitle">Santé</h1>
+      <div class="subtitle" id="headerSubtitle">Une donnée par jour. Une tendance par semaine.</div>
+    </div>
+
+    <div class="pill">
+      <div class="lbl">Poids</div>
+      <div class="val" id="headerPill">—</div>
+    </div>
+  </div>
+
+  <!-- Expanded rings -->
+  <div class="ringsRow" aria-label="Récap anneaux">
+    <div class="ringCard">
+      <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="6"/>
+        <circle id="ringGoal" cx="22" cy="22" r="18" fill="none" stroke="var(--orange)" stroke-width="6"
+                stroke-linecap="round" transform="rotate(-90 22 22)"
+                stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+      </svg>
+      <div class="ringMeta">
+        <div class="t">Objectif</div>
+        <div class="v" id="ringGoalText">—</div>
+      </div>
+    </div>
+
+    <div class="ringCard">
+      <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="6"/>
+        <circle id="ringStreak" cx="22" cy="22" r="18" fill="none" stroke="var(--red)" stroke-width="6"
+                stroke-linecap="round" transform="rotate(-90 22 22)"
+                stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+      </svg>
+      <div class="ringMeta">
+        <div class="t">Série (pesées)</div>
+        <div class="v" id="ringStreakText">—</div>
+      </div>
+    </div>
+
+    <div class="ringCard">
+      <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
+        <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="6"/>
+        <circle id="ringMove" cx="22" cy="22" r="18" fill="none" stroke="var(--pink)" stroke-width="6"
+                stroke-linecap="round" transform="rotate(-90 22 22)"
+                stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+      </svg>
+      <div class="ringMeta">
+        <div class="t">Activité</div>
+        <div class="v" id="ringMoveText">—</div>
       </div>
     </div>
   </div>
 
-  <noscript>
-    <div class="wrap safeX">
-      <div class="noscript">
-        JavaScript est désactivé : les boutons et le graphique ne peuvent pas fonctionner.
-        Ouvre ce fichier dans Safari et active JavaScript.
+  <!-- Compact mini rings -->
+  <div class="miniRings" aria-label="Anneaux mini">
+    <div class="miniLeft" id="miniLeftText">Résumé</div>
+    <div class="miniStrip">
+      <div class="miniRing" title="Objectif">
+        <svg viewBox="0 0 44 44" aria-hidden="true">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="7"/>
+          <circle id="miniGoal" cx="22" cy="22" r="18" fill="none" stroke="var(--orange)" stroke-width="7"
+                  stroke-linecap="round" transform="rotate(-90 22 22)"
+                  stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+        </svg>
+      </div>
+      <div class="miniRing" title="Série">
+        <svg viewBox="0 0 44 44" aria-hidden="true">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="7"/>
+          <circle id="miniStreak" cx="22" cy="22" r="18" fill="none" stroke="var(--red)" stroke-width="7"
+                  stroke-linecap="round" transform="rotate(-90 22 22)"
+                  stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+        </svg>
+      </div>
+      <div class="miniRing" title="Activité">
+        <svg viewBox="0 0 44 44" aria-hidden="true">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="7"/>
+          <circle id="miniMove" cx="22" cy="22" r="18" fill="none" stroke="var(--pink)" stroke-width="7"
+                  stroke-linecap="round" transform="rotate(-90 22 22)"
+                  stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+        </svg>
       </div>
     </div>
-  </noscript>
+  </div>
+</header>
 
-  <div class="toasts" id="toasts"></div>
+<!-- Sentinel to detect when header should compact -->
+<div id="scrollSentinel" style="height:1px"></div>
 
-  <main class="wrap safeX safeBottomPad" id="main">
-    <!-- HERO -->
-    <header class="hero" id="hero">
-      <div class="heroTop">
-        <div>
-          <h1 class="largeTitle">Santé</h1>
-          <div class="subtitle" id="headerSubtitle">Une donnée par jour. Une tendance par semaine.</div>
-        </div>
-        <div class="bigPill">
-          <div class="k">Poids actuel</div>
-          <div class="v" id="headerPill">—</div>
-        </div>
-      </div>
+<div class="toasts" id="toasts"></div>
 
-      <div class="searchCard" role="button" aria-label="Rechercher">
-        <div class="searchIcon">🔎</div>
-        <div class="searchText">Rechercher (visuel)</div>
-      </div>
-
-      <div class="rings">
-        <div class="ringRow">
-          <div class="ringBadge">
-            <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
-              <circle cx="22" cy="22" r="18" class="ringTrack"></circle>
-              <circle id="ringGoal" cx="22" cy="22" r="18" class="ringProg" style="stroke:var(--accent)"></circle>
-            </svg>
-            <div class="emo">🎯</div>
-          </div>
-          <div class="ringMeta">
-            <div class="ringTitle">Objectif</div>
-            <div class="ringValue" id="ringGoalText">—</div>
-          </div>
-        </div>
-
-        <div class="ringRow">
-          <div class="ringBadge">
-            <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
-              <circle cx="22" cy="22" r="18" class="ringTrack"></circle>
-              <circle id="ringStreak" cx="22" cy="22" r="18" class="ringProg" style="stroke:var(--accent2)"></circle>
-            </svg>
-            <div class="emo">🔥</div>
-          </div>
-          <div class="ringMeta">
-            <div class="ringTitle">Série (pesées)</div>
-            <div class="ringValue" id="ringStreakText">—</div>
-          </div>
-        </div>
-
-        <div class="ringRow">
-          <div class="ringBadge">
-            <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
-              <circle cx="22" cy="22" r="18" class="ringTrack"></circle>
-              <circle id="ringMove" cx="22" cy="22" r="18" class="ringProg" style="stroke:var(--accent3)"></circle>
-            </svg>
-            <div class="emo">🚶</div>
-          </div>
-          <div class="ringMeta">
-            <div class="ringTitle">Activité (marche)</div>
-            <div class="ringValue" id="ringMoveText">—</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="banner" id="safariBanner">
-        ⚠️ Ouvre dans <b>Safari</b> (Partager → <b>Ouvrir dans Safari</b>) puis “Sur l’écran d’accueil”.
-      </div>
-    </header>
-
-    <!-- SCREENS -->
+<div class="wrap">
+  <!-- TODAY -->
+  <section class="section active" id="secToday">
     <div class="stack">
-      <!-- Résumé -->
-      <section class="screen active" id="screenSummary">
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Highlights</h2>
-            <div class="segmented" style="max-width:220px">
-              <button class="segBtn active" data-mode="weight" type="button">Poids</button>
-              <button class="segBtn" data-mode="activity" type="button">Activité</button>
+
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Highlights</h2>
+            <div class="segmented" id="todaySeg">
+              <button class="segBtn active" data-today="poids" type="button">Poids</button>
+              <button class="segBtn" data-today="act" type="button">Activité</button>
             </div>
           </div>
 
-          <div class="row" style="align-items:flex-end">
-            <div>
-              <label>Date</label>
-              <input id="date" type="date" />
+          <!-- Highlight: Poids -->
+          <div id="todayPaneWeight">
+            <div class="row" style="align-items:flex-end">
+              <div>
+                <label>Date</label>
+                <input id="date" type="date" />
+              </div>
+              <div>
+                <label>Poids du jour (kg)</label>
+                <input id="weight" type="number" step="0.1" inputmode="decimal" placeholder="ex: 114.6" />
+              </div>
+              <div>
+                <button id="saveWeightBtn" type="button">Ajouter</button>
+              </div>
             </div>
-            <div>
-              <label>Poids du jour (kg)</label>
-              <input id="weight" type="number" step="0.1" inputmode="decimal" placeholder="ex : 114.6" />
-            </div>
-            <div>
-              <button id="saveWeightBtn" type="button">Ajouter</button>
-            </div>
+            <div class="tiny" style="margin-top:10px">Conseil : pesée matin + conditions similaires = courbe plus fiable.</div>
           </div>
-          <div class="tiny" style="margin-top:8px">Conseil : pesée matin + conditions similaires = courbe plus fiable.</div>
+
+          <!-- Highlight: Activité -->
+          <div id="todayPaneAct" style="display:none">
+            <div class="kpis" style="margin-top:4px">
+              <div class="kpi"><div class="t">Activité aujourd’hui</div><div class="v" id="kpiMove">—</div></div>
+              <div class="kpi"><div class="t">Distance</div><div class="v" id="kpiDist">—</div></div>
+              <div class="kpi"><div class="t">Vitesse moy.</div><div class="v" id="kpiSpeed">—</div></div>
+              <div class="kpi"><div class="t">Objectif</div><div class="v" id="kpiMoveGoal">—</div></div>
+            </div>
+            <div class="tiny" style="margin-top:10px">Ces valeurs se basent sur tes marches enregistrées.</div>
+          </div>
         </div>
+      </div>
 
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Tendances</h2>
-            <div class="segmented" id="rangeSeg" style="max-width:420px">
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Tendances</h2>
+            <div class="segmented" id="rangeSeg">
               <button class="segBtn active" data-range="7" type="button">Semaine</button>
               <button class="segBtn" data-range="30" type="button">Mois</button>
               <button class="segBtn" data-range="180" type="button">6 mois</button>
@@ -659,52 +596,59 @@
             </div>
           </div>
 
-          <div class="kpis">
+          <div class="kpis" style="margin-top:6px">
             <div class="kpi"><div class="t">Poids actuel</div><div class="v" id="kpiWeight">—</div></div>
             <div class="kpi"><div class="t">Perte totale</div><div class="v" id="kpiLost">—</div></div>
             <div class="kpi"><div class="t">Moyenne 7 jours</div><div class="v" id="kpiAvg7">—</div></div>
-            <div class="kpi"><div class="t">Activité aujourd’hui</div><div class="v" id="kpiMove">—</div></div>
-          </div>
-
-          <div class="pillRow">
-            <span class="pill info" id="pillBMI">IMC : <strong>—</strong></span>
-            <span class="pill warn" id="pillTrend">Tendance : <strong>—</strong></span>
-            <span class="pill" id="pillETA">Estimation : <strong>—</strong></span>
+            <div class="kpi"><div class="t">Tendance</div><div class="v" id="kpiTrend">—</div></div>
           </div>
 
           <div style="margin-top:12px">
-            <canvas id="chart" width="1000" height="380"></canvas>
-            <div class="note" id="coachNote" style="display:none"></div>
+            <canvas id="chart" width="1000" height="360"></canvas>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Repas d’aujourd’hui</h2>
+          <div class="tiny" id="coachNote" style="margin-top:10px;display:none"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Repas d’aujourd’hui</h2>
           </div>
           <div class="mealGrid" id="todayMeals"></div>
         </div>
-      </section>
+      </div>
 
-      <!-- Parcours (Repas semaine) -->
-      <section class="screen" id="screenJourney">
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Repas de la semaine</h2>
+    </div>
+  </section>
+
+  <!-- MEALS -->
+  <section class="section" id="secMeals">
+    <div class="stack">
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Repas</h2>
           </div>
           <div class="tiny">Coche “fait” pour suivre ta régularité.</div>
-          <div class="mealGrid" id="weekMeals" style="margin-top:10px"></div>
-          <div class="row" style="margin-top:10px">
+          <div class="mealGrid" id="weekMeals" style="margin-top:12px"></div>
+          <div class="footerBtns">
             <button class="secondary" id="resetChecksBtn" type="button">Réinitialiser les coches</button>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </section>
 
-      <!-- Activité (Marche) -->
-      <section class="screen" id="screenActivity">
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Marche</h2>
+  <!-- WALK -->
+  <section class="section" id="secWalk">
+    <div class="stack">
+
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Activité</h2>
           </div>
 
           <div class="row" style="align-items:flex-end">
@@ -729,46 +673,49 @@
             </div>
           </div>
 
-          <div class="row" style="margin-top:10px">
+          <div class="footerBtns" style="margin-top:12px">
             <button id="walkStartBtn" type="button">Démarrer</button>
             <button class="secondary" id="walkStopBtn" type="button" disabled>Terminer</button>
             <button class="secondary" id="walkClearBtn" type="button">Effacer la trace</button>
           </div>
 
-          <div class="tiny" style="margin-top:10px">
-            L’activité “aujourd’hui” = total des minutes de marche enregistrées.
-          </div>
+          <div class="tiny" style="margin-top:10px">Astuce : dehors, GPS plus stable.</div>
         </div>
+      </div>
 
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Carte</h2>
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Carte</h2>
           </div>
-          <div id="walkMap" style="height:320px;border-radius:16px;border:1px solid var(--line);background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center">
-            <div class="tiny" style="padding:14px;text-align:center;max-width:520px">
-              La carte utilise OpenStreetMap (Leaflet) chargé en ligne.
-              Hors connexion : le suivi fonctionne, mais sans fond de carte.
-            </div>
-          </div>
+          <div id="walkMap"></div>
+          <div class="tiny" style="margin-top:10px">OpenStreetMap (en ligne). Hors connexion : marche OK, carte sans fond.</div>
         </div>
+      </div>
 
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Historique</h2>
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Historique</h2>
           </div>
           <div id="walkHistory" class="mealGrid"></div>
-          <div class="row" style="margin-top:10px">
+          <div class="footerBtns">
             <button class="secondary" id="walkExportBtn" type="button">Exporter (JSON)</button>
             <button class="secondary" id="walkClearAllBtn" type="button">Tout effacer</button>
           </div>
         </div>
-      </section>
+      </div>
 
-      <!-- Profil -->
-      <section class="screen" id="screenProfile">
-        <div class="card">
-          <div class="cardTitleRow">
-            <h2 class="cardTitle">Profil</h2>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="section" id="secProfile">
+    <div class="stack">
+      <div class="card">
+        <div class="pad">
+          <div class="sectionHeader">
+            <h2 class="hTitle">Profil</h2>
           </div>
 
           <div class="row">
@@ -782,7 +729,7 @@
             </div>
           </div>
 
-          <div class="row">
+          <div class="row" style="margin-top:10px">
             <div>
               <label>Objectif (kg)</label>
               <input id="targetWeight" type="number" step="0.1" inputmode="decimal" placeholder="85" />
@@ -793,7 +740,7 @@
             </div>
           </div>
 
-          <div class="row">
+          <div class="row" style="margin-top:10px">
             <div>
               <label>Ω-3 / semaine</label>
               <select id="omegaTarget">
@@ -803,77 +750,65 @@
               </select>
             </div>
             <div>
-              <label>—</label>
-              <input value="Données stockées sur l’appareil" readonly />
+              <label>Stockage</label>
+              <input value="Local (sur l’appareil)" readonly />
             </div>
           </div>
 
-          <div class="row" style="margin-top:10px">
+          <div class="footerBtns" style="margin-top:12px">
             <button id="saveProfileBtn" type="button">Enregistrer</button>
             <button class="secondary" id="exportBackupBtn" type="button">Backup (JSON)</button>
-          </div>
-          <div class="row">
             <button class="secondary" id="importBackupBtn" type="button">Importer (JSON)</button>
             <button class="secondary" id="clearAllBtn" type="button">Tout effacer</button>
           </div>
 
           <input id="importFile" type="file" accept="application/json" style="display:none" />
-          <div class="tiny" style="margin-top:10px">
-            Si ton objectif est ambitieux : vise la régularité. Perdre du poids trop vite fatigue et tient moins dans le temps.
-            Si tu as un souci de santé, fais valider par un pro.
-          </div>
         </div>
-      </section>
-    </div>
-  </main>
-
-  <!-- Bottom tab bar -->
-  <nav class="tabBar" role="navigation" aria-label="Menu">
-    <div class="wrap safeX">
-      <div class="tabInner">
-        <button class="tabBtn active" id="tabSummary" type="button" aria-selected="true">
-          <div class="ico">❤️</div><div class="lbl">Résumé</div>
-        </button>
-        <button class="tabBtn" id="tabJourney" type="button" aria-selected="false">
-          <div class="ico">📚</div><div class="lbl">Parcours</div>
-        </button>
-        <button class="tabBtn" id="tabActivity" type="button" aria-selected="false">
-          <div class="ico">🚶</div><div class="lbl">Activité</div>
-        </button>
-        <button class="tabBtn" id="tabProfile" type="button" aria-selected="false">
-          <div class="ico">👤</div><div class="lbl">Profil</div>
-        </button>
       </div>
     </div>
-  </nav>
+  </section>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottomNav" aria-label="Navigation">
+  <div class="tabs">
+    <button class="tab active" id="tabToday" type="button">
+      <div class="ico">❤️</div><div class="lbl">Résumé</div>
+    </button>
+    <button class="tab" id="tabMeals" type="button">
+      <div class="ico">📚</div><div class="lbl">Parcours</div>
+    </button>
+    <button class="tab" id="tabWalk" type="button">
+      <div class="ico">🏃</div><div class="lbl">Activité</div>
+    </button>
+    <button class="tab" id="tabProfile" type="button">
+      <div class="ico">👤</div><div class="lbl">Profil</div>
+    </button>
+  </div>
+</nav>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  window.addEventListener("error", (e) => {
-    alert("Erreur dans le script :\n" + (e?.message || "inconnue"));
-  });
-
   (function(){
     "use strict";
 
-    // ========= STORAGE =========
-    const STORAGE = {
-      PROFILE: "health30_profile_v2",
-      WEIGHTS: "health30_weights_v2",
-      MEAL_CHECKS: "health30_meal_checks_v2",
-      WALKS: "health30_walks_v2",
-      WALK_ACTIVE: "health30_walk_active_v2",
-      UI_RANGE: "health30_ui_range_v2",
+    // ====== STORAGE (compat: on lit anciennes clés si existantes) ======
+    const KEYS = {
+      PROFILE: "health30_profile_v3",
+      WEIGHTS: "health30_weights_v3",
+      MEAL_CHECKS: "health30_meal_checks_v3",
+      WALKS: "health30_walks_v3",
+      WALK_ACTIVE: "health30_walk_active_v3",
+      UI_RANGE: "health30_ui_range_v3",
     };
 
-    // ========= DEFAULTS =========
-    const DEFAULT_PROFILE = {
-      heightCm: 173,
-      startWeight: 115.0,
-      targetWeight: 85.0,
-      omegaTarget: 3,
-      moveGoalMin: 30
-    };
+    const FALLBACK_KEYS = [
+      { PROFILE:"health30_profile_v2", WEIGHTS:"health30_weights_v2", MEAL_CHECKS:"health30_meal_checks_v2", WALKS:"health30_walks_v2", WALK_ACTIVE:"health30_walk_active_v2", UI_RANGE:"health30_ui_range_v2" },
+      { PROFILE:"health30_profile_v1", WEIGHTS:"health30_weights_v1", MEAL_CHECKS:"health30_meal_checks_v1", WALKS:"health30_walks_v1", WALK_ACTIVE:"health30_walk_active_v1", UI_RANGE:"health30_ui_range_v1" },
+      { PROFILE:"defi30_ultra_profile_v2", WEIGHTS:"defi30_ultra_weights_v2", MEAL_CHECKS:"defi30_ultra_meal_checks_v2", WALKS:"defi30_ultra_walks_v1", WALK_ACTIVE:"defi30_ultra_walk_active_v1", UI_RANGE:null },
+    ];
+
+    const DEFAULT_PROFILE = { heightCm:173, startWeight:115.0, targetWeight:85.0, omegaTarget:3, moveGoalMin:30 };
 
     const PROTEINS = ["Poulet","Œufs","Thon","Skyr","Sardines"];
     const WEEK_PLAN = {
@@ -881,26 +816,17 @@ document.addEventListener("DOMContentLoaded", () => {
       dinner: ["Œufs","Skyr","Œufs","Thon","Skyr","Œufs","Sardines"]
     };
     const MEAL_DEFAULTS = { lunchSoupMl:700, dinnerSoupMl:450 };
-
-    const MOTIVATION = [
-      "Une donnée par jour. Une tendance par semaine.",
-      "Simple, régulier, mesurable.",
-      "La constance bat la perfection.",
-      "On avance calmement, mais on avance."
-    ];
-
     const GPS_OPTS = { enableHighAccuracy:true, maximumAge:1000, timeout:20000 };
 
-    // ========= DOM =========
+    // ====== DOM ======
     const $ = (id)=>document.getElementById(id);
     const exists = (id)=>!!document.getElementById(id);
 
-    function setText(id, txt){ const el=$(id); if(el) el.textContent = txt; }
-    function setHTML(id, html){ const el=$(id); if(el) el.innerHTML = html; }
-    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+    function setText(id, t){ const el=$(id); if(el) el.textContent = t; }
+    function setHTML(id, h){ const el=$(id); if(el) el.innerHTML = h; }
 
-    // ========= Toasts =========
-    function toast(type, title, msg, ms=2000){
+    // ====== Toasts ======
+    function toast(type, title, msg, ms=1800){
       const box = $("toasts");
       if(!box) return;
       const el = document.createElement("div");
@@ -918,21 +844,30 @@ document.addEventListener("DOMContentLoaded", () => {
       el.querySelector(".x").addEventListener("click", kill);
       box.appendChild(el);
       if(ms>0) setTimeout(kill, ms);
-      try{
-        if(navigator.vibrate){
-          if(type==="good") navigator.vibrate(18);
-          if(type==="bad") navigator.vibrate([10,20,10]);
-        }
-      }catch{}
     }
 
-    // ========= JSON helpers =========
+    // ====== JSON helpers (with fallback read) ======
     function loadJSON(key, fallback){
       try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
       catch{ return fallback; }
     }
     function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
-    function del(key){ localStorage.removeItem(key); }
+    function del(key){ if(key) localStorage.removeItem(key); }
+
+    function loadWithFallback(primaryKey, fallbackKeyName){
+      // primary first
+      const v = loadJSON(primaryKey, null);
+      if(v!==null) return v;
+
+      // scan fallbacks
+      for(const fb of FALLBACK_KEYS){
+        const k = fb[fallbackKeyName];
+        if(!k) continue;
+        const vv = loadJSON(k, null);
+        if(vv!==null) return vv;
+      }
+      return null;
+    }
 
     function downloadText(filename, text, mime){
       const blob=new Blob([text], {type:mime||"text/plain;charset=utf-8"});
@@ -941,7 +876,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     }
 
-    // ========= Date utils =========
+    // ====== Date utils ======
     function isoToday(){
       const d=new Date();
       const tz=d.getTimezoneOffset()*60000;
@@ -975,44 +910,106 @@ document.addEventListener("DOMContentLoaded", () => {
       if(Number.isNaN(x)) return "—";
       return x.toFixed(d);
     }
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-    // ========= Profile =========
+    // ====== Compact header toggle (smooth & reliable) ======
+    function initHeaderCompact(){
+      const sentinel = $("scrollSentinel");
+      if(!sentinel || !("IntersectionObserver" in window)){
+        // fallback scroll
+        let ticking=false;
+        window.addEventListener("scroll", ()=>{
+          if(ticking) return;
+          ticking=true;
+          requestAnimationFrame(()=>{
+            document.body.classList.toggle("compact", window.scrollY > 80);
+            ticking=false;
+          });
+        }, {passive:true});
+        return;
+      }
+
+      const obs = new IntersectionObserver((entries)=>{
+        const e = entries[0];
+        // when sentinel is not visible, we are scrolled past header
+        document.body.classList.toggle("compact", !e.isIntersecting);
+      }, {root:null, threshold:0.01});
+
+      obs.observe(sentinel);
+    }
+
+    // ====== Tabs ======
+    function setTab(which){
+      const map = [
+        ["tabToday","secToday"],
+        ["tabMeals","secMeals"],
+        ["tabWalk","secWalk"],
+        ["tabProfile","secProfile"]
+      ];
+      map.forEach(([t,s])=>{
+        const tEl=$(t), sEl=$(s);
+        if(tEl) tEl.classList.toggle("active", t===which);
+        if(sEl) sEl.classList.toggle("active", t===which);
+      });
+      // little helper in compact header
+      const label = which==="tabToday" ? "Résumé" : which==="tabMeals" ? "Repas" : which==="tabWalk" ? "Activité" : "Profil";
+      if(exists("miniLeftText")) setText("miniLeftText", label);
+    }
+
+    // ====== Today segmented ======
+    function initTodaySeg(){
+      const seg = $("todaySeg");
+      if(!seg) return;
+      seg.querySelectorAll("[data-today]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          seg.querySelectorAll(".segBtn").forEach(x=>x.classList.remove("active"));
+          btn.classList.add("active");
+          const v = btn.getAttribute("data-today");
+          $("todayPaneWeight").style.display = (v==="poids") ? "block" : "none";
+          $("todayPaneAct").style.display = (v==="act") ? "block" : "none";
+        });
+      });
+    }
+
+    // ====== Profile ======
     function loadProfile(){
-      let p = loadJSON(STORAGE.PROFILE, null);
-      if(!p){ p = DEFAULT_PROFILE; saveJSON(STORAGE.PROFILE, p); }
-      if(typeof p.moveGoalMin!=="number") p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
-      if(typeof p.omegaTarget!=="number") p.omegaTarget = DEFAULT_PROFILE.omegaTarget;
+      let p = loadWithFallback(KEYS.PROFILE, "PROFILE");
+      if(!p){ p = DEFAULT_PROFILE; saveJSON(KEYS.PROFILE, p); }
+      p.heightCm = Number(p.heightCm ?? DEFAULT_PROFILE.heightCm);
+      p.startWeight = Number(p.startWeight ?? DEFAULT_PROFILE.startWeight);
+      p.targetWeight = Number(p.targetWeight ?? DEFAULT_PROFILE.targetWeight);
+      p.omegaTarget = Number(p.omegaTarget ?? DEFAULT_PROFILE.omegaTarget);
+      p.moveGoalMin = Number(p.moveGoalMin ?? DEFAULT_PROFILE.moveGoalMin);
       return p;
     }
 
-    // ========= Weights =========
+    // ====== Weights ======
     function loadWeights(){
-      const rows = loadJSON(STORAGE.WEIGHTS, []);
-      return Array.isArray(rows)
-        ? rows.filter(r=>r && r.date && typeof r.date==="string").sort((a,b)=>a.date.localeCompare(b.date))
-        : [];
+      const rows = loadWithFallback(KEYS.WEIGHTS, "WEIGHTS") ?? [];
+      const arr = Array.isArray(rows) ? rows : [];
+      return arr
+        .filter(r=>r && r.date && typeof r.date==="string")
+        .sort((a,b)=>a.date.localeCompare(b.date));
     }
+    function saveWeights(rows){ saveJSON(KEYS.WEIGHTS, rows); }
+
     function saveWeight(dateISO, weight){
       const rows = loadWeights();
       const idx = rows.findIndex(r=>r.date===dateISO);
       const row = { date:dateISO, weight:Number(weight) };
       if(idx>=0) rows[idx]=row; else rows.push(row);
       rows.sort((a,b)=>a.date.localeCompare(b.date));
-      saveJSON(STORAGE.WEIGHTS, rows);
+      saveWeights(rows);
     }
 
     function computeStreak(rows){
-      const dates = rows
-        .filter(r=>typeof r.weight==="number" && r.date)
-        .map(r=>r.date)
-        .sort();
+      const dates = rows.filter(r=>typeof r.weight==="number").map(r=>r.date).sort();
       if(!dates.length) return 0;
-
-      let streak = 1;
+      let streak=1;
       for(let i=dates.length-1;i>0;i--){
-        const d1 = new Date(dates[i]+"T00:00:00");
-        const d0 = new Date(dates[i-1]+"T00:00:00");
-        const diffDays = Math.round((d1-d0)/(24*3600*1000));
+        const d1=new Date(dates[i]+"T00:00:00");
+        const d0=new Date(dates[i-1]+"T00:00:00");
+        const diffDays=Math.round((d1-d0)/(24*3600*1000));
         if(diffDays===1) streak++;
         else if(diffDays===0) continue;
         else break;
@@ -1031,48 +1028,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const prev7 = withW.slice(-14,-7).map(r=>r.weight);
       const avgPrev7 = prev7.length ? prev7.reduce((a,b)=>a+b,0)/prev7.length : null;
 
-      return { current, lost, avg7, avgPrev7, count: withW.length };
+      const trend = (avgPrev7!=null && avg7!=null) ? (avgPrev7 - avg7) : null; // positive = down
+      return { current, lost, avg7, avgPrev7, trend, count: withW.length };
     }
 
-    function computeBMI(profile, current){
-      const h = Number(profile.heightCm);
-      if(!h || !current) return null;
-      const m = h/100;
-      return current/(m*m);
+    // ====== Chart range ======
+    function loadRange(){
+      const v = loadWithFallback(KEYS.UI_RANGE, "UI_RANGE");
+      return (v || "7");
     }
-
-    function estimateETA(profile, stats){
-      const tw = Number(profile.targetWeight);
-      const cur = stats.current;
-      if(cur==null || Number.isNaN(tw)) return null;
-
-      const remaining = cur - tw;
-      if(remaining <= 0) return { text:"Objectif atteint", date:null };
-
-      if(stats.avg7==null || stats.avgPrev7==null) return { text:"Ajoute plus de données", date:null };
-
-      const weeklyLoss = (stats.avgPrev7 - stats.avg7);
-      if(weeklyLoss <= 0.05) return { text:"Tendance stable", date:null };
-
-      const weeks = remaining / weeklyLoss;
-      const days = Math.ceil(weeks*7);
-      const eta = new Date();
-      eta.setDate(eta.getDate()+days);
-      return { text:`≈ ${days} jours`, date:eta };
-    }
-
-    function coachMessage(stats){
-      if(stats.current==null) return null;
-      if(stats.avg7==null) return "Ajoute 7 pesées pour obtenir une tendance fiable.";
-      const diff = stats.current - stats.avg7;
-      if(diff < -0.2) return "Sous la moyenne 7 jours — bon signal. Continue.";
-      if(diff >  0.2) return "Au-dessus de la moyenne 7 jours — rebond possible (eau/sel/sommeil).";
-      return "Tendance régulière — vise la constance.";
-    }
-
-    // ========= Range =========
-    function loadRange(){ return loadJSON(STORAGE.UI_RANGE, "7") || "7"; }
-    function saveRange(v){ saveJSON(STORAGE.UI_RANGE, v); }
+    function saveRange(v){ saveJSON(KEYS.UI_RANGE, v); }
 
     function filterByRange(rows, range){
       const withW = rows.filter(r=>typeof r.weight==="number");
@@ -1094,26 +1059,29 @@ document.addEventListener("DOMContentLoaded", () => {
       const W=c.width, H=c.height;
       ctx.clearRect(0,0,W,H);
 
-      const data = filterByRange(rows, range)
-        .map(r=>({x:new Date(r.date+"T00:00:00").getTime(), y:r.weight, d:r.date}))
-        .sort((a,b)=>a.x-b.x);
-
-      const padL=56, padR=16, padT=14, padB=34;
-      const plotW=W-padL-padR, plotH=H-padT-padB;
-
-      ctx.fillStyle="#fff";
+      // background
+      ctx.fillStyle="rgba(0,0,0,.35)";
       ctx.fillRect(0,0,W,H);
 
-      ctx.strokeStyle="rgba(17,24,39,.08)";
+      const data = filterByRange(rows, range)
+        .filter(r=>typeof r.weight==="number")
+        .map(r=>({x:new Date(r.date+"T00:00:00").getTime(), y:r.weight}))
+        .sort((a,b)=>a.x-b.x);
+
+      ctx.strokeStyle="rgba(255,255,255,.10)";
       ctx.lineWidth=1;
       ctx.strokeRect(0.5,0.5,W-1,H-1);
 
+      ctx.fillStyle="rgba(255,255,255,.60)";
+      ctx.font="14px -apple-system, system-ui";
+
       if(data.length<2){
-        ctx.fillStyle="rgba(17,24,39,.55)";
-        ctx.font="13px -apple-system, system-ui";
         ctx.fillText("Ajoute 2 pesées pour afficher la courbe.", 16, 28);
         return;
       }
+
+      const padL=56, padR=16, padT=14, padB=34;
+      const plotW=W-padL-padR, plotH=H-padT-padB;
 
       const minX=data[0].x, maxX=data[data.length-1].x;
       const ys=data.map(p=>p.y);
@@ -1124,10 +1092,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const xToPx=x=>padL+((x-minX)/(maxX-minX))*plotW;
       const yToPx=y=>padT+(1-((y-minY)/(maxY-minY)))*plotH;
 
-      ctx.strokeStyle="rgba(17,24,39,.06)";
+      // grid
+      ctx.strokeStyle="rgba(255,255,255,.06)";
       ctx.lineWidth=1;
       ctx.font="12px -apple-system, system-ui";
-      ctx.fillStyle="rgba(17,24,39,.45)";
+      ctx.fillStyle="rgba(255,255,255,.45)";
       for(let i=0;i<=4;i++){
         const t=i/4;
         const yVal=maxY-t*(maxY-minY);
@@ -1136,6 +1105,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillText(yVal.toFixed(1), 12, y+4);
       }
 
+      // target line
       const tw = Number(profile.targetWeight);
       if(!Number.isNaN(tw)){
         const yT = yToPx(tw);
@@ -1145,6 +1115,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.setLineDash([]);
       }
 
+      // curve
       ctx.strokeStyle="rgba(255,45,85,.95)";
       ctx.lineWidth=2.8;
       ctx.lineJoin="round";
@@ -1162,22 +1133,22 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       ctx.stroke();
 
+      // points
       ctx.fillStyle="rgba(255,45,85,1)";
       data.forEach(p=>{
         const x=xToPx(p.x), y=yToPx(p.y);
         ctx.beginPath(); ctx.arc(x,y,3.2,0,Math.PI*2); ctx.fill();
       });
-
-      const last=data[data.length-1];
-      ctx.fillStyle="rgba(17,24,39,.78)";
-      ctx.font="12px -apple-system, system-ui";
-      ctx.fillText(`Dernier: ${last.y.toFixed(1)} kg`, 16, H-12);
     }
 
-    // ========= Meals =========
+    // ====== Meals ======
+    function loadMealChecks(){
+      const st = loadWithFallback(KEYS.MEAL_CHECKS, "MEAL_CHECKS");
+      return st && typeof st==="object" ? st : {};
+    }
+    function saveMealChecks(obj){ saveJSON(KEYS.MEAL_CHECKS, obj); }
+
     function mealKey(dateISO, mealType){ return dateISO + "_" + mealType; }
-    function loadMealChecks(){ return loadJSON(STORAGE.MEAL_CHECKS, {}); }
-    function saveMealChecks(obj){ saveJSON(STORAGE.MEAL_CHECKS, obj); }
 
     function mealCard(dateISO, mealType){
       const checks = loadMealChecks();
@@ -1203,14 +1174,14 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="item">
           <div class="left">
             <div class="icon">🥣</div>
-            <div><b>Soupe maison</b><div class="tiny">${soupMl} ml</div></div>
+            <div><b>Soupe maison</b><div class="muted">${soupMl} ml</div></div>
           </div>
         </div>
 
         <div class="item">
           <div class="left">
             <div class="icon">🍗</div>
-            <div><b>Protéines</b><div class="tiny">${mealType==="lunch" ? "≈ 200 g" : "portion légère"}</div></div>
+            <div><b>Protéines</b><div class="muted">${mealType==="lunch" ? "≈ 200 g" : "portion légère"}</div></div>
           </div>
           <div style="min-width:120px">
             <select aria-label="Protéines">
@@ -1223,7 +1194,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="item">
           <div class="left">
             <div class="icon">🫒</div>
-            <div><b>Huile d’olive</b><div class="tiny">1 c. à café</div></div>
+            <div><b>Huile d’olive</b><div class="muted">1 c. à café</div></div>
           </div>
         </div>` : ""}
       `;
@@ -1233,21 +1204,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const st = loadMealChecks();
         st[key] = cb.checked;
         saveMealChecks(st);
-        toast("good","Repas", cb.checked ? "Repas coché." : "Coche retirée.", 1200);
+        toast("good","Repas", cb.checked ? "Coché." : "Décoché.", 1200);
         renderAll();
       });
 
       return el;
     }
 
-    // ========= Walk =========
+    // ====== Walk ======
     let watchId=null, timerId=null;
     let walkMap=null, walkLine=null, walkMarker=null;
 
-    function getActiveWalk(){ return loadJSON(STORAGE.WALK_ACTIVE, null); }
-    function setActiveWalk(w){ if(!w) del(STORAGE.WALK_ACTIVE); else saveJSON(STORAGE.WALK_ACTIVE, w); }
-    function loadWalks(){ const rows = loadJSON(STORAGE.WALKS, []); return Array.isArray(rows)?rows:[]; }
-    function saveWalks(rows){ saveJSON(STORAGE.WALKS, rows); }
+    function loadWalks(){
+      const w = loadWithFallback(KEYS.WALKS, "WALKS");
+      return Array.isArray(w) ? w : [];
+    }
+    function saveWalks(rows){ saveJSON(KEYS.WALKS, rows); }
+
+    function getActiveWalk(){
+      const w = loadWithFallback(KEYS.WALK_ACTIVE, "WALK_ACTIVE");
+      return w && typeof w==="object" ? w : null;
+    }
+    function setActiveWalk(w){
+      if(!w) del(KEYS.WALK_ACTIVE);
+      else saveJSON(KEYS.WALK_ACTIVE, w);
+    }
 
     function haversineMeters(a,b){
       const R=6371000;
@@ -1278,6 +1259,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }).addTo(walkMap);
 
       walkLine = L.polyline([], { weight:5 }).addTo(walkMap);
+      // default view
+      walkMap.setView([48.8566, 2.3522], 12);
     }
 
     function renderWalkOnMap(points, fit=true){
@@ -1302,6 +1285,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderWalkStats(w){
       if(!exists("walkStatus")) return;
+
       const now=Date.now();
       const elapsed = w?.active ? (now - w.startedAt) : (w?.elapsedMs || 0);
       const distM = w?.distanceM || 0;
@@ -1340,19 +1324,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const v = (h>0) ? (km/h) : 0;
 
         const el=document.createElement("div");
-        el.className="histCard";
+        el.className="mealCard";
         el.innerHTML = `
-          <div class="histTop">
+          <div class="mealHead">
             <div>
-              <div class="histTitle">Marche • ${d}</div>
-              <div class="histMeta">
-                Début : ${t}<br>
-                Durée : ${fmtHMS(w.elapsedMs||0)} • Distance : ${km.toFixed(2)} km • Vitesse : ${v.toFixed(1)} km/h
-              </div>
+              <div class="mealTitle">Marche • ${d}</div>
+              <div class="dayLabel">Début : ${t} • Durée : ${fmtHMS(w.elapsedMs||0)}</div>
             </div>
-            <div class="tiny">${(w.points?.length||0)} pts</div>
+            <div class="dayLabel">${(w.points?.length||0)} pts</div>
           </div>
-          <div class="histBtns">
+
+          <div class="item">
+            <div class="left">
+              <div class="icon">📍</div>
+              <div><b>${km.toFixed(2)} km</b><div class="muted">Vitesse : ${v.toFixed(1)} km/h</div></div>
+            </div>
+          </div>
+
+          <div class="footerBtns" style="margin-top:10px">
             <button class="secondary" type="button" data-view="${w.id}">Voir</button>
             <button class="secondary" type="button" data-del="${w.id}">Supprimer</button>
           </div>
@@ -1365,9 +1354,9 @@ document.addEventListener("DOMContentLoaded", () => {
           const id=btn.getAttribute("data-view");
           const w=loadWalks().find(x=>x.id===id);
           if(!w?.points?.length){ toast("bad","Carte","Aucun point GPS."); return; }
-          setScreen("activity");
-          setTimeout(()=>renderWalkOnMap(w.points,true), 50);
-          toast("info","Carte","Trace chargée.", 1200);
+          setTab("tabWalk");
+          setTimeout(()=>renderWalkOnMap(w.points,true), 80);
+          toast("good","Carte","Trace chargée.", 1200);
         });
       });
 
@@ -1413,7 +1402,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cur.points.push(p);
         setActiveWalk(cur);
         renderWalkUI(true);
-        renderHeaderRingsAndPills();
+        renderHeaderRings();
+        renderTodayActivityKpis();
       }, (err)=>{
         let msg="Erreur GPS.";
         if(err?.code===1) msg="Permission refusée : autorise Position dans Safari.";
@@ -1430,7 +1420,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const cur=getActiveWalk();
         if(cur?.active){
           renderWalkUI(true);
-          renderHeaderRingsAndPills();
+          renderHeaderRings();
+          renderTodayActivityKpis();
         }
       }, 1000);
     }
@@ -1443,10 +1434,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const w={ id:"walk_"+Date.now(), active:true, startedAt:Date.now(), elapsedMs:0, distanceM:0, points:[] };
       setActiveWalk(w);
       renderWalkUI();
-      toast("info","Marche","Démarrée.", 1200);
+      toast("good","Marche","Démarrée.", 1200);
       beginWatch();
       ensureTimer();
-      renderHeaderRingsAndPills();
     }
 
     function stopWalk(){
@@ -1474,88 +1464,57 @@ document.addEventListener("DOMContentLoaded", () => {
         if(!confirm("Effacer la trace de la marche en cours ?")) return;
         cur.points=[]; cur.distanceM=0;
         setActiveWalk(cur);
-        toast("info","Trace","Effacée.", 1200);
+        toast("good","Trace","Effacée.", 1200);
         renderWalkUI();
-        renderHeaderRingsAndPills();
+        renderHeaderRings();
+        renderTodayActivityKpis();
         return;
       }
       if(!confirm("Effacer la trace affichée sur la carte (sans toucher à l’historique) ?")) return;
       if(walkLine) walkLine.setLatLngs([]);
       if(walkMarker && walkMap){ try{ walkMap.removeLayer(walkMarker);}catch{} walkMarker=null; }
-      toast("info","Carte","Trace retirée.", 1200);
+      toast("good","Carte","Trace retirée.", 1200);
     }
 
     function exportWalks(){
       const payload={ version:1, exportedAt:new Date().toISOString(), walks:loadWalks() };
-      downloadText("health30_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
-      toast("good","Export","Fichier créé.", 1200);
+      downloadText("sante_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+      toast("good","Export","Terminé.", 1200);
     }
 
     function clearAllWalks(){
       if(!confirm("Tout effacer : historique des marches ?")) return;
-      del(STORAGE.WALKS);
-      setActiveWalk(null);
+      del(KEYS.WALKS);
+      del(KEYS.WALK_ACTIVE);
       stopWatchAndTimer();
       renderAll();
-      toast("info","Marche","Historique effacé.", 1400);
+      toast("good","Marche","Historique effacé.", 1400);
     }
 
-    function computeMoveMinutesToday(todayISO){
+    function computeMoveToday(todayISO){
       const walks = loadWalks();
       let min = 0;
+      let distM = 0;
 
       walks.forEach(w=>{
         if(w?.startedAt && sameIsoDay(w.startedAt, todayISO)){
           min += (w.elapsedMs||0)/60000;
+          distM += (w.distanceM||0);
         }
       });
 
       const active = getActiveWalk();
       if(active?.active && active?.startedAt && sameIsoDay(active.startedAt, todayISO)){
         min += (Date.now() - active.startedAt)/60000;
+        distM += (active.distanceM||0);
       }
-      return min;
+
+      return { minutes:min, distKm: distM/1000 };
     }
 
-    // ========= Backup =========
-    function exportBackup(){
-      const payload={
-        version:2,
-        exportedAt:new Date().toISOString(),
-        profile: loadProfile(),
-        weights: loadWeights(),
-        mealChecks: loadMealChecks(),
-        walks: loadWalks(),
-        walkActive: getActiveWalk()
-      };
-      downloadText("health30_backup.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
-      toast("good","Backup","Exporté.", 1200);
-    }
-
-    async function importBackupFile(file){
-      const text = await file.text();
-      const payload = JSON.parse(text);
-      if(!payload) throw new Error("Fichier invalide");
-
-      if(!confirm("Importer ce backup et remplacer tes données ?")) return;
-
-      if(payload.profile) saveJSON(STORAGE.PROFILE, payload.profile);
-      if(Array.isArray(payload.weights)) saveJSON(STORAGE.WEIGHTS, payload.weights);
-      if(payload.mealChecks) saveJSON(STORAGE.MEAL_CHECKS, payload.mealChecks);
-      if(Array.isArray(payload.walks)) saveJSON(STORAGE.WALKS, payload.walks);
-      if(payload.walkActive) saveJSON(STORAGE.WALK_ACTIVE, payload.walkActive);
-
-      stopWatchAndTimer();
-      const aw = getActiveWalk();
-      if(aw?.active){ beginWatch(); ensureTimer(); }
-
-      renderAll();
-      toast("good","Import","Terminé ✅", 1600);
-    }
-
-    // ========= Rings =========
-    function setRingProgress(circleId, pct){
-      const el = document.getElementById(circleId);
+    // ====== Rings (big + mini) ======
+    function setRing(circleId, pct){
+      const el = $(circleId);
       if(!el) return;
       const C = 113.1;
       const p = clamp(Number(pct)||0, 0, 100);
@@ -1563,21 +1522,15 @@ document.addEventListener("DOMContentLoaded", () => {
       el.style.strokeDashoffset = String(C * (1 - p/100));
     }
 
-    function renderHeaderRingsAndPills(){
+    function renderHeaderRings(){
       const profile = loadProfile();
       const rows = loadWeights();
       const stats = computeStats(profile, rows);
 
-      // subtitle tournant
-      const idx = Math.floor(Date.now()/(10*60*1000)) % MOTIVATION.length;
-      setText("headerSubtitle", MOTIVATION[idx]);
+      // header pill
+      setText("headerPill", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
 
-      // header pill + nav pill
-      const wTxt = stats.current!=null ? `${fmt(stats.current,1)} kg` : "—";
-      setText("headerPill", wTxt);
-      setText("navPillVal", wTxt);
-
-      // Goal %
+      // goal %
       const sw = Number(profile.startWeight);
       const tw = Number(profile.targetWeight);
       let goalPct = 0;
@@ -1588,66 +1541,97 @@ document.addEventListener("DOMContentLoaded", () => {
         goalPct = clamp(goalPct, 0, 100);
       }
 
-      // Streak (21 jours)
+      // streak %
       const streak = computeStreak(rows);
       const streakPct = clamp((streak/21)*100, 0, 100);
 
-      // Move (today)
+      // move %
       const todayISO = isoToday();
-      const moveMin = computeMoveMinutesToday(todayISO);
-      const goalMin = Number(profile.moveGoalMin) || DEFAULT_PROFILE.moveGoalMin;
-      const movePct = clamp((moveMin/goalMin)*100, 0, 100);
+      const move = computeMoveToday(todayISO);
+      const goalMin = Math.max(5, Number(profile.moveGoalMin)||DEFAULT_PROFILE.moveGoalMin);
+      const movePct = clamp((move.minutes/goalMin)*100, 0, 100);
 
-      setRingProgress("ringGoal", goalPct);
-      setRingProgress("ringStreak", streakPct);
-      setRingProgress("ringMove", movePct);
+      // write rings
+      setRing("ringGoal", goalPct);
+      setRing("ringStreak", streakPct);
+      setRing("ringMove", movePct);
+
+      setRing("miniGoal", goalPct);
+      setRing("miniStreak", streakPct);
+      setRing("miniMove", movePct);
 
       setText("ringGoalText", (stats.current!=null && !Number.isNaN(tw)) ? `${fmt(stats.current,1)} → ${fmt(tw,1)} kg` : "—");
       setText("ringStreakText", streak ? `${streak} jours` : "—");
-      setText("ringMoveText", `${Math.round(moveMin)} / ${goalMin} min`);
+      setText("ringMoveText", `${Math.round(move.minutes)} / ${goalMin} min`);
     }
 
-    // ========= Render main =========
-    function renderSummary(){
+    // ====== Today activity KPIs ======
+    function renderTodayActivityKpis(){
+      const profile = loadProfile();
+      const todayISO = isoToday();
+      const move = computeMoveToday(todayISO);
+      const goalMin = Math.max(5, Number(profile.moveGoalMin)||DEFAULT_PROFILE.moveGoalMin);
+
+      const active = getActiveWalk();
+      let speed = 0;
+      if(active?.active){
+        const hours = (Date.now()-active.startedAt)/3600000;
+        const km = (active.distanceM||0)/1000;
+        speed = hours>0 ? km/hours : 0;
+      }else{
+        // average speed of today walks (rough)
+        const walks = loadWalks().filter(w=>w?.startedAt && sameIsoDay(w.startedAt,todayISO));
+        let km=0, h=0;
+        walks.forEach(w=>{ km += (w.distanceM||0)/1000; h += (w.elapsedMs||0)/3600000; });
+        speed = h>0 ? km/h : 0;
+      }
+
+      if(exists("kpiMove")) setText("kpiMove", `${Math.round(move.minutes)} min`);
+      if(exists("kpiDist")) setText("kpiDist", `${move.distKm.toFixed(2)} km`);
+      if(exists("kpiSpeed")) setText("kpiSpeed", `${speed.toFixed(1)} km/h`);
+      if(exists("kpiMoveGoal")) setText("kpiMoveGoal", `${goalMin} min`);
+    }
+
+    // ====== Coach note ======
+    function coachMessage(stats){
+      if(stats.current==null) return null;
+      if(stats.avg7==null) return "Ajoute 7 pesées pour obtenir une tendance fiable.";
+      const diff = stats.current - stats.avg7;
+      if(diff < -0.2) return "Sous la moyenne 7 jours — bon signal. Continue.";
+      if(diff >  0.2) return "Au-dessus de la moyenne 7 jours — possible rebond (sel, sommeil, eau).";
+      return "Tendance régulière — vise la constance.";
+    }
+
+    // ====== Main render ======
+    function renderAll(){
       const profile = loadProfile();
       const rows = loadWeights();
       const stats = computeStats(profile, rows);
-
       const todayISO = isoToday();
       const selectedISO = $("date")?.value || todayISO;
 
-      // KPIs
-      setText("kpiWeight", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
-      setHTML("kpiLost", stats.lost!=null ? `<span class="${stats.lost>=0?'pos':'neg'}">${fmt(stats.lost,1)} kg</span>` : "—");
-      setText("kpiAvg7", stats.avg7!=null ? `${fmt(stats.avg7,1)} kg` : "—");
+      // profile fields
+      if(exists("height")) $("height").value = profile.heightCm ?? "";
+      if(exists("startWeight")) $("startWeight").value = profile.startWeight ?? "";
+      if(exists("targetWeight")) $("targetWeight").value = profile.targetWeight ?? "";
+      if(exists("omegaTarget")) $("omegaTarget").value = String(profile.omegaTarget ?? 3);
+      if(exists("moveGoalMin")) $("moveGoalMin").value = String(profile.moveGoalMin ?? DEFAULT_PROFILE.moveGoalMin);
 
-      const moveMin = computeMoveMinutesToday(todayISO);
-      setText("kpiMove", `${Math.round(moveMin)} min`);
+      // kpis weight
+      if(exists("kpiWeight")) setText("kpiWeight", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
+      if(exists("kpiLost")) setHTML("kpiLost", stats.lost!=null ? `<span class="${stats.lost>=0?'pos':'neg'}">${fmt(stats.lost,1)} kg</span>` : "—");
+      if(exists("kpiAvg7")) setText("kpiAvg7", stats.avg7!=null ? `${fmt(stats.avg7,1)} kg` : "—");
 
-      // Pills
-      const bmi = computeBMI(profile, stats.current);
-      setHTML("pillBMI", `IMC : <strong>${bmi!=null ? bmi.toFixed(1) : "—"}</strong>`);
-
-      const trend = (stats.avgPrev7!=null && stats.avg7!=null) ? (stats.avgPrev7 - stats.avg7) : null;
-      if(trend==null) setHTML("pillTrend", `Tendance : <strong>—</strong>`);
-      else{
-        const dir = trend>0.05 ? "⬇︎" : trend<-0.05 ? "⬆︎" : "→";
-        const lbl = trend>0 ? `baisse ${trend.toFixed(1)} kg/sem` : `hausse ${Math.abs(trend).toFixed(1)} kg/sem`;
-        setHTML("pillTrend", `Tendance : <strong>${dir} ${lbl}</strong>`);
-      }
-
-      const eta = estimateETA(profile, stats);
-      if(!eta) setHTML("pillETA", `Estimation : <strong>—</strong>`);
-      else{
-        if(eta.date){
-          const d = eta.date.toLocaleDateString("fr-FR", { year:"numeric", month:"short", day:"numeric" });
-          setHTML("pillETA", `Estimation : <strong>${eta.text} • ${d}</strong>`);
-        }else{
-          setHTML("pillETA", `Estimation : <strong>${eta.text}</strong>`);
+      if(exists("kpiTrend")){
+        if(stats.trend==null) setText("kpiTrend","—");
+        else{
+          const dir = stats.trend>0.05 ? "⬇︎" : stats.trend<-0.05 ? "⬆︎" : "→";
+          const txt = stats.trend>0 ? `baisse ${stats.trend.toFixed(1)} kg/sem` : `hausse ${Math.abs(stats.trend).toFixed(1)} kg/sem`;
+          setText("kpiTrend", `${dir} ${txt}`);
         }
       }
 
-      // Coach note
+      // coach note
       const note = coachMessage(stats);
       if(exists("coachNote")){
         if(note){
@@ -1658,7 +1642,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Autofill poids sur la date
+      // autofill weight input
       const existing = rows.find(r=>r.date===selectedISO);
       if(existing && exists("weight")){
         if($("weight").value==="" || $("weight").dataset.autofill==="1"){
@@ -1667,20 +1651,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // Chart
+      // chart
       const range = loadRange();
       drawWeightChart(profile, rows, range);
 
-      // Meals
+      // meals
       if(exists("todayMeals")){
         $("todayMeals").innerHTML="";
         $("todayMeals").appendChild(mealCard(selectedISO,"lunch"));
         $("todayMeals").appendChild(mealCard(selectedISO,"dinner"));
       }
-    }
-
-    function renderJourney(){
-      const todayISO = isoToday();
       if(exists("weekMeals")){
         $("weekMeals").innerHTML="";
         for(let i=0;i<7;i++){
@@ -1689,87 +1669,57 @@ document.addEventListener("DOMContentLoaded", () => {
           $("weekMeals").appendChild(mealCard(d,"dinner"));
         }
       }
-    }
 
-    function renderProfile(){
-      const profile = loadProfile();
-      if(exists("height")) $("height").value = profile.heightCm ?? "";
-      if(exists("startWeight")) $("startWeight").value = profile.startWeight ?? "";
-      if(exists("targetWeight")) $("targetWeight").value = profile.targetWeight ?? "";
-      if(exists("omegaTarget")) $("omegaTarget").value = String(profile.omegaTarget ?? 3);
-      if(exists("moveGoalMin")) $("moveGoalMin").value = String(profile.moveGoalMin ?? DEFAULT_PROFILE.moveGoalMin);
-    }
+      // activity KPIs
+      renderTodayActivityKpis();
 
-    function renderAll(){
-      renderHeaderRingsAndPills();
-      renderSummary();
-      renderJourney();
-      renderProfile();
+      // header rings
+      renderHeaderRings();
+
+      // walk
       renderWalkUI();
     }
 
-    // ========= Screens (tabs) =========
-    let currentScreen = "summary";
-    const screens = {
-      summary: $("screenSummary"),
-      journey: $("screenJourney"),
-      activity: $("screenActivity"),
-      profile: $("screenProfile"),
-    };
-    const tabBtns = {
-      summary: $("tabSummary"),
-      journey: $("tabJourney"),
-      activity: $("tabActivity"),
-      profile: $("tabProfile"),
-    };
-
-    function setScreen(name){
-      currentScreen = name;
-      Object.keys(screens).forEach(k=>{
-        screens[k]?.classList.toggle("active", k===name);
-      });
-      Object.keys(tabBtns).forEach(k=>{
-        tabBtns[k]?.classList.toggle("active", k===name);
-        tabBtns[k]?.setAttribute("aria-selected", k===name ? "true" : "false");
-      });
-
-      // Small perf: si on vient sur activité, force init map après layout
-      if(name==="activity"){
-        setTimeout(()=>{ renderWalkUI(); if(getActiveWalk()?.points?.length) renderWalkUI(true); }, 50);
-      }
-
-      // option : remonter légèrement pour “style app”
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    // ====== Backup ======
+    function exportBackup(){
+      const payload={
+        version:3,
+        exportedAt:new Date().toISOString(),
+        profile: loadProfile(),
+        weights: loadWeights(),
+        mealChecks: loadMealChecks(),
+        walks: loadWalks(),
+        walkActive: getActiveWalk()
+      };
+      downloadText("sante_backup.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
+      toast("good","Backup","Exporté.", 1400);
     }
 
-    // ========= Compact nav on scroll (fluide) =========
-    const navBar = document.querySelector(".navBar");
-    const hero = $("hero");
-    let ticking = false;
+    async function importBackupFile(file){
+      const text = await file.text();
+      const payload = JSON.parse(text);
+      if(!payload) throw new Error("Fichier invalide");
+      if(!confirm("Importer ce backup et remplacer tes données ?")) return;
 
-    function onScroll(){
-      if(ticking) return;
-      ticking = true;
-      requestAnimationFrame(()=>{
-        const y = window.scrollY || 0;
-        const threshold = Math.min(80, (hero?.offsetHeight || 200) * 0.25);
-        navBar?.classList.toggle("compact", y > threshold);
-        ticking = false;
-      });
+      if(payload.profile) saveJSON(KEYS.PROFILE, payload.profile);
+      if(Array.isArray(payload.weights)) saveJSON(KEYS.WEIGHTS, payload.weights);
+      if(payload.mealChecks) saveJSON(KEYS.MEAL_CHECKS, payload.mealChecks);
+      if(Array.isArray(payload.walks)) saveJSON(KEYS.WALKS, payload.walks);
+      if(payload.walkActive) saveJSON(KEYS.WALK_ACTIVE, payload.walkActive);
+
+      stopWatchAndTimer();
+      const aw = getActiveWalk();
+      if(aw?.active){ beginWatch(); ensureTimer(); }
+
+      toast("good","Import","Terminé ✅", 1600);
+      renderAll();
     }
-    window.addEventListener("scroll", onScroll, { passive:true });
 
-    // ========= iOS banner =========
-    try{
-      const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if(isIOS && exists("safariBanner")) $("safariBanner").classList.add("show");
-    }catch{}
-
-    // ========= Events =========
-    tabBtns.summary?.addEventListener("click", ()=>setScreen("summary"));
-    tabBtns.journey?.addEventListener("click", ()=>setScreen("journey"));
-    tabBtns.activity?.addEventListener("click", ()=>setScreen("activity"));
-    tabBtns.profile?.addEventListener("click", ()=>setScreen("profile"));
+    // ====== Wire events ======
+    $("tabToday")?.addEventListener("click", ()=>setTab("tabToday"));
+    $("tabMeals")?.addEventListener("click", ()=>setTab("tabMeals"));
+    $("tabWalk")?.addEventListener("click", ()=>{ setTab("tabWalk"); setTimeout(()=>{ ensureLeafletMap(); try{ walkMap?.invalidateSize(); }catch{} }, 120); });
+    $("tabProfile")?.addEventListener("click", ()=>setTab("tabProfile"));
 
     $("date")?.addEventListener("change", ()=>{
       if(exists("weight")){
@@ -1784,11 +1734,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const w=$("weight")?.value ? Number($("weight").value) : null;
       if(!d){ toast("bad","Date","Choisis une date."); return; }
       if(w===null || Number.isNaN(w)){ toast("bad","Poids","Entre ton poids."); return; }
-
       saveWeight(d,w);
       if(exists("weight")) $("weight").dataset.autofill="0";
+      toast("good","Poids","Enregistré ✅", 1400);
       renderAll();
-      toast("good","Poids","Enregistré ✅", 1500);
     });
 
     $("saveProfileBtn")?.addEventListener("click", ()=>{
@@ -1804,17 +1753,16 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       if(!p.moveGoalMin || p.moveGoalMin<5) p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
-
-      saveJSON(STORAGE.PROFILE, p);
+      saveJSON(KEYS.PROFILE, p);
+      toast("good","Profil","Enregistré ✅", 1400);
+      setTab("tabToday");
       renderAll();
-      setScreen("summary");
-      toast("good","Profil","Enregistré ✅", 1500);
     });
 
     $("resetChecksBtn")?.addEventListener("click", ()=>{
       if(!confirm("Réinitialiser toutes les coches repas ?")) return;
-      del(STORAGE.MEAL_CHECKS);
-      toast("info","Repas","Coches réinitialisées.", 1500);
+      del(KEYS.MEAL_CHECKS);
+      toast("good","Repas","Coches réinitialisées.", 1400);
       renderAll();
     });
 
@@ -1829,30 +1777,21 @@ document.addEventListener("DOMContentLoaded", () => {
     $("importFile")?.addEventListener("change", async (e)=>{
       const f=e.target.files?.[0];
       if(!f) return;
-      try{
-        await importBackupFile(f);
-      }catch(err){
-        toast("bad","Import","Échec : " + (err?.message||""), 2600);
-      }finally{
-        e.target.value="";
-      }
+      try{ await importBackupFile(f); }
+      catch(err){ toast("bad","Import","Échec : " + (err?.message||""), 2600); }
+      finally{ e.target.value=""; }
     });
 
     $("clearAllBtn")?.addEventListener("click", ()=>{
       if(!confirm("Tout effacer (profil + poids + repas + marches) ?")) return;
-      del(STORAGE.PROFILE);
-      del(STORAGE.WEIGHTS);
-      del(STORAGE.MEAL_CHECKS);
-      del(STORAGE.WALKS);
-      del(STORAGE.WALK_ACTIVE);
-      del(STORAGE.UI_RANGE);
+      Object.values(KEYS).forEach(k=>del(k));
       stopWatchAndTimer();
       if(exists("weight")) $("weight").value="";
+      toast("good","Reset","Données effacées.", 1600);
       renderAll();
-      toast("info","Reset","Données effacées.", 1800);
     });
 
-    // Range segmented
+    // range seg
     const rangeSeg = $("rangeSeg");
     rangeSeg?.querySelectorAll("[data-range]").forEach(btn=>{
       btn.addEventListener("click", ()=>{
@@ -1864,18 +1803,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
-    // Mode segmented (Poids/Activité) : juste visuel pour l’instant
-    document.querySelectorAll('[data-mode]').forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        btn.parentElement.querySelectorAll(".segBtn").forEach(x=>x.classList.remove("active"));
-        btn.classList.add("active");
-        toast("info","Mode", btn.getAttribute("data-mode")==="activity" ? "Vue activité (visuel)." : "Vue poids.", 900);
-      });
-    });
-
-    // ========= INIT =========
-    if(exists("date")) $("date").value = isoToday();
-
     // init range UI
     const initRange = loadRange();
     if(rangeSeg){
@@ -1884,12 +1811,25 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // resume active walk if needed
+    // init today seg
+    initTodaySeg();
+
+    // init date
+    if(exists("date")) $("date").value = isoToday();
+
+    // resume active walk
     const aw = getActiveWalk();
     if(aw?.active){ beginWatch(); ensureTimer(); }
 
+    // init header compact behaviour
+    initHeaderCompact();
+
+    // render
     renderAll();
-    onScroll(); // set initial compact state
+
+    // map size fix when opening tab
+    setTimeout(()=>{ ensureLeafletMap(); try{ walkMap?.invalidateSize(); }catch{} }, 250);
+
   })();
 });
 </script>

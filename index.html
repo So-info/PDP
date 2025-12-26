@@ -99,7 +99,7 @@
     /* ===== Layout ===== */
     .wrap{
       max-width:980px;margin:0 auto;
-      padding:14px 14px calc(130px + var(--safeBot));
+      padding:14px 14px calc(140px + var(--safeBot));
     }
     .stack{display:grid;gap:12px}
     .section{display:none}
@@ -122,7 +122,16 @@
     .tiny{font-size:12px;color:var(--muted);line-height:1.35}
     .muted{color:var(--muted);font-size:12px;line-height:1.35}
 
-    /* ===== Coach bubble UI ===== */
+    /* ===== Dashboard / Snapshot ===== */
+    .snapshotGrid{
+      display:grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap:12px;
+      align-items:stretch;
+    }
+    @media(max-width:820px){
+      .snapshotGrid{grid-template-columns:1fr}
+    }
     .coachTop{
       display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
     }
@@ -144,7 +153,7 @@
       border-radius:22px;
       border:1px solid rgba(255,255,255,.10);
       background:
-        radial-gradient(500px 220px at 15% 30%, rgba(255,45,85,.18), rgba(255,255,255,.04));
+        radial-gradient(520px 220px at 15% 30%, rgba(255,45,85,.18), rgba(255,255,255,.04));
     }
     .coachMsg{
       color: rgba(255,255,255,.84);
@@ -152,6 +161,40 @@
       line-height:1.45;
     }
 
+    .statsTiles{
+      display:grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap:10px;
+    }
+    .tile{
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding:12px;
+      min-width:0;
+    }
+    .tile .t{font-size:12px;color:var(--muted2)}
+    .tile .v{
+      margin-top:6px;font-size:18px;font-weight:950;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .pos{color:var(--good)} .neg{color:var(--bad)}
+    .tile .s{margin-top:6px;font-size:12px;color:var(--muted)}
+
+    .bar{
+      margin-top:8px;height:10px;border-radius:999px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .bar > div{
+      height:100%;
+      width:0%;
+      border-radius:999px;
+      background: rgba(255,255,255,.75);
+    }
+
+    /* ===== Missions ===== */
     .missionGrid{
       margin-top:12px;
       display:grid;gap:10px;
@@ -182,26 +225,31 @@
       white-space:nowrap;
     }
 
-    .quickBtns{
-      margin-top:12px;
-      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    /* ===== Quick log ===== */
+    .quickLog{
+      display:grid;
+      grid-template-columns: repeat(3,minmax(0,1fr));
       gap:10px;
+      margin-top:12px;
     }
-    @media(max-width:560px){.quickBtns{grid-template-columns:1fr}}
-    .qbtn{
-      border:none;border-radius:20px;
-      padding:12px 12px;cursor:pointer;
-      font-weight:950;color:var(--text);
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      box-shadow: 0 18px 55px rgba(0,0,0,.35);
-      text-align:left;
+    @media(max-width:820px){.quickLog{grid-template-columns:1fr}}
+    .logCard{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius:22px;
+      padding:12px;
     }
-    .qbtn strong{display:block;font-size:14px}
-    .qbtn span{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
-    .qbtn.pink{border-color:rgba(255,45,85,.25);background:rgba(255,45,85,.08)}
-    .qbtn.good{border-color:rgba(48,209,88,.22);background:rgba(48,209,88,.08)}
-    .qbtn.warn{border-color:rgba(255,159,10,.22);background:rgba(255,159,10,.08)}
+    .logTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .logTop .name{font-weight:950}
+    .logTop .val{color:var(--muted)}
+    .logBtns{display:flex;gap:10px;margin-top:10px}
+    .logBtns button{padding:10px 10px;border-radius:18px}
+    .miniInput{
+      margin-top:10px;
+      display:flex;gap:10px;align-items:center;
+    }
+    .miniInput input[type="number"]{max-width:120px}
+    .miniInput input[type="range"]{width:100%}
 
     /* ===== Forms ===== */
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -260,34 +308,6 @@
       color:var(--text);
       box-shadow: 0 18px 44px rgba(0,0,0,.45);
     }
-
-    /* ===== KPIs ===== */
-    .kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-    @media(min-width:820px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
-    .kpi{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      border-radius:20px;
-      padding:12px;
-      min-width:0;
-    }
-    .kpi .t{font-size:12px;color:var(--muted2)}
-    .kpi .v{margin-top:6px;font-size:18px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .pos{color:var(--good)} .neg{color:var(--bad)}
-
-    .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .chip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      background: rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
-      color:var(--muted);
-      font-size:12px;
-    }
-    .chip strong{color:var(--text)}
-    .chip.good{border-color:rgba(48,209,88,.22);background:rgba(48,209,88,.08)}
-    .chip.warn{border-color:rgba(255,159,10,.22);background:rgba(255,159,10,.08)}
-    .chip.pink{border-color:rgba(255,45,85,.22);background:rgba(255,45,85,.08)}
 
     /* ===== Chart ===== */
     canvas{
@@ -427,7 +447,7 @@
     <div class="headTop">
       <div>
         <h1 class="title">Coach</h1>
-        <div class="subtitle" id="headerSubtitle">Petites actions, grands résultats. Aujourd’hui on gagne facile.</div>
+        <div class="subtitle" id="headerSubtitle">Objectif : gagner ta journée (2/3). Simple, faisable, sans sport.</div>
       </div>
 
       <div class="miniStats">
@@ -453,45 +473,94 @@
     <!-- ===== Résumé ===== -->
     <section class="section active" id="secSummary">
       <div class="card">
-        <div class="coachTop">
-          <div class="coachName">
-            <div class="coachAvatar">🙂</div>
-            <div>
-              <div style="font-size:18px;font-weight:950;letter-spacing:-.2px">Coach du jour</div>
-              <div class="tiny" id="dailyScore">Score : —</div>
+        <div class="snapshotGrid">
+          <!-- Coach -->
+          <div>
+            <div class="coachTop">
+              <div class="coachName">
+                <div class="coachAvatar">🙂</div>
+                <div>
+                  <div style="font-size:18px;font-weight:950;letter-spacing:-.2px">Résumé du jour</div>
+                  <div class="tiny" id="dailyScore">Score : —</div>
+                </div>
+              </div>
+              <span class="badge" id="todayBadge">🎯 Objectif: —</span>
+            </div>
+
+            <div class="coachBubble">
+              <div class="coachMsg" id="coachMsg">—</div>
+            </div>
+
+            <div class="missionGrid" id="missions"></div>
+          </div>
+
+          <!-- Tiles -->
+          <div>
+            <div class="statsTiles">
+              <div class="tile">
+                <div class="t">Poids</div>
+                <div class="v" id="tileWeight">—</div>
+                <div class="s" id="tileWeightSub">—</div>
+              </div>
+              <div class="tile">
+                <div class="t">Moyenne 7j</div>
+                <div class="v" id="tileAvg7">—</div>
+                <div class="s" id="tileTrend">—</div>
+              </div>
+              <div class="tile">
+                <div class="t">Perte totale</div>
+                <div class="v" id="tileLost">—</div>
+                <div class="s" id="tileETA">—</div>
+              </div>
+              <div class="tile">
+                <div class="t">Aujourd’hui</div>
+                <div class="v" id="tileToday">—</div>
+                <div class="s" id="tileMealsMove">—</div>
+              </div>
+            </div>
+
+            <div class="quickLog">
+              <div class="logCard">
+                <div class="logTop">
+                  <div class="name">💧 Eau</div>
+                  <div class="val"><span id="waterNow">—</span> / <span id="waterGoal">—</span> ml</div>
+                </div>
+                <div class="bar"><div id="waterBar"></div></div>
+                <div class="logBtns">
+                  <button class="secondary" id="waterMinus" type="button">-250</button>
+                  <button class="secondary" id="waterPlus" type="button">+250</button>
+                </div>
+              </div>
+
+              <div class="logCard">
+                <div class="logTop">
+                  <div class="name">😴 Sommeil</div>
+                  <div class="val"><span id="sleepNow">—</span> / <span id="sleepGoal">—</span> h</div>
+                </div>
+                <div class="bar"><div id="sleepBar"></div></div>
+                <div class="miniInput">
+                  <input id="sleepInput" type="number" step="0.5" min="0" max="16" placeholder="7.5" />
+                  <button class="secondary" id="sleepSave" type="button">OK</button>
+                </div>
+              </div>
+
+              <div class="logCard">
+                <div class="logTop">
+                  <div class="name">🍽️ Faim</div>
+                  <div class="val"><span id="hungerNow">—</span>/5</div>
+                </div>
+                <div class="miniInput">
+                  <input id="hungerRange" type="range" min="1" max="5" step="1" />
+                </div>
+                <div class="tiny">1 = facile • 5 = très dur (utile pour ajuster repas)</div>
+              </div>
             </div>
           </div>
-          <span class="badge" id="todayBadge">🎯 Objectif: —</span>
-        </div>
-
-        <div class="coachBubble">
-          <div class="coachMsg" id="coachMsg">—</div>
-        </div>
-
-        <div class="missionGrid" id="missions"></div>
-
-        <div class="quickBtns">
-          <button class="qbtn pink" id="btnAntiFaim" type="button">
-            <strong>J’ai faim</strong>
-            <span>Plan rapide anti-grignotage</span>
-          </button>
-          <button class="qbtn warn" id="btnCraquage" type="button">
-            <strong>J’ai craqué</strong>
-            <span>Reset sans culpabilité (2 min)</span>
-          </button>
-          <button class="qbtn good" id="btnMiniMarche" type="button">
-            <strong>Pas d’énergie</strong>
-            <span>Mission mini “10 minutes”</span>
-          </button>
         </div>
       </div>
 
       <div class="card">
-        <h2 class="cardTitle">Pesée & tendance</h2>
-        <div class="tiny" style="margin-top:8px">
-          Ici, on suit la tendance (7 jours). Un jour haut = souvent eau/sel/sommeil.
-        </div>
-
+        <h2 class="cardTitle">Pesée & courbe</h2>
         <div class="grid2" style="margin-top:12px">
           <div>
             <label>Date</label>
@@ -516,24 +585,11 @@
         </div>
 
         <canvas id="chart" width="1000" height="360"></canvas>
-
-        <div class="kpis">
-          <div class="kpi"><div class="t">Poids actuel</div><div class="v" id="kpiWeight">—</div></div>
-          <div class="kpi"><div class="t">Perte totale</div><div class="v" id="kpiLost">—</div></div>
-          <div class="kpi"><div class="t">Moyenne 7 jours</div><div class="v" id="kpiAvg7">—</div></div>
-          <div class="kpi"><div class="t">Marche aujourd’hui</div><div class="v" id="kpiMove">—</div></div>
-        </div>
-
-        <div class="chips">
-          <span class="chip pink" id="chipBMI">IMC : <strong>—</strong></span>
-          <span class="chip warn" id="chipTrend">Tendance : <strong>—</strong></span>
-          <span class="chip" id="chipETA">Estimation : <strong>—</strong></span>
-        </div>
       </div>
 
       <div class="card">
         <h2 class="cardTitle">Repas d’aujourd’hui</h2>
-        <div class="tiny" style="margin-top:8px">But : satiété + simplicité. 2 repas cochés = journée gagnée.</div>
+        <div class="tiny" style="margin-top:8px">2 repas cochés = journée gagnée.</div>
         <div class="mealGrid" id="todayMeals"></div>
       </div>
     </section>
@@ -544,8 +600,7 @@
         <h2 class="cardTitle">Repas</h2>
         <div class="coachBubble" style="margin-top:12px;background:radial-gradient(520px 220px at 15% 30%, rgba(48,209,88,.14), rgba(255,255,255,.04));border-color:rgba(48,209,88,.18)">
           <div class="coachMsg" id="foodCoach">
-            Règle coach (sans sport) :<br>
-            <b>Protéines + légumes/soupe</b> → faim contrôlée → perte de poids.<br>
+            Règle coach (sans sport) : <b>protéines + légumes/soupe</b> = faim contrôlée.<br>
             Si faim : <b>skyr / œufs / thon</b> avant tout sucré.
           </div>
         </div>
@@ -563,7 +618,7 @@
     <section class="section" id="secActivity">
       <div class="card">
         <h2 class="cardTitle">Activité</h2>
-        <div class="tiny" style="margin-top:8px">Objectif : marche douce. Même 10 minutes = victoire.</div>
+        <div class="tiny" style="margin-top:8px">Même 10 minutes = victoire.</div>
 
         <div class="grid2" style="margin-top:12px">
           <div><label>Statut</label><input id="walkStatus" type="text" value="Prêt" readonly /></div>
@@ -602,13 +657,21 @@
     <!-- ===== Profil ===== -->
     <section class="section" id="secProfile">
       <div class="card">
-        <h2 class="cardTitle">Profil</h2>
+        <h2 class="cardTitle">Profil & objectifs</h2>
+        <div class="tiny" style="margin-top:8px">
+          Ici tu règles ton “coach”. Plus les objectifs sont simples, plus tu tiens.
+        </div>
 
         <div class="grid2" style="margin-top:12px">
           <div><label>Taille (cm)</label><input id="height" type="number" step="1" inputmode="numeric" placeholder="173" /></div>
           <div><label>Poids de départ (kg)</label><input id="startWeight" type="number" step="0.1" inputmode="decimal" placeholder="115" /></div>
           <div><label>Objectif (kg)</label><input id="targetWeight" type="number" step="0.1" inputmode="decimal" placeholder="85" /></div>
-          <div><label>Objectif marche / jour (min)</label><input id="moveGoalMin" type="number" step="5" inputmode="numeric" placeholder="30" /></div>
+          <div><label>Marche / jour (min)</label><input id="moveGoalMin" type="number" step="5" inputmode="numeric" placeholder="30" /></div>
+        </div>
+
+        <div class="grid2" style="margin-top:12px">
+          <div><label>Eau / jour (ml)</label><input id="waterGoalMl" type="number" step="250" inputmode="numeric" placeholder="2000" /></div>
+          <div><label>Sommeil cible (heures)</label><input id="sleepGoalH" type="number" step="0.5" inputmode="decimal" placeholder="7.5" /></div>
         </div>
 
         <div class="grid2" style="margin-top:12px">
@@ -617,6 +680,25 @@
             <select id="weighMode">
               <option value="daily" selected>Quotidienne (précis)</option>
               <option value="3x">3×/semaine (moins stress)</option>
+            </select>
+          </div>
+          <div>
+            <label>Ton du coach</label>
+            <select id="coachTone">
+              <option value="soft" selected>Doux (anti-culpabilité)</option>
+              <option value="balanced">Équilibré</option>
+              <option value="strict">Direct (plus ferme)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top:12px">
+          <div>
+            <label>Jours conseillés (si 3×/sem)</label>
+            <select id="weighDays">
+              <option value="LMV" selected>Lun / Mer / Ven</option>
+              <option value="MJS">Mar / Jeu / Sam</option>
+              <option value="LMJ">Lun / Mer / Jeu</option>
             </select>
           </div>
           <div>
@@ -640,6 +722,18 @@
 
         <input id="importFile" type="file" accept="application/json" style="display:none" />
       </div>
+
+      <div class="card">
+        <h2 class="cardTitle">Stats perso (coach)</h2>
+        <div class="tiny" style="margin-top:8px">On suit la constance, pas la perfection.</div>
+
+        <div class="statsTiles" style="margin-top:12px">
+          <div class="tile"><div class="t">Jours suivis</div><div class="v" id="pDays">—</div><div class="s">jours avec au moins 1 action</div></div>
+          <div class="tile"><div class="t">Taux 7 jours</div><div class="v" id="pRate7">—</div><div class="s">missions validées / possibles</div></div>
+          <div class="tile"><div class="t">Meilleure semaine</div><div class="v" id="pBest7">—</div><div class="s">meilleur score sur 7 jours</div></div>
+          <div class="tile"><div class="t">IMC (si poids)</div><div class="v" id="pBMI">—</div><div class="s" id="pBMILabel">—</div></div>
+        </div>
+      </div>
     </section>
 
   </div>
@@ -657,20 +751,17 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   "use strict";
-
-  window.addEventListener("error", (e) => {
-    alert("Erreur dans le script :\n" + (e?.message || "inconnue"));
-  });
+  window.addEventListener("error", (e) => alert("Erreur dans le script :\n" + (e?.message || "inconnue")));
 
   // ===== Storage =====
   const STORAGE = {
-    PROFILE: "coach_profile_v2",
-    WEIGHTS: "coach_weights_v2",
-    MEAL_CHECKS: "coach_meal_checks_v2",
-    WALKS: "coach_walks_v2",
-    WALK_ACTIVE: "coach_walk_active_v2",
-    UI_RANGE: "coach_ui_range_v2",
-    DAILY: "coach_daily_v2",         // missions, xp, streak flexible
+    PROFILE: "coach_profile_v3",
+    WEIGHTS: "coach_weights_v3",
+    MEAL_CHECKS: "coach_meal_checks_v3",
+    WALKS: "coach_walks_v3",
+    WALK_ACTIVE: "coach_walk_active_v3",
+    UI_RANGE: "coach_ui_range_v3",
+    DAILY: "coach_daily_v3", // eau/sommeil/faim + missions + xp
   };
 
   const DEFAULT_PROFILE = {
@@ -679,7 +770,11 @@ document.addEventListener("DOMContentLoaded", () => {
     targetWeight: 85.0,
     omegaTarget: 3,
     moveGoalMin: 30,
-    weighMode: "daily"
+    waterGoalMl: 2000,
+    sleepGoalH: 7.5,
+    weighMode: "daily",
+    weighDays: "LMV",
+    coachTone: "soft"
   };
 
   const PROTEINS = ["Poulet","Œufs","Thon","Skyr","Sardines"];
@@ -693,16 +788,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== DOM helpers =====
   const $ = (id)=>document.getElementById(id);
   const exists = (id)=>!!document.getElementById(id);
-  function setText(id, txt){ const el=$(id); if(el) el.textContent = txt; }
-  function setHTML(id, html){ const el=$(id); if(el) el.innerHTML = html; }
+  const setText = (id, txt)=>{ const el=$(id); if(el) el.textContent = txt; };
+  const setHTML = (id, html)=>{ const el=$(id); if(el) el.innerHTML = html; };
 
   // ===== JSON helpers =====
-  function loadJSON(key, fallback){
-    try{ const v=localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-    catch{ return fallback; }
-  }
-  function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
-  function del(key){ localStorage.removeItem(key); }
+  const loadJSON = (key, fallback)=>{ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch{ return fallback; } };
+  const saveJSON = (key, val)=>localStorage.setItem(key, JSON.stringify(val));
+  const del = (key)=>localStorage.removeItem(key);
 
   function downloadText(filename, text, mime){
     const blob=new Blob([text], {type:mime||"text/plain;charset=utf-8"});
@@ -712,7 +804,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===== Toasts =====
-  function toast(type, title, msg, ms=2000){
+  function toast(type, title, msg, ms=1800){
     const box=$("toasts"); if(!box) return;
     const el=document.createElement("div");
     el.className="toast " + (type||"");
@@ -732,12 +824,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===== Utils =====
-  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-  function fmt(n,d=1){
-    if(n===null||n===undefined||n==="") return "—";
-    const x=Number(n); if(Number.isNaN(x)) return "—";
-    return x.toFixed(d);
-  }
+  const clamp=(v,min,max)=>Math.max(min, Math.min(max, v));
+  const fmt=(n,d=1)=>{ if(n===null||n===undefined||n==="") return "—"; const x=Number(n); if(Number.isNaN(x)) return "—"; return x.toFixed(d); };
+
   function isoToday(){
     const d=new Date();
     const tz=d.getTimezoneOffset()*60000;
@@ -759,7 +848,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const isoTs=new Date(d - tz).toISOString().slice(0,10);
     return isoTs===iso;
   }
-  function pad2(n){ return String(n).padStart(2,"0"); }
+  const pad2=n=>String(n).padStart(2,"0");
   function fmtHMS(ms){
     const s=Math.max(0, Math.floor(ms/1000));
     const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
@@ -789,9 +878,89 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadProfile(){
     let p = loadJSON(STORAGE.PROFILE, null);
     if(!p){ p = DEFAULT_PROFILE; saveJSON(STORAGE.PROFILE, p); }
+    // patch
     if(typeof p.moveGoalMin!=="number") p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
+    if(typeof p.waterGoalMl!=="number") p.waterGoalMl = DEFAULT_PROFILE.waterGoalMl;
+    if(typeof p.sleepGoalH!=="number") p.sleepGoalH = DEFAULT_PROFILE.sleepGoalH;
     if(!p.weighMode) p.weighMode = DEFAULT_PROFILE.weighMode;
+    if(!p.weighDays) p.weighDays = DEFAULT_PROFILE.weighDays;
+    if(!p.coachTone) p.coachTone = DEFAULT_PROFILE.coachTone;
     return p;
+  }
+
+  // ===== Daily store (missions + eau + sommeil + faim) =====
+  function loadDaily(){ return loadJSON(STORAGE.DAILY, {}); }
+  function saveDaily(obj){ saveJSON(STORAGE.DAILY, obj); }
+
+  function ensureDay(iso){
+    const all=loadDaily();
+    if(!all[iso]){
+      all[iso]={
+        tasks:{ weigh:false, meals:false, move:false },
+        xp:0,
+        waterMl:0,
+        sleepH:null,
+        hunger:3
+      };
+      saveDaily(all);
+    }
+    return all[iso];
+  }
+  function setTask(iso, key, val){
+    const all=loadDaily();
+    if(!all[iso]) ensureDay(iso);
+    all[iso].tasks[key]=!!val;
+    saveDaily(all);
+  }
+  function addXP(amount){
+    const today=isoToday();
+    const all=loadDaily();
+    if(!all[today]) ensureDay(today);
+    all[today].xp = (all[today].xp||0) + (Number(amount)||0);
+    saveDaily(all);
+  }
+  function totalXP(){
+    const all=loadDaily();
+    return Object.values(all).reduce((sum, d)=>sum + (d?.xp||0), 0);
+  }
+  function levelFromXP(xp){
+    if(xp < 120) return { name:"Départ", next:120 };
+    if(xp < 320) return { name:"Régulier", next:320 };
+    if(xp < 600) return { name:"Solide", next:600 };
+    if(xp < 1000) return { name:"Coaché", next:1000 };
+    return { name:"Machine 😄", next:null };
+  }
+  function flexStreakWeights(rows, todayISO){
+    const set=new Set(rows.filter(r=>typeof r.weight==="number").map(r=>r.date));
+    let ok=0;
+    for(let i=0;i<7;i++){
+      const d=addDays(todayISO, -i);
+      if(set.has(d)) ok++;
+    }
+    return ok;
+  }
+
+  function setWater(delta){
+    const today=isoToday();
+    const all=loadDaily();
+    if(!all[today]) ensureDay(today);
+    all[today].waterMl = clamp((all[today].waterMl||0) + delta, 0, 10000);
+    saveDaily(all);
+  }
+  function setSleep(hours){
+    const today=isoToday();
+    const all=loadDaily();
+    if(!all[today]) ensureDay(today);
+    const v=Number(hours);
+    all[today].sleepH = Number.isNaN(v) ? null : clamp(v, 0, 16);
+    saveDaily(all);
+  }
+  function setHunger(v){
+    const today=isoToday();
+    const all=loadDaily();
+    if(!all[today]) ensureDay(today);
+    all[today].hunger = clamp(Number(v)||3, 1, 5);
+    saveDaily(all);
   }
 
   // ===== Weights =====
@@ -827,6 +996,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!h || !current) return null;
     const m = h/100;
     return current/(m*m);
+  }
+  function bmiLabel(bmi){
+    if(bmi==null) return "—";
+    if(bmi < 18.5) return "Insuffisance pondérale";
+    if(bmi < 25) return "Corpulence normale";
+    if(bmi < 30) return "Surpoids";
+    if(bmi < 35) return "Obésité (classe I)";
+    if(bmi < 40) return "Obésité (classe II)";
+    return "Obésité (classe III)";
   }
   function estimateETA(profile, stats){
     const tw = Number(profile.targetWeight);
@@ -942,9 +1120,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===== Meals =====
-  function mealKey(dateISO, mealType){ return dateISO + "_" + mealType; }
-  function loadMealChecks(){ return loadJSON(STORAGE.MEAL_CHECKS, {}); }
-  function saveMealChecks(obj){ saveJSON(STORAGE.MEAL_CHECKS, obj); }
+  const mealKey=(dateISO, mealType)=>dateISO + "_" + mealType;
+  const loadMealChecks=()=>loadJSON(STORAGE.MEAL_CHECKS, {});
+  const saveMealChecks=(obj)=>saveJSON(STORAGE.MEAL_CHECKS, obj);
 
   function mealCard(dateISO, mealType){
     const checks = loadMealChecks();
@@ -991,16 +1169,6 @@ document.addEventListener("DOMContentLoaded", () => {
           </select>
         </div>
       </div>
-
-      <div class="item">
-        <div class="left">
-          <div class="icon">💧</div>
-          <div style="min-width:0">
-            <div style="font-weight:900">Eau</div>
-            <div class="muted">Un grand verre avant/pendant</div>
-          </div>
-        </div>
-      </div>
     `;
 
     const cb = el.querySelector('input[type="checkbox"]');
@@ -1023,127 +1191,14 @@ document.addEventListener("DOMContentLoaded", () => {
     return (a?1:0)+(b?1:0);
   }
 
-  // ===== Daily (missions + xp + streak flexible) =====
-  function loadDaily(){ return loadJSON(STORAGE.DAILY, {}); }
-  function saveDaily(obj){ saveJSON(STORAGE.DAILY, obj); }
-
-  function ensureDay(iso){
-    const all=loadDaily();
-    if(!all[iso]){
-      all[iso]={
-        tasks:{ weigh:false, meals:false, move:false },
-        xp:0,
-        mood:null
-      };
-      saveDaily(all);
-    }
-    return all[iso];
-  }
-  function setTask(iso, key, val){
-    const all=loadDaily();
-    if(!all[iso]) ensureDay(iso);
-    all[iso].tasks[key]=!!val;
-    saveDaily(all);
-  }
-  function addXP(amount){
-    const today=isoToday();
-    const all=loadDaily();
-    if(!all[today]) ensureDay(today);
-    all[today].xp = (all[today].xp||0) + (Number(amount)||0);
-    saveDaily(all);
-  }
-  function totalXP(){
-    const all=loadDaily();
-    return Object.values(all).reduce((sum, d)=>sum + (d?.xp||0), 0);
-  }
-  function levelFromXP(xp){
-    // doux et progressif
-    if(xp < 120) return { name:"Départ", next:120 };
-    if(xp < 320) return { name:"Régulier", next:320 };
-    if(xp < 600) return { name:"Solide", next:600 };
-    if(xp < 1000) return { name:"Coaché", next:1000 };
-    return { name:"Machine 😄", next:null };
-  }
-
-  function flexStreakWeights(rows, todayISO){
-    // sur 7 jours : combien de jours avec pesée
-    const set=new Set(rows.filter(r=>typeof r.weight==="number").map(r=>r.date));
-    let ok=0;
-    for(let i=0;i<7;i++){
-      const d=addDays(todayISO, -i);
-      if(set.has(d)) ok++;
-    }
-    return ok; // 0..7
-  }
-
-  function computeMoveMinutesToday(todayISO){
-    const walks=loadWalks();
-    let min=0;
-    walks.forEach(w=>{
-      if(w?.startedAt && sameIsoDay(w.startedAt, todayISO)) min += (w.elapsedMs||0)/60000;
-    });
-    const active=getActiveWalk();
-    if(active?.active && active?.startedAt && sameIsoDay(active.startedAt, todayISO)){
-      min += (Date.now()-active.startedAt)/60000;
-    }
-    return min;
-  }
-
-  function dailyScore(profile, rows, todayISO){
-    const day=ensureDay(todayISO);
-    const weightsToday = rows.find(r=>r.date===todayISO && typeof r.weight==="number");
-    const meals = mealsDoneCount(todayISO);
-    const moveMin = computeMoveMinutesToday(todayISO);
-
-    const weighDone = day.tasks.weigh || !!weightsToday || (profile.weighMode==="3x" ? false : false);
-    const mealsDone = day.tasks.meals || (meals>=2);
-    const moveDone  = day.tasks.move  || (moveMin>=10);
-
-    let score=0;
-    if(weighDone) score++;
-    if(mealsDone) score++;
-    if(moveDone) score++;
-
-    return { score, max:3, weighDone, mealsDone, moveDone, meals, moveMin };
-  }
-
-  function coachText(profile, stats, score, todayISO){
-    // messages courts, anti-culpabilité, actionnables
-    if(stats.current==null){
-      return "On démarre simple : coche 2 repas + marche 10 minutes. Pas besoin d’être sportif. Aujourd’hui, tu gagnes juste en faisant “fait”.";
-    }
-
-    // poids du jour vs moyenne
-    if(stats.avg7!=null){
-      const diff = stats.current - stats.avg7;
-      if(diff > 0.5){
-        return "Poids plus haut aujourd’hui : très souvent eau/sel/sommeil. Plan : dîner simple (protéines + légumes) + 10 min de marche douce. On reste calme.";
-      }
-      if(diff < -0.5){
-        return "Excellent signal : tu es sous ta moyenne 7 jours. Garde le même plan, sans te cramer. La régularité gagne.";
-      }
-    }
-
-    if(score.score===3){
-      return "Journée parfaite ✅ Tu peux t’arrêter là : maintien, hydratation, sommeil. Demain on refait simple.";
-    }
-    if(score.score===2){
-      return "Très bien. Il manque juste 1 mini-action pour gagner la journée. Choisis la plus facile maintenant.";
-    }
-    if(score.score===1){
-      return "On est en route. Objectif : encore 1 action. Même 10 minutes de marche = victoire.";
-    }
-    return "Aujourd’hui : 2 repas simples + 10 minutes de marche. Pas besoin de motivation : juste une petite action maintenant.";
-  }
-
   // ===== Walk =====
   let watchId=null, timerId=null;
   let walkMap=null, walkLine=null, walkMarker=null;
 
-  function getActiveWalk(){ return loadJSON(STORAGE.WALK_ACTIVE, null); }
-  function setActiveWalk(w){ if(!w) del(STORAGE.WALK_ACTIVE); else saveJSON(STORAGE.WALK_ACTIVE, w); }
-  function loadWalks(){ const rows=loadJSON(STORAGE.WALKS, []); return Array.isArray(rows)?rows:[]; }
-  function saveWalks(rows){ saveJSON(STORAGE.WALKS, rows); }
+  const getActiveWalk=()=>loadJSON(STORAGE.WALK_ACTIVE, null);
+  const setActiveWalk=(w)=>{ if(!w) del(STORAGE.WALK_ACTIVE); else saveJSON(STORAGE.WALK_ACTIVE, w); };
+  const loadWalks=()=>{ const rows=loadJSON(STORAGE.WALKS, []); return Array.isArray(rows)?rows:[]; };
+  const saveWalks=(rows)=>saveJSON(STORAGE.WALKS, rows);
 
   function haversineMeters(a,b){
     const R=6371000; const toRad=x=>x*Math.PI/180;
@@ -1286,7 +1341,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cur.points.push(p);
       setActiveWalk(cur);
       renderWalkUI(true);
-      render(); // met à jour move du jour + missions
+      render();
     }, (err)=>{
       let msg="Erreur GPS.";
       if(err?.code===1) msg="Permission refusée : autorise Position dans Safari.";
@@ -1296,7 +1351,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderWalkUI();
     }, GPS_OPTS);
   }
-
   function ensureTimer(){
     if(timerId!=null) return;
     timerId=setInterval(()=>{
@@ -1307,7 +1361,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }, 1000);
   }
-
   function startWalk(){
     if(!navigator.geolocation){ toast("bad","GPS","Géolocalisation indisponible.", 2400); return; }
     const cur=getActiveWalk();
@@ -1316,11 +1369,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const w={ id:"walk_"+Date.now(), active:true, startedAt:Date.now(), elapsedMs:0, distanceM:0, points:[] };
     setActiveWalk(w);
     renderWalkUI();
-    toast("good","Marche","Démarrée. Doucement = parfait.", 1400);
+    toast("good","Marche","Démarrée.", 1400);
     addXP(10);
     beginWatch(); ensureTimer();
   }
-
   function stopWalk(){
     const cur=getActiveWalk();
     if(!cur?.active){ toast("bad","Marche","Aucune marche en cours.", 2200); return; }
@@ -1340,7 +1392,6 @@ document.addEventListener("DOMContentLoaded", () => {
     toast("good","Marche","Enregistrée ✅", 1600);
     render();
   }
-
   function clearActiveTrace(){
     const cur=getActiveWalk();
     if(cur?.active){
@@ -1357,13 +1408,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if(walkMarker && walkMap){ try{ walkMap.removeLayer(walkMarker);}catch{} walkMarker=null; }
     toast("info","Carte","Trace retirée.", 1200);
   }
-
   function exportWalks(){
     const payload={ version:1, exportedAt:new Date().toISOString(), walks:loadWalks() };
     downloadText("coach_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
     toast("good","Export","OK.", 1200);
   }
-
   function clearAllWalks(){
     if(!confirm("Tout effacer : historique des marches ?")) return;
     del(STORAGE.WALKS);
@@ -1374,6 +1423,58 @@ document.addEventListener("DOMContentLoaded", () => {
     toast("info","Marche","Historique effacé.", 1400);
   }
 
+  // ===== Today calculations =====
+  function computeMoveMinutesToday(todayISO){
+    const walks=loadWalks();
+    let min=0;
+    walks.forEach(w=>{
+      if(w?.startedAt && sameIsoDay(w.startedAt, todayISO)) min += (w.elapsedMs||0)/60000;
+    });
+    const active=getActiveWalk();
+    if(active?.active && active?.startedAt && sameIsoDay(active.startedAt, todayISO)){
+      min += (Date.now()-active.startedAt)/60000;
+    }
+    return min;
+  }
+
+  // ===== Coach (score + message) =====
+  function dailyScore(profile, rows, todayISO){
+    const day=ensureDay(todayISO);
+    const weightsToday = rows.find(r=>r.date===todayISO && typeof r.weight==="number");
+    const meals = mealsDoneCount(todayISO);
+    const moveMin = computeMoveMinutesToday(todayISO);
+
+    const weighDone = day.tasks.weigh || !!weightsToday;
+    const mealsDone = day.tasks.meals || (meals>=2);
+    const moveDone  = day.tasks.move  || (moveMin>=10);
+
+    let score=0;
+    if(weighDone) score++;
+    if(mealsDone) score++;
+    if(moveDone) score++;
+
+    return { score, max:3, weighDone, mealsDone, moveDone, meals, moveMin };
+  }
+
+  function coachText(profile, stats, score){
+    const tone = profile.coachTone || "soft";
+    const soft = (s)=>s;
+    const strict = (s)=>s.replaceAll("peux", "dois").replaceAll("OK", "On le fait.");
+
+    const base = (()=> {
+      if(stats.current==null){
+        return "Plan simple : coche 2 repas + marche 10 minutes. Tu n’as pas besoin d’être sportif : juste constant.";
+      }
+      if(score.score===3) return "Journée gagnée ✅ Tu peux t’arrêter là : maintien + hydratation + sommeil.";
+      if(score.score===2) return "Très bien. Il manque juste 1 mini-action pour gagner la journée.";
+      if(score.score===1) return "On avance. Choisis l’action la plus facile maintenant (même 10 min).";
+      return "Aujourd’hui : 2 repas simples + 10 minutes. Simple = durable.";
+    })();
+
+    if(tone==="strict") return strict(base);
+    return soft(base);
+  }
+
   // ===== Missions UI =====
   function renderMissions(profile, stats, todayISO){
     const rows=loadWeights();
@@ -1381,42 +1482,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setText("dailyScore", `Score : ${score.score}/${score.max} (objectif = 2/3)`);
     setText("todayBadge", `🎯 Marche: ${Math.round(score.moveMin)} / ${Number(profile.moveGoalMin)||30} min`);
+    setText("coachMsg", coachText(profile, stats, score));
 
     const box=$("missions");
     if(!box) return;
     box.innerHTML="";
 
-    // Mission 1: pesée (mais “skip OK”)
-    const tasks = ensureDay(todayISO).tasks;
-
     const items = [
-      {
-        key:"weigh",
-        ico:"⚖️",
-        name: profile.weighMode==="3x" ? "Pesée (3×/semaine)" : "Pesée",
-        hint: profile.weighMode==="3x"
-          ? "Si tu n’as pas envie aujourd’hui : skip OK. Lun/Mer/Ven c’est top."
-          : "Matin, conditions similaires. Si stress → tu peux skip, la tendance reste."
-        ,
-        checked: score.weighDone,
-        xp:"+12 XP"
-      },
-      {
-        key:"meals",
-        ico:"🍲",
-        name:"2 repas simples",
-        hint:"Protéines + soupe/légumes. Si faim : skyr/œufs/thon.",
-        checked: score.mealsDone,
-        xp:"+16 XP"
-      },
-      {
-        key:"move",
-        ico:"🚶‍♂️",
-        name:"Marche douce 10 min",
-        hint:"10 min = victoire. 20 min = bonus. Pas besoin de sport.",
-        checked: score.moveDone,
-        xp:"+14 XP"
-      }
+      { key:"weigh", ico:"⚖️", name:"Pesée (ou skip OK)", hint:"La tendance compte plus qu’un jour.", xp:"+12 XP", checked:score.weighDone },
+      { key:"meals", ico:"🍲", name:"2 repas simples", hint:"Protéines + légumes/soupe = satiété.", xp:"+16 XP", checked:score.mealsDone },
+      { key:"move",  ico:"🚶‍♂️", name:"Marche 10 min", hint:"10 min = victoire. Pas besoin de sport.", xp:"+14 XP", checked:score.moveDone },
     ];
 
     items.forEach(it=>{
@@ -1440,45 +1515,124 @@ document.addEventListener("DOMContentLoaded", () => {
         setTask(todayISO, it.key, cb.checked);
         if(cb.checked){
           addXP(it.key==="weigh"?12:it.key==="meals"?16:14);
-          toast("good","Mission", "Validée ✅", 1200);
+          toast("good","Mission","Validée ✅", 1200);
         }else{
-          toast("info","Mission", "Retirée", 1000);
+          toast("info","Mission","Retirée", 1000);
         }
         render();
       });
       box.appendChild(row);
     });
-
-    // Coach message
-    setText("coachMsg", coachText(profile, stats, score, todayISO));
   }
 
-  // ===== Render header (XP / streak / level) =====
-  function renderHeader(profile, stats){
-    const todayISO=isoToday();
+  // ===== Summary tiles + daily log =====
+  function renderSnapshot(profile, stats, todayISO){
     const rows=loadWeights();
+    const day=ensureDay(todayISO);
+    const meals = mealsDoneCount(todayISO);
+    const moveMin = computeMoveMinutesToday(todayISO);
+    const score = dailyScore(profile, rows, todayISO);
 
+    // Tiles values
+    setText("tileWeight", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
+    setText("tileWeightSub", stats.current!=null ? `Dernière pesée: ${rows.filter(r=>typeof r.weight==="number").slice(-1)[0]?.date || "—"}` : "Ajoute une pesée");
+
+    setText("tileAvg7", stats.avg7!=null ? `${fmt(stats.avg7,1)} kg` : "—");
+
+    const trend=(stats.avgPrev7!=null && stats.avg7!=null) ? (stats.avgPrev7 - stats.avg7) : null;
+    if(trend==null) setText("tileTrend","Tendance: —");
+    else{
+      const dir = trend>0.05 ? "⬇︎" : trend<-0.05 ? "⬆︎" : "→";
+      const lbl = trend>0 ? `baisse ${trend.toFixed(1)} kg/sem` : `hausse ${Math.abs(trend).toFixed(1)} kg/sem`;
+      setText("tileTrend", `Tendance: ${dir} ${lbl}`);
+    }
+
+    const lost = stats.lost;
+    setHTML("tileLost", lost!=null ? `<span class="${lost>=0?'pos':'neg'}">${fmt(lost,1)} kg</span>` : "—");
+    const eta=estimateETA(profile, stats);
+    if(!eta) setText("tileETA","Estimation: —");
+    else{
+      if(eta.date){
+        const d=eta.date.toLocaleDateString("fr-FR",{year:"numeric",month:"short",day:"numeric"});
+        setText("tileETA", `Est.: ${eta.text} • ${d}`);
+      }else setText("tileETA", `Est.: ${eta.text}`);
+    }
+
+    setText("tileToday", `${score.score}/3`);
+    setText("tileMealsMove", `Repas: ${meals}/2 • Marche: ${Math.round(moveMin)} min`);
+
+    // Header
     setText("headerWeight", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
+    setText("badgeStreak", `${flexStreakWeights(rows, todayISO)}/7`);
 
-    // série “flexible”: pesées sur 7 jours
-    const flex = flexStreakWeights(rows, todayISO);
-    setText("badgeStreak", `${flex}/7`);
-
-    const xp = totalXP();
+    const xp=totalXP();
     setText("badgeXP", String(xp));
+    setText("badgeLevel", levelFromXP(xp).name);
 
-    const lvl = levelFromXP(xp);
-    setText("badgeLevel", lvl.name);
+    // Daily log bars
+    setText("waterNow", String(day.waterMl||0));
+    setText("waterGoal", String(profile.waterGoalMl||DEFAULT_PROFILE.waterGoalMl));
+    const wPct = clamp(((day.waterMl||0) / (profile.waterGoalMl||DEFAULT_PROFILE.waterGoalMl)) * 100, 0, 100);
+    if($("waterBar")) $("waterBar").style.width = wPct.toFixed(0) + "%";
 
-    // subtitle tournant “coach”
-    const libs=[
-      "Objectif : gagner la journée (2/3 missions).",
-      "Sans sport : satiété + régularité = perte de poids.",
-      "Un jour imparfait n’annule pas ta progression.",
-      "Tu n’as besoin que d’une petite action maintenant."
-    ];
-    const idx=Math.floor(Date.now()/(10*60*1000)) % libs.length;
-    setText("headerSubtitle", libs[idx]);
+    setText("sleepNow", day.sleepH==null ? "—" : String(day.sleepH));
+    setText("sleepGoal", String(profile.sleepGoalH||DEFAULT_PROFILE.sleepGoalH));
+    const sPct = day.sleepH==null ? 0 : clamp((day.sleepH / (profile.sleepGoalH||DEFAULT_PROFILE.sleepGoalH)) * 100, 0, 100);
+    if($("sleepBar")) $("sleepBar").style.width = sPct.toFixed(0) + "%";
+
+    setText("hungerNow", String(day.hunger||3));
+    if($("hungerRange")) $("hungerRange").value = String(day.hunger||3);
+  }
+
+  // ===== Profile stats =====
+  function profileStats(profile, stats){
+    const today=isoToday();
+    const all=loadDaily();
+    const days = Object.keys(all);
+
+    // jours avec action
+    const daysTracked = days.filter(k=>{
+      const d=all[k];
+      const anyTask = d?.tasks && (d.tasks.weigh || d.tasks.meals || d.tasks.move);
+      const anyLog = (d?.waterMl||0)>0 || d?.sleepH!=null || d?.hunger!=null;
+      return !!(anyTask || anyLog);
+    }).length;
+
+    // taux sur 7 jours (missions)
+    let done=0, possible=0;
+    for(let i=0;i<7;i++){
+      const iso=addDays(today, -i);
+      const d=all[iso];
+      if(!d) continue;
+      possible += 3;
+      if(d.tasks?.weigh) done++;
+      if(d.tasks?.meals) done++;
+      if(d.tasks?.move) done++;
+    }
+    const rate7 = possible ? Math.round((done/possible)*100) : 0;
+
+    // meilleure semaine (glissante)
+    let best = 0;
+    for(let start=0; start<30; start++){
+      let dsum=0, psum=0;
+      for(let i=0;i<7;i++){
+        const iso=addDays(today, -(start+i));
+        const d=all[iso];
+        psum += 3;
+        if(d?.tasks?.weigh) dsum++;
+        if(d?.tasks?.meals) dsum++;
+        if(d?.tasks?.move) dsum++;
+      }
+      best = Math.max(best, psum ? Math.round((dsum/psum)*100) : 0);
+    }
+
+    // BMI
+    const bmi = computeBMI(profile, stats.current);
+    setText("pDays", String(daysTracked));
+    setText("pRate7", (possible?`${rate7}%`:"—"));
+    setText("pBest7", (days.length?`${best}%`:"—"));
+    setText("pBMI", bmi!=null ? bmi.toFixed(1) : "—");
+    setText("pBMILabel", bmi!=null ? bmiLabel(bmi) : "Ajoute une pesée");
   }
 
   // ===== Main render =====
@@ -1507,38 +1661,21 @@ document.addEventListener("DOMContentLoaded", () => {
     if(exists("targetWeight")) $("targetWeight").value = profile.targetWeight ?? "";
     if(exists("omegaTarget")) $("omegaTarget").value = String(profile.omegaTarget ?? 3);
     if(exists("moveGoalMin")) $("moveGoalMin").value = String(profile.moveGoalMin ?? DEFAULT_PROFILE.moveGoalMin);
+    if(exists("waterGoalMl")) $("waterGoalMl").value = String(profile.waterGoalMl ?? DEFAULT_PROFILE.waterGoalMl);
+    if(exists("sleepGoalH")) $("sleepGoalH").value = String(profile.sleepGoalH ?? DEFAULT_PROFILE.sleepGoalH);
     if(exists("weighMode")) $("weighMode").value = profile.weighMode ?? "daily";
+    if(exists("weighDays")) $("weighDays").value = profile.weighDays ?? "LMV";
+    if(exists("coachTone")) $("coachTone").value = profile.coachTone ?? "soft";
 
-    // KPIs
-    setText("kpiWeight", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
-    setHTML("kpiLost", stats.lost!=null ? `<span class="${stats.lost>=0?'pos':'neg'}">${fmt(stats.lost,1)} kg</span>` : "—");
-    setText("kpiAvg7", stats.avg7!=null ? `${fmt(stats.avg7,1)} kg` : "—");
-
-    const moveMin = computeMoveMinutesToday(todayISO);
-    setText("kpiMove", `${Math.round(moveMin)} min`);
-
-    // chips
-    const bmi=computeBMI(profile, stats.current);
-    setHTML("chipBMI", `IMC : <strong>${bmi!=null ? bmi.toFixed(1) : "—"}</strong>`);
-
-    const trend=(stats.avgPrev7!=null && stats.avg7!=null) ? (stats.avgPrev7 - stats.avg7) : null;
-    if(trend==null) setHTML("chipTrend", `Tendance : <strong>—</strong>`);
-    else{
-      const dir = trend>0.05 ? "⬇︎" : trend<-0.05 ? "⬆︎" : "→";
-      const lbl = trend>0 ? `baisse ${trend.toFixed(1)} kg/sem` : `hausse ${Math.abs(trend).toFixed(1)} kg/sem`;
-      setHTML("chipTrend", `Tendance : <strong>${dir} ${lbl}</strong>`);
-    }
-
-    const eta=estimateETA(profile, stats);
-    if(!eta) setHTML("chipETA", `Estimation : <strong>—</strong>`);
-    else{
-      if(eta.date){
-        const d=eta.date.toLocaleDateString("fr-FR",{year:"numeric",month:"short",day:"numeric"});
-        setHTML("chipETA", `Estimation : <strong>${eta.text} • ${d}</strong>`);
-      }else{
-        setHTML("chipETA", `Estimation : <strong>${eta.text}</strong>`);
-      }
-    }
+    // subtitle rotating
+    const libs=[
+      "Objectif : gagner ta journée (2/3).",
+      "Sans sport : satiété + régularité = perte de poids.",
+      "Un jour imparfait n’annule pas la semaine.",
+      "Petite action maintenant → gros résultat plus tard."
+    ];
+    const idx=Math.floor(Date.now()/(10*60*1000)) % libs.length;
+    setText("headerSubtitle", libs[idx]);
 
     // chart
     drawWeightChart(profile, rows, loadRange());
@@ -1558,13 +1695,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // missions
+    // snapshot + missions + profile stats
+    renderSnapshot(profile, stats, todayISO);
     renderMissions(profile, stats, todayISO);
+    profileStats(profile, stats);
 
-    // header badges
-    renderHeader(profile, stats);
-
-    // walk ui
+    // walk UI
     renderWalkUI();
   }
 
@@ -1586,7 +1722,6 @@ document.addEventListener("DOMContentLoaded", () => {
     saveWeight(d,w);
     if(exists("weight")) $("weight").dataset.autofill="0";
 
-    // mission weigh
     if(d===isoToday()){
       setTask(d,"weigh",true);
       addXP(12);
@@ -1597,19 +1732,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("skipWeighBtn")?.addEventListener("click", ()=>{
     const today=isoToday();
-    setTask(today,"weigh",true); // “je gère” -> on valide la mission mentalement
+    setTask(today,"weigh",true);
     addXP(4);
     toast("good","Pesée","OK. On garde la régularité sans stress.", 1600);
     render();
   });
 
+  // Range segmented
+  const rangeSeg=$("rangeSeg");
+  rangeSeg?.querySelectorAll("[data-range]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const v=btn.getAttribute("data-range");
+      saveRange(v);
+      rangeSeg.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+      btn.classList.add("active");
+      render();
+    });
+  });
+
+  // Meals tools
   $("resetChecksBtn")?.addEventListener("click", ()=>{
     if(!confirm("Réinitialiser toutes les coches repas ?")) return;
     del(STORAGE.MEAL_CHECKS);
     toast("info","Repas","Coches réinitialisées.", 1400);
     render();
   });
-
   $("markMealsDoneBtn")?.addEventListener("click", ()=>{
     const today=isoToday();
     setTask(today,"meals",true);
@@ -1618,12 +1765,31 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   });
 
+  // Water / sleep / hunger
+  $("waterPlus")?.addEventListener("click", ()=>{ setWater(+250); addXP(1); render(); });
+  $("waterMinus")?.addEventListener("click", ()=>{ setWater(-250); render(); });
+
+  $("sleepSave")?.addEventListener("click", ()=>{
+    const v=$("sleepInput")?.value;
+    setSleep(v);
+    addXP(2);
+    toast("good","Sommeil","Noté.", 1200);
+    render();
+  });
+
+  $("hungerRange")?.addEventListener("input", (e)=>{
+    setHunger(e.target.value);
+    render();
+  });
+
+  // Walk wiring
   $("walkStartBtn")?.addEventListener("click", startWalk);
   $("walkStopBtn")?.addEventListener("click", stopWalk);
   $("walkClearBtn")?.addEventListener("click", clearActiveTrace);
   $("walkExportBtn")?.addEventListener("click", exportWalks);
   $("walkClearAllBtn")?.addEventListener("click", clearAllWalks);
 
+  // Profile save
   $("saveProfileBtn")?.addEventListener("click", ()=>{
     const p={
       heightCm: $("height")?.value ? Number($("height").value) : null,
@@ -1631,13 +1797,20 @@ document.addEventListener("DOMContentLoaded", () => {
       targetWeight: $("targetWeight")?.value ? Number($("targetWeight").value) : null,
       omegaTarget: $("omegaTarget")?.value ? Number($("omegaTarget").value) : 3,
       moveGoalMin: $("moveGoalMin")?.value ? Number($("moveGoalMin").value) : DEFAULT_PROFILE.moveGoalMin,
-      weighMode: $("weighMode")?.value || "daily"
+      waterGoalMl: $("waterGoalMl")?.value ? Number($("waterGoalMl").value) : DEFAULT_PROFILE.waterGoalMl,
+      sleepGoalH: $("sleepGoalH")?.value ? Number($("sleepGoalH").value) : DEFAULT_PROFILE.sleepGoalH,
+      weighMode: $("weighMode")?.value || "daily",
+      weighDays: $("weighDays")?.value || "LMV",
+      coachTone: $("coachTone")?.value || "soft"
     };
     if(!p.startWeight || !p.targetWeight){
       toast("bad","Profil","Remplis poids de départ et objectif.", 2400);
       return;
     }
     if(!p.moveGoalMin || p.moveGoalMin<5) p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
+    if(!p.waterGoalMl || p.waterGoalMl<500) p.waterGoalMl = DEFAULT_PROFILE.waterGoalMl;
+    if(!p.sleepGoalH || p.sleepGoalH<4) p.sleepGoalH = DEFAULT_PROFILE.sleepGoalH;
+
     saveJSON(STORAGE.PROFILE, p);
     addXP(8);
     toast("good","Profil","Enregistré ✅", 1400);
@@ -1645,9 +1818,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setTab("navSummary");
   });
 
+  // Backup
   $("exportBackupBtn")?.addEventListener("click", ()=>{
     const payload={
-      version:2,
+      version:3,
       exportedAt:new Date().toISOString(),
       profile: loadProfile(),
       weights: loadWeights(),
@@ -1698,56 +1872,14 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   });
 
-  // range segmented
-  const rangeSeg=$("rangeSeg");
-  rangeSeg?.querySelectorAll("[data-range]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const v=btn.getAttribute("data-range");
-      saveRange(v);
-      rangeSeg.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
-      btn.classList.add("active");
-      render();
-    });
-  });
-
-  // quick buttons
-  $("btnAntiFaim")?.addEventListener("click", ()=>{
-    alert(
-      "PLAN ANTI-FAIM (simple)\n\n" +
-      "1) 1 grand verre d’eau\n" +
-      "2) 1 option satiété : skyr OU 2 œufs OU thon\n" +
-      "3) Attends 10 minutes\n\n" +
-      "But : couper l’urgence, pas être parfait."
-    );
-    addXP(2);
-    render();
-  });
-  $("btnCraquage")?.addEventListener("click", ()=>{
-    alert(
-      "RESET SANS CULPABILITÉ (2 min)\n\n" +
-      "• OK, c’est arrivé.\n" +
-      "• Prochaine action : eau + mini repas simple.\n" +
-      "• On reprend maintenant, pas demain.\n\n" +
-      "Le poids se joue sur la semaine, pas sur 1 moment."
-    );
-    addXP(2);
-    render();
-  });
-  $("btnMiniMarche")?.addEventListener("click", ()=>{
-    const profile=loadProfile();
-    alert(
-      "MISSION MINI (10 min)\n\n" +
-      "• Mets un timer 10 min\n" +
-      "• Marche doucement\n" +
-      "• C’est gagné.\n\n" +
-      `Objectif normal: ${profile.moveGoalMin} min, mais aujourd’hui 10 min suffisent.`
-    );
-    addXP(3);
-    render();
-  });
-
   // init date
   if(exists("date")) $("date").value = isoToday();
+
+  // init range UI
+  const initRange=loadRange();
+  rangeSeg?.querySelectorAll("button").forEach(b=>{
+    b.classList.toggle("active", b.getAttribute("data-range")===initRange);
+  });
 
   // resume active walk
   const aw=getActiveWalk();
@@ -1755,12 +1887,6 @@ document.addEventListener("DOMContentLoaded", () => {
     beginWatch();
     ensureTimer();
   }
-
-  // init range UI
-  const initRange=loadRange();
-  rangeSeg?.querySelectorAll("button").forEach(b=>{
-    b.classList.toggle("active", b.getAttribute("data-range")===initRange);
-  });
 
   render();
 });

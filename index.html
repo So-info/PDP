@@ -3,31 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Santé — Coach -30 kg</title>
   <meta name="theme-color" content="#FF2D55" />
-
-  <!-- Leaflet (optionnel : carte marche) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+  <title>Nounours Coaching— Perte de poids (iPhone)</title>
   <style>
     :root{
       --bg:#F2F2F7;
       --card:#FFFFFF;
       --text:#111827;
-      --muted:rgba(17,24,39,.55);
+      --muted:rgba(17,24,39,.56);
       --line:rgba(17,24,39,.10);
       --shadow: 0 12px 32px rgba(0,0,0,.06);
       --r:18px;
 
-      --accent:#FF2D55;   /* iOS pink */
-      --accent2:#FF3B30;  /* iOS red */
-      --accent3:#FF9F0A;  /* iOS orange */
+      --accent:#FF2D55;
+      --accent2:#FF3B30;
+      --accent3:#FF9F0A;
+
       --good:#16A34A;
+      --warn:#FF9F0A;
       --bad:#DC2626;
 
-      --tabH: 74px; /* barre bas */
-      --headerBlur: blur(18px);
+      --tabH: 76px;
+      --blur: blur(18px);
     }
 
     *{box-sizing:border-box}
@@ -39,278 +36,322 @@
       color:var(--text);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-
-      /* IMPORTANT : évite que le bas soit caché par la barre */
+      /* IMPORTANT iPhone: garde le bas visible malgré la barre fixe */
       padding-bottom: calc(var(--tabH) + env(safe-area-inset-bottom));
+      overscroll-behavior-y: none;
     }
 
-    /* ====== HEADER “Apple Santé” ====== */
+    /* ===== Header sticky (ne casse pas le scroll) ===== */
     header{
-      position:sticky; top:0; z-index:50;
-      background:rgba(242,242,247,.88);
-      backdrop-filter: var(--headerBlur);
-      -webkit-backdrop-filter: var(--headerBlur);
-      border-bottom:1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(242,242,247,.88);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--line);
+      transform: translateZ(0);
     }
-
     .headerInner{
-      max-width:980px;
-      margin:0 auto;
-      padding: 10px 14px 10px;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
     }
-
     .headerTop{
       display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
-      padding-top: env(safe-area-inset-top);
     }
-
     .titleBlock{min-width:0}
     .title{
       margin:0;
-      font-size:28px;
-      letter-spacing:-.5px;
-      font-weight:900;
-      line-height:1.05;
+      font-size: 26px;
+      font-weight: 950;
+      letter-spacing: -.4px;
+      line-height: 1.05;
     }
     .subtitle{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:6px;
-      letter-spacing:.1px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.25;
     }
-
     .pill{
-      min-width:134px;
-      padding:10px 12px;
-      border-radius:999px;
+      min-width: 138px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
       border:1px solid var(--line);
-      background:rgba(255,255,255,.92);
-      box-shadow:0 10px 22px rgba(0,0,0,.05);
-      text-align:right;
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      text-align: right;
+      flex: 0 0 auto;
     }
     .pill .lbl{font-size:11px;color:var(--muted)}
-    .pill .val{font-size:16px;font-weight:900;margin-top:3px; white-space:nowrap}
+    .pill .val{margin-top:3px;font-size:16px;font-weight:950;white-space:nowrap}
 
-    /* Anneaux : toujours visibles dans le header */
+    /* Rings row */
     .ringsRow{
+      margin-top: 10px;
       display:grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap:10px;
-      margin-top:10px;
-      transition: all .18s ease;
+      gap: 10px;
     }
-
     .ringCard{
       display:flex; align-items:center; gap:10px;
-      padding:10px 10px;
-      border-radius:16px;
-      background:rgba(255,255,255,.92);
+      padding: 10px 10px;
+      border-radius: 16px;
       border:1px solid var(--line);
-      box-shadow:0 10px 22px rgba(0,0,0,.05);
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
       min-width:0;
     }
-
-    .ringSvg{width:44px;height:44px;flex:0 0 44px}
-    .ringMeta{min-width:0; width:100%}
-    .ringTitle{font-size:12px;color:var(--muted);margin:0}
+    .ringSvg{width:42px;height:42px;flex:0 0 42px}
+    .ringMeta{min-width:0}
+    .ringTitle{font-size:12px;color:var(--muted);font-weight:900}
     .ringValue{
-      font-size:14px;
-      font-weight:900;
       margin-top:2px;
+      font-size:13px;
+      font-weight:950;
       line-height:1.2;
-      white-space:normal;            /* ✅ pour lire tout */
-      overflow:visible;              /* ✅ */
-      word-break:break-word;
+      white-space: normal;     /* ✅ lisible en entier */
+      overflow: visible;
+      word-break: break-word;
     }
 
-    /* mode compact en scroll : titre réduit, rings plus petits mais visibles */
+    /* Compact mode en scroll */
     header.compact .title{font-size:20px}
     header.compact .subtitle{display:none}
+    header.compact .pill{padding:8px 10px; min-width:128px}
     header.compact .ringsRow{gap:8px}
     header.compact .ringCard{padding:8px 8px;border-radius:14px}
     header.compact .ringSvg{width:38px;height:38px;flex-basis:38px}
-    header.compact .ringValue{font-size:13px}
 
-    @media (max-width:420px){
-      .pill{min-width:120px}
-      .ringsRow{gap:8px}
-      .ringValue{font-size:13px}
+    @media (max-width: 420px){
+      .pill{min-width:128px}
+      .title{font-size:24px}
     }
 
-    /* ====== LAYOUT ====== */
-    .wrap{max-width:980px;margin:0 auto;padding:12px 14px 18px}
-    .stack{display:grid;gap:12px}
-
+    /* ===== Layout ===== */
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 12px 14px 16px;
+    }
+    .stack{display:grid; gap:12px}
     .card{
-      background:rgba(255,255,255,.92);
-      border:1px solid var(--line);
-      border-radius:var(--r);
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--line);
+      border-radius: var(--r);
       box-shadow: var(--shadow);
-      padding:14px;
+      padding: 14px;
+      min-width: 0;
     }
-
-    .tiny{font-size:12px;color:var(--muted)}
+    .tiny{font-size:12px;color:var(--muted);line-height:1.35}
     .muted{color:var(--muted)}
     .pos{color:var(--good)} .neg{color:var(--bad)}
 
-    /* ====== Highlights style “Apple Santé” ====== */
-    .highlightsGrid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:10px;
-    }
-    @media(min-width:820px){
-      .highlightsGrid{grid-template-columns: repeat(2, minmax(0,1fr));}
-    }
-
-    .hCard{
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:#fff;
-      padding:12px;
-      box-shadow:0 10px 22px rgba(0,0,0,.04);
-      min-width:0;
-    }
-    .hTop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .hTitle{font-size:12px;color:var(--muted);font-weight:900}
-    .hBig{margin-top:6px;font-size:22px;font-weight:950;letter-spacing:-.3px}
-    .hSub{margin-top:4px;font-size:12px;color:var(--muted);line-height:1.35}
-    .hChip{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:7px 10px;border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,45,85,.06);
-      color:rgba(17,24,39,.78);
-      font-size:12px;
-      white-space:nowrap;
-    }
-
-    /* ====== Input row : FIX chevauchement date/poids ====== */
+    /* Form grid (évite chevauchements sur iPhone) */
     .formGrid{
       display:grid;
       grid-template-columns: 1fr 1fr auto;
-      gap:10px;
-      align-items:end;
+      gap: 10px;
+      align-items: end;
     }
-    @media (max-width:520px){
-      .formGrid{
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 560px){
+      .formGrid{grid-template-columns: 1fr}
+      .formGrid .btnFull{width:100%}
     }
 
     label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
 
-    input, button, select, textarea{
+    input, select, textarea{
       width:100%;
       border-radius:14px;
-      border:1px solid var(--line);
+      border: 1px solid var(--line);
       background:#fff;
-      padding:11px 12px;
+      padding: 11px 12px;
       font-size:16px;
       outline:none;
     }
     input:focus, select:focus, textarea:focus{
-      border-color:rgba(255,45,85,.45);
-      box-shadow:0 0 0 3px rgba(255,45,85,.12);
+      border-color: rgba(255,45,85,.45);
+      box-shadow: 0 0 0 3px rgba(255,45,85,.12);
     }
 
     button{
-      width:auto;
-      padding:12px 14px;
+      border:none;
       border-radius:14px;
-      background:var(--accent);
+      padding: 12px 14px;
+      background: var(--accent);
       color:#fff;
       font-weight:950;
       cursor:pointer;
-      border:none;
-      box-shadow:0 12px 22px rgba(255,45,85,.18);
+      box-shadow: 0 12px 22px rgba(255,45,85,.18);
       -webkit-tap-highlight-color: transparent;
-      white-space:nowrap;
+      white-space: nowrap;
     }
     button:active{transform: translateY(1px)}
     button.secondary{
-      background:#fff;color:var(--text);
-      border:1px solid var(--line);
+      background:#fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow:none;
+      font-weight:900;
+    }
+    button.ghost{
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
       box-shadow:none;
       font-weight:900;
     }
     button:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
 
-    /* ====== Sections ====== */
+    /* Sections */
     .section{display:none}
     .section.active{display:block}
 
-    /* chart */
-    canvas{
-      width:100%;
-      height:240px;
-      border-radius:16px;
+    /* ===== Highlights (propre et lisible) ===== */
+    .highGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media(min-width:820px){
+      .highGrid{grid-template-columns: repeat(2, minmax(0,1fr));}
+    }
+    .hCard{
       border:1px solid var(--line);
+      border-radius: 18px;
       background:#fff;
+      padding: 12px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.04);
+      min-width:0;
+    }
+    .hTitle{font-size:12px;color:var(--muted);font-weight:950}
+    .hBig{margin-top:6px;font-size:22px;font-weight:950;letter-spacing:-.3px}
+    .hSub{margin-top:4px;font-size:12px;color:var(--muted);line-height:1.35}
+    .chip{
+      display:inline-flex;align-items:center;gap:8px;
+      padding: 7px 10px;
+      border-radius:999px;
+      border: 1px solid var(--line);
+      background: rgba(255,45,85,.06);
+      font-size:12px;
+      color: rgba(17,24,39,.78);
+      white-space: nowrap;
+      margin-top: 10px;
     }
 
-    /* meals */
+    /* Coach action row */
+    .ctaRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+    .ctaRow > *{flex: 1 1 200px}
+
+    /* Meals */
     .mealGrid{display:grid;gap:10px}
-    @media(min-width:820px){.mealGrid{grid-template-columns:1fr 1fr}}
-    .mealCard{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fff;min-width:0}
+    @media(min-width:820px){.mealGrid{grid-template-columns: 1fr 1fr}}
+    .mealCard{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:#fff;
+      padding:12px;
+      min-width:0;
+    }
     .mealHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
     .mealTitle{font-weight:950}
     .dayLabel{font-size:12px;color:var(--muted)}
     .check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);user-select:none;white-space:nowrap}
     .check input{width:22px;height:22px}
-    .item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed rgba(17,24,39,.10)}
+
+    .item{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed rgba(17,24,39,.10)}
     .item:first-of-type{border-top:none}
     .left{display:flex;gap:10px;min-width:0}
     .icon{
       width:36px;height:36px;border-radius:14px;
       background:rgba(255,45,85,.08);
       border:1px solid rgba(255,45,85,.14);
-      display:flex;align-items:center;justify-content:center;font-size:18px;flex:0 0 36px
+      display:flex;align-items:center;justify-content:center;
+      flex: 0 0 36px;
+      font-size:18px;
+    }
+    .item b{display:block}
+    .item .sub{font-size:12px;color:var(--muted);line-height:1.25}
+
+    /* Movement timer */
+    .timerBig{
+      font-size: 34px;
+      font-weight: 950;
+      letter-spacing: -0.6px;
+      margin-top: 4px;
+    }
+    .barWrap{
+      margin-top: 10px;
+      height: 10px;
+      background: rgba(17,24,39,.08);
+      border-radius: 999px;
+      overflow:hidden;
+      border: 1px solid var(--line);
+    }
+    .barFill{
+      height:100%;
+      width: 0%;
+      background: rgba(255,45,85,.85);
+      border-radius: 999px;
     }
 
-    /* walk/history */
-    .histCard{border:1px solid var(--line);border-radius:18px;padding:12px;background:#fff}
-    .histTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .histTitle{font-weight:950}
-    .histMeta{font-size:12px;color:var(--muted);line-height:1.35;margin-top:4px}
-    .histBtns{display:flex;gap:8px;margin-top:10px}
-    .histBtns button{flex:1}
+    /* Chart */
+    canvas{
+      width:100%;
+      height: 240px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:#fff;
+    }
 
-    /* ====== Bottom Tab Bar (toujours visible + safe area) ====== */
+    /* Bottom Tab Bar */
     .tabbar{
-      position:fixed; left:0; right:0; bottom:0;
+      position: fixed;
+      left:0; right:0; bottom:0;
       height: calc(var(--tabH) + env(safe-area-inset-bottom));
       padding-bottom: env(safe-area-inset-bottom);
       background: rgba(242,242,247,.92);
-      backdrop-filter: var(--headerBlur);
-      -webkit-backdrop-filter: var(--headerBlur);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
       border-top: 1px solid var(--line);
-      z-index:60;
+      z-index: 60;
+      transform: translateZ(0);
     }
-    .tabbarInner{
-      max-width:980px;
-      margin:0 auto;
+    .tabInner{
+      max-width: 980px;
+      margin: 0 auto;
       height: var(--tabH);
       padding: 8px 10px 10px;
       display:grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap:8px;
+      grid-template-columns: repeat(5, minmax(0,1fr));
+      gap: 8px;
     }
     .tabBtn{
-      border:1px solid transparent;
-      background:transparent;
-      box-shadow:none;
-      padding:10px 8px;
-      border-radius:14px;
-      display:flex; flex-direction:column; align-items:center; justify-content:center;
-      gap:4px;
       width:100%;
-      cursor:pointer;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: transparent;
       color: rgba(17,24,39,.55);
-      font-weight:900;
+      box-shadow: none;
+      padding: 10px 8px;
+      display:flex;
+      flex-direction: column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      font-weight: 900;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .tabBtn .ico{font-size:18px; line-height:1}
-    .tabBtn .txt{font-size:11px; line-height:1}
+    .tabBtn .ico{font-size:18px;line-height:1}
+    .tabBtn .txt{font-size:11px;line-height:1}
     .tabBtn.active{
       background:#fff;
       border-color: var(--line);
@@ -318,27 +359,31 @@
       color: var(--text);
     }
 
-    /* ===== Toasts ===== */
+    /* Toasts */
     .toasts{
-      position:fixed; right:14px; bottom: calc(var(--tabH) + 14px + env(safe-area-inset-bottom));
-      z-index:9999;
-      display:flex; flex-direction:column; gap:10px;
-      width:min(380px, calc(100vw - 28px));
-      pointer-events:none;
+      position: fixed;
+      right: 14px;
+      bottom: calc(var(--tabH) + 14px + env(safe-area-inset-bottom));
+      z-index: 9999;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+      width: min(380px, calc(100vw - 28px));
+      pointer-events: none;
     }
     .toast{
       pointer-events:auto;
-      border-radius:18px;
-      padding:12px 12px;
-      background:#fff;
-      border:1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px 12px;
+      background: #fff;
+      border: 1px solid var(--line);
       box-shadow: 0 18px 50px rgba(0,0,0,.12);
-      display:flex; gap:10px; align-items:flex-start;
+      display:flex; gap: 10px; align-items:flex-start;
       transform: translateY(8px);
-      opacity:0;
+      opacity: 0;
       animation: toastIn .18s ease forwards;
     }
-    @keyframes toastIn{ to{ transform: translateY(0); opacity:1; } }
+    @keyframes toastIn{to{transform:translateY(0);opacity:1}}
     .toast .ico{
       width:36px;height:36px;border-radius:14px;
       display:flex;align-items:center;justify-content:center;
@@ -349,13 +394,60 @@
     .toast .title{font-weight:950}
     .toast .msg{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.35}
     .toast .x{
-      margin-left:auto;
-      background:transparent;border:none;width:auto;padding:0;
-      color:var(--muted);font-weight:950;cursor:pointer;
-      box-shadow:none;
+      margin-left:auto;background:transparent;border:none;cursor:pointer;
+      color:var(--muted);font-weight:950;box-shadow:none;padding:0;
     }
     .toast.good .ico{background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.18)}
     .toast.bad  .ico{background:rgba(220,38,38,.10);border-color:rgba(220,38,38,.18)}
+
+    /* Bottom sheet (anti-fringale) */
+    .sheetBack{
+      position:fixed; inset:0; z-index:120;
+      background: rgba(0,0,0,.28);
+      opacity:0; pointer-events:none;
+      transition: opacity .18s ease;
+    }
+    .sheetBack.show{opacity:1; pointer-events:auto}
+    .sheet{
+      position:fixed; left:0; right:0; bottom:0; z-index:121;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-top:1px solid var(--line);
+      border-radius: 18px 18px 0 0;
+      transform: translateY(110%);
+      transition: transform .22s ease;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .sheet.show{transform: translateY(0)}
+    .sheetInner{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 10px 14px 14px;
+    }
+    .grab{
+      width: 42px; height: 5px;
+      border-radius: 999px;
+      background: rgba(17,24,39,.15);
+      margin: 6px auto 10px;
+    }
+    .sheetTitle{
+      font-weight: 950;
+      font-size: 16px;
+      letter-spacing: -.2px;
+      margin: 0;
+    }
+    .sheetSub{margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
+    .sheetList{display:grid;gap:10px;margin-top:12px}
+    .sheetItem{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.04);
+    }
+    .sheetItem b{display:block}
+    .sheetItem .sub{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.35}
   </style>
 </head>
 
@@ -364,8 +456,8 @@
   <div class="headerInner">
     <div class="headerTop">
       <div class="titleBlock">
-        <h1 class="title" id="headerTitle">Santé</h1>
-        <div class="subtitle" id="headerSubtitle">Résumé • objectifs • constance</div>
+        <h1 class="title" id="headerTitle">Nounours Coaching</h1>
+        <div class="subtitle" id="headerSubtitle">Objectif : gagner ta journée, sans sport.</div>
       </div>
       <div class="pill">
         <div class="lbl">Poids actuel</div>
@@ -373,44 +465,43 @@
       </div>
     </div>
 
-    <!-- Anneaux toujours visibles -->
     <div class="ringsRow" aria-label="Objectifs du jour">
       <div class="ringCard">
         <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
-          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(17,24,39,.10)" stroke-width="6"/>
-          <circle id="ringGoal" cx="22" cy="22" r="18" fill="none" stroke="var(--accent)" stroke-width="6"
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(17,24,39,.10)" stroke-width="6"></circle>
+          <circle id="ringMeals" cx="22" cy="22" r="18" fill="none" stroke="var(--accent)" stroke-width="6"
                   stroke-linecap="round" transform="rotate(-90 22 22)"
-                  stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+                  stroke-dasharray="113.1" stroke-dashoffset="113.1"></circle>
         </svg>
         <div class="ringMeta">
-          <div class="ringTitle">Objectif</div>
-          <div class="ringValue" id="ringGoalText">—</div>
+          <div class="ringTitle">Repas</div>
+          <div class="ringValue" id="ringMealsText">—</div>
         </div>
       </div>
 
       <div class="ringCard">
         <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
-          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(17,24,39,.10)" stroke-width="6"/>
-          <circle id="ringStreak" cx="22" cy="22" r="18" fill="none" stroke="var(--accent2)" stroke-width="6"
-                  stroke-linecap="round" transform="rotate(-90 22 22)"
-                  stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
-        </svg>
-        <div class="ringMeta">
-          <div class="ringTitle">Pesées</div>
-          <div class="ringValue" id="ringStreakText">—</div>
-        </div>
-      </div>
-
-      <div class="ringCard">
-        <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
-          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(17,24,39,.10)" stroke-width="6"/>
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(17,24,39,.10)" stroke-width="6"></circle>
           <circle id="ringMove" cx="22" cy="22" r="18" fill="none" stroke="var(--accent3)" stroke-width="6"
                   stroke-linecap="round" transform="rotate(-90 22 22)"
-                  stroke-dasharray="113.1" stroke-dashoffset="113.1"/>
+                  stroke-dasharray="113.1" stroke-dashoffset="113.1"></circle>
         </svg>
         <div class="ringMeta">
-          <div class="ringTitle">Activité</div>
+          <div class="ringTitle">Mouvement</div>
           <div class="ringValue" id="ringMoveText">—</div>
+        </div>
+      </div>
+
+      <div class="ringCard">
+        <svg class="ringSvg" viewBox="0 0 44 44" aria-hidden="true">
+          <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(17,24,39,.10)" stroke-width="6"></circle>
+          <circle id="ringWeigh" cx="22" cy="22" r="18" fill="none" stroke="var(--accent2)" stroke-width="6"
+                  stroke-linecap="round" transform="rotate(-90 22 22)"
+                  stroke-dasharray="113.1" stroke-dashoffset="113.1"></circle>
+        </svg>
+        <div class="ringMeta">
+          <div class="ringTitle">Pesée</div>
+          <div class="ringValue" id="ringWeighText">—</div>
         </div>
       </div>
     </div>
@@ -419,10 +510,25 @@
 
 <div class="toasts" id="toasts"></div>
 
+<!-- Anti-fringale sheet -->
+<div class="sheetBack" id="sheetBack"></div>
+<div class="sheet" id="sheet">
+  <div class="sheetInner">
+    <div class="grab"></div>
+    <h3 class="sheetTitle">Anti-fringale (2 minutes)</h3>
+    <div class="sheetSub" id="sheetSub">On choisit une option facile. Le but : éviter “je craque”.</div>
+    <div class="sheetList" id="sheetList"></div>
+    <div class="ctaRow" style="margin-top:12px">
+      <button class="secondary" id="sheetCloseBtn" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
-  <div class="stack" style="margin-top:12px">
-    <!-- ===== Résumé ===== -->
-    <section class="section active" id="secSummary">
+  <div class="stack">
+
+    <!-- ===== Aujourd’hui ===== -->
+    <section class="section active" id="secToday">
       <div class="card">
         <div class="formGrid">
           <div>
@@ -434,48 +540,52 @@
             <input id="weight" type="number" step="0.1" inputmode="decimal" placeholder="ex: 114.6" />
           </div>
           <div>
-            <button id="saveWeightBtn" type="button">Ajouter</button>
+            <button class="btnFull" id="saveWeightBtn" type="button">Ajouter</button>
           </div>
         </div>
-        <div class="tiny" style="margin-top:8px">Astuce : la moyenne 7 jours est plus importante que le chiffre du jour.</div>
+        <div class="tiny" style="margin-top:8px">
+          Règle d’or : une journée “gagnée” = <b>2 objectifs sur 3</b>. Pas besoin d’être parfait.
+        </div>
       </div>
 
       <div class="card">
-        <div class="highlightsGrid">
+        <div class="highGrid">
           <div class="hCard">
-            <div class="hTop">
-              <div>
-                <div class="hTitle">Score du jour</div>
-                <div class="hBig" id="hScore">—</div>
-                <div class="hSub" id="hScoreSub">Objectifs : pesée • repas • marche</div>
-              </div>
-              <div class="hChip" id="hNext">✨ Prochaine action</div>
-            </div>
+            <div class="hTitle">Score du jour</div>
+            <div class="hBig" id="hScore">—</div>
+            <div class="hSub" id="hScoreSub">—</div>
+            <div class="chip" id="hNext">✨ Prochaine action</div>
           </div>
 
           <div class="hCard">
-            <div class="hTitle">Tendance (7 jours)</div>
+            <div class="hTitle">Tendance (moyenne 7 jours)</div>
             <div class="hBig" id="hTrend">—</div>
-            <div class="hSub" id="hTrendSub">Basée sur les 14 dernières pesées</div>
+            <div class="hSub" id="hTrendSub">—</div>
           </div>
 
           <div class="hCard">
             <div class="hTitle">Poids & moyenne</div>
             <div class="hBig" id="hNow">—</div>
-            <div class="hSub" id="hNowSub">Moyenne 7 jours : —</div>
+            <div class="hSub" id="hNowSub">—</div>
           </div>
 
           <div class="hCard">
             <div class="hTitle">Projection</div>
             <div class="hBig" id="hETA">—</div>
-            <div class="hSub" id="hETASub">Si la tendance continue</div>
+            <div class="hSub" id="hETASub">—</div>
           </div>
         </div>
+
+        <div class="ctaRow">
+          <button id="nextActionBtn" type="button">▶︎ Faire la prochaine action</button>
+          <button class="ghost" id="cravingBtn" type="button">🍫 J’ai envie de grignoter</button>
+        </div>
+
+        <div class="tiny" id="coachLine" style="margin-top:10px"></div>
 
         <div style="margin-top:12px">
           <canvas id="chart" width="1000" height="360"></canvas>
         </div>
-        <div class="tiny" id="coachLine" style="margin-top:10px"></div>
       </div>
 
       <div class="card">
@@ -487,67 +597,102 @@
     <!-- ===== Repas ===== -->
     <section class="section" id="secMeals">
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🍽️ Repas (semaine)</h2>
-        <div class="tiny">Coche “fait” pour garder la constance. Objectif : 2/2 par jour.</div>
-        <div class="mealGrid" id="weekMeals" style="margin-top:10px"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-          <button class="secondary" id="resetChecksBtn" type="button" style="flex:1 1 220px">Réinitialiser les coches</button>
+        <h2 style="margin:0 0 10px;font-size:15px">🍽️ Repas (plan “anti-décision”)</h2>
+        <div class="tiny">
+          Le but : <b>protéines + volume</b> → tu manges, tu calmes la faim, tu avances.
         </div>
+
+        <div class="formGrid" style="grid-template-columns:1fr 1fr; margin-top:10px">
+          <div>
+            <label>Mode repas</label>
+            <select id="mealMode">
+              <option value="simple" selected>Ultra simple</option>
+              <option value="normal">Normal</option>
+              <option value="social">Social (week-end)</option>
+            </select>
+          </div>
+          <div>
+            <label>Protéine préférée</label>
+            <select id="proteinPref">
+              <option value="Poulet" selected>Poulet</option>
+              <option value="Œufs">Œufs</option>
+              <option value="Thon">Thon</option>
+              <option value="Skyr">Skyr</option>
+              <option value="Sardines">Sardines</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ctaRow">
+          <button id="cravingBtn2" type="button">🍫 Anti-fringale</button>
+          <button class="secondary" id="resetChecksBtn" type="button">Réinitialiser les coches</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin:0 0 10px;font-size:15px">📅 Semaine</h2>
+        <div class="mealGrid" id="weekMeals"></div>
       </div>
     </section>
 
-    <!-- ===== Marche ===== -->
-    <section class="section" id="secWalk">
+    <!-- ===== Mouvement ===== -->
+    <section class="section" id="secMove">
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🚶 Marche</h2>
-
-        <div class="formGrid">
-          <div>
-            <label>Statut</label>
-            <input id="walkStatus" type="text" value="Prêt" readonly />
-          </div>
-          <div>
-            <label>Temps</label>
-            <input id="walkTime" type="text" value="00:00:00" readonly />
-          </div>
-          <div style="display:flex;gap:10px;align-items:end">
-            <button id="walkStartBtn" type="button" style="flex:1">Démarrer</button>
-            <button class="secondary" id="walkStopBtn" type="button" disabled style="flex:1">Stop</button>
-          </div>
+        <h2 style="margin:0 0 10px;font-size:15px">🚶 Mouvement (zéro sport)</h2>
+        <div class="tiny">
+          Objectif = <b>10 minutes</b>. Si tu es KO : <b>2 minutes</b> → ça relance.
         </div>
 
-        <div class="formGrid" style="margin-top:10px;grid-template-columns:1fr 1fr auto">
-          <div>
-            <label>Distance</label>
-            <input id="walkDistance" type="text" value="0.00 km" readonly />
-          </div>
-          <div>
-            <label>Vitesse</label>
-            <input id="walkSpeed" type="text" value="0.0 km/h" readonly />
-          </div>
-          <div>
-            <button class="secondary" id="walkClearBtn" type="button">Effacer</button>
-          </div>
+        <div style="margin-top:10px">
+          <div class="tiny muted">Timer</div>
+          <div class="timerBig" id="moveTimer">00:00</div>
+          <div class="barWrap"><div class="barFill" id="moveBar"></div></div>
+          <div class="tiny" style="margin-top:8px" id="moveMeta">—</div>
         </div>
 
-        <div class="tiny" style="margin-top:8px">L’activité du jour = minutes de marche enregistrées.</div>
-      </div>
+        <div class="ctaRow">
+          <button id="moveStartBtn" type="button">Démarrer</button>
+          <button class="secondary" id="moveStopBtn" type="button" disabled>Stop</button>
+          <button class="ghost" id="moveAdd5Btn" type="button">+5 min (manuel)</button>
+        </div>
 
-      <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🗺️ Carte</h2>
-        <div id="walkMap" style="height:320px;border-radius:16px;border:1px solid var(--line);background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center">
-          <div class="tiny" style="padding:14px;text-align:center;max-width:520px">
-            Carte OpenStreetMap (Leaflet). Hors connexion : la marche fonctionne, sans fond de carte.
-          </div>
+        <div class="ctaRow">
+          <button class="secondary" id="move2minBtn" type="button">Mode KO : 2 minutes</button>
+          <button class="secondary" id="move10minBtn" type="button">Objectif : 10 minutes</button>
         </div>
       </div>
 
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">🧾 Historique</h2>
-        <div id="walkHistory" class="mealGrid"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-          <button class="secondary" id="walkExportBtn" type="button" style="flex:1 1 200px">Exporter (JSON)</button>
-          <button class="secondary" id="walkClearAllBtn" type="button" style="flex:1 1 200px">Tout effacer</button>
+        <h2 style="margin:0 0 10px;font-size:15px">🧾 Historique (7 jours)</h2>
+        <div class="tiny" id="moveHistory">—</div>
+      </div>
+    </section>
+
+    <!-- ===== Progression ===== -->
+    <section class="section" id="secProgress">
+      <div class="card">
+        <h2 style="margin:0 0 10px;font-size:15px">📈 Progression</h2>
+        <div class="highGrid">
+          <div class="hCard">
+            <div class="hTitle">Jours gagnés (7 derniers)</div>
+            <div class="hBig" id="pWin7">—</div>
+            <div class="hSub" id="pWin7Sub">—</div>
+          </div>
+          <div class="hCard">
+            <div class="hTitle">Série pesée</div>
+            <div class="hBig" id="pStreak">—</div>
+            <div class="hSub">La constance bat la motivation.</div>
+          </div>
+          <div class="hCard">
+            <div class="hTitle">XP / Niveau</div>
+            <div class="hBig" id="pXP">—</div>
+            <div class="hSub" id="pXPSub">—</div>
+          </div>
+          <div class="hCard">
+            <div class="hTitle">Perte totale</div>
+            <div class="hBig" id="pLost">—</div>
+            <div class="hSub" id="pLostSub">—</div>
+          </div>
         </div>
       </div>
     </section>
@@ -555,8 +700,7 @@
     <!-- ===== Profil ===== -->
     <section class="section" id="secProfile">
       <div class="card">
-        <h2 style="margin:0 0 10px;font-size:15px">👤 Profil (coaching)</h2>
-
+        <h2 style="margin:0 0 10px;font-size:15px">👤 Profil</h2>
         <div class="formGrid" style="grid-template-columns:1fr 1fr">
           <div>
             <label>Taille (cm)</label>
@@ -574,162 +718,105 @@
             <input id="targetWeight" type="number" step="0.1" inputmode="decimal" placeholder="85" />
           </div>
           <div>
-            <label>Objectif marche / jour (min)</label>
-            <input id="moveGoalMin" type="number" step="5" inputmode="numeric" placeholder="30" />
+            <label>Objectif mouvement / jour (min)</label>
+            <input id="moveGoalMin" type="number" step="1" inputmode="numeric" placeholder="10" />
           </div>
         </div>
 
         <div class="formGrid" style="grid-template-columns:1fr 1fr; margin-top:10px">
           <div>
-            <label>Ω-3 / semaine</label>
-            <select id="omegaTarget">
-              <option value="2">2 fois</option>
-              <option value="3" selected>3 fois</option>
-              <option value="4">4 fois</option>
-            </select>
-          </div>
-          <div>
             <label>Mode pesée</label>
             <select id="weighMode">
               <option value="daily" selected>Quotidien</option>
               <option value="3x">3× / semaine</option>
+              <option value="weekly">1× / semaine</option>
+            </select>
+          </div>
+          <div>
+            <label>Objectif repas / jour</label>
+            <select id="mealGoal">
+              <option value="2" selected>2 repas (simple)</option>
+              <option value="3">3 repas</option>
             </select>
           </div>
         </div>
 
         <div class="tiny" style="margin-top:10px">
-          Tout est stocké sur ton appareil (localStorage). Tu peux faire un backup pour ne rien perdre.
+          Données stockées sur l’appareil. Fais un backup si tu changes d’iPhone.
         </div>
 
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <button id="saveProfileBtn" type="button" style="flex:1 1 220px">Enregistrer</button>
-          <button class="secondary" id="exportBackupBtn" type="button" style="flex:1 1 220px">Backup (JSON)</button>
-          <button class="secondary" id="importBackupBtn" type="button" style="flex:1 1 220px">Importer</button>
-          <button class="secondary" id="clearAllBtn" type="button" style="flex:1 1 220px">Tout effacer</button>
+        <div class="ctaRow">
+          <button id="saveProfileBtn" type="button">Enregistrer</button>
+          <button class="secondary" id="exportBackupBtn" type="button">Backup (JSON)</button>
+          <button class="secondary" id="importBackupBtn" type="button">Importer</button>
+          <button class="secondary" id="clearAllBtn" type="button">Tout effacer</button>
         </div>
 
         <input id="importFile" type="file" accept="application/json" style="display:none" />
       </div>
     </section>
+
   </div>
 </div>
 
-<!-- Bottom tabs -->
 <nav class="tabbar" aria-label="Navigation">
-  <div class="tabbarInner">
-    <button class="tabBtn active" id="tabSummary" type="button"><div class="ico">📌</div><div class="txt">Résumé</div></button>
+  <div class="tabInner">
+    <button class="tabBtn active" id="tabToday" type="button"><div class="ico">🏠</div><div class="txt">Aujourd’hui</div></button>
     <button class="tabBtn" id="tabMeals" type="button"><div class="ico">🍽️</div><div class="txt">Repas</div></button>
-    <button class="tabBtn" id="tabWalk" type="button"><div class="ico">🚶</div><div class="txt">Marche</div></button>
+    <button class="tabBtn" id="tabMove" type="button"><div class="ico">🚶</div><div class="txt">Bouger</div></button>
+    <button class="tabBtn" id="tabProgress" type="button"><div class="ico">📈</div><div class="txt">Progrès</div></button>
     <button class="tabBtn" id="tabProfile" type="button"><div class="ico">👤</div><div class="txt">Profil</div></button>
   </div>
 </nav>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  window.addEventListener("error", (e) => {
-    alert("Erreur dans le script :\n" + (e?.message || "inconnue"));
-  });
+  window.addEventListener("error", (e) => alert("Erreur JS :\n" + (e?.message || "inconnue")));
 
   (function(){
     "use strict";
 
     /* ===== Storage ===== */
     const STORAGE = {
-      PROFILE: "coach30_profile_v3",
-      WEIGHTS: "coach30_weights_v3",
-      MEAL_CHECKS: "coach30_meal_checks_v3",
-      WALKS: "coach30_walks_v3",
-      WALK_ACTIVE: "coach30_walk_active_v3",
+      PROFILE: "coach30_profile_v1",
+      WEIGHTS: "coach30_weights_v1",
+      MEAL_CHECKS: "coach30_meal_checks_v1",
+      MOVES: "coach30_moves_v1",        // { "YYYY-MM-DD": minutesNumber }
+      XP: "coach30_xp_v1",              // number
+      WINS: "coach30_wins_v1",          // { "YYYY-MM-DD": {mealsOk, moveOk, weighOk, win} }
     };
 
     const DEFAULT_PROFILE = {
       heightCm: 173,
       startWeight: 115.0,
       targetWeight: 85.0,
-      omegaTarget: 3,
-      moveGoalMin: 30,
-      weighMode: "daily"
+      moveGoalMin: 10,     // sans sport -> 10 min
+      weighMode: "daily",
+      mealGoal: 2,
+      mealMode: "simple",
+      proteinPref: "Poulet",
     };
-
-    const PROTEINS = ["Poulet","Œufs","Thon","Skyr","Sardines"];
-    const WEEK_PLAN = {
-      lunch:  ["Poulet","Poulet","Thon","Poulet","Poulet","Sardines","Poulet"],
-      dinner: ["Œufs","Skyr","Œufs","Thon","Skyr","Œufs","Sardines"]
-    };
-    const MEAL_DEFAULTS = { lunchSoupMl:700, dinnerSoupMl:450 };
 
     const MOTIVATION = [
-      "Objectif : constance, pas perfection.",
-      "Regarde la moyenne 7 jours, pas le chiffre du jour.",
-      "2/3 objectifs = journée gagnée.",
-      "Simple. Mesurable. Faisable."
+      "Objectif : 2/3. Pas parfait. Juste constant.",
+      "Une journée gagnée vaut plus qu’une journée parfaite.",
+      "La moyenne 7 jours > le chiffre du jour.",
+      "Quand c’est dur : fais petit. Mais fais."
     ];
 
-    const GPS_OPTS = { enableHighAccuracy:true, maximumAge:1000, timeout:20000 };
-
-    /* ===== DOM ===== */
+    /* ===== DOM helpers ===== */
     const $ = (id)=>document.getElementById(id);
     const exists = (id)=>!!document.getElementById(id);
+    const clamp = (v,min,max)=>Math.max(min, Math.min(max, v));
+    const pad2 = (n)=>String(n).padStart(2,"0");
 
-    function setText(id, txt){ const el=$(id); if(el) el.textContent = txt; }
-    function setHTML(id, html){ const el=$(id); if(el) el.innerHTML = html; }
-    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
-    function pad2(n){ return String(n).padStart(2,"0"); }
     function fmt(n,d=1){
       if(n===null||n===undefined||n==="") return "—";
       const x=Number(n);
       if(Number.isNaN(x)) return "—";
       return x.toFixed(d);
     }
-    function fmtHMS(ms){
-      const s=Math.max(0, Math.floor(ms/1000));
-      const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), ss=s%60;
-      return `${pad2(h)}:${pad2(m)}:${pad2(ss)}`;
-    }
 
-    /* ===== Toasts ===== */
-    function toast(type, title, msg, ms=2200){
-      const box = $("toasts");
-      if(!box) return;
-      const el = document.createElement("div");
-      el.className = "toast " + (type||"");
-      const ico = type==="good" ? "✅" : type==="bad" ? "⛔" : "✨";
-      el.innerHTML = `
-        <div class="ico">${ico}</div>
-        <div style="min-width:0">
-          <div class="title">${title||"Info"}</div>
-          <div class="msg">${msg||""}</div>
-        </div>
-        <button class="x" type="button" aria-label="Fermer">✕</button>
-      `;
-      const kill = ()=>{ el.style.opacity="0"; el.style.transform="translateY(8px)"; setTimeout(()=>el.remove(), 200); };
-      el.querySelector(".x").addEventListener("click", kill);
-      box.appendChild(el);
-      if(ms>0) setTimeout(kill, ms);
-      try{
-        if(navigator.vibrate){
-          if(type==="good") navigator.vibrate(18);
-          if(type==="bad") navigator.vibrate([10,20,10]);
-        }
-      }catch{}
-    }
-
-    /* ===== JSON helpers ===== */
-    function loadJSON(key, fallback){
-      try{ const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-      catch{ return fallback; }
-    }
-    function saveJSON(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
-    function del(key){ localStorage.removeItem(key); }
-
-    function downloadText(filename, text, mime){
-      const blob=new Blob([text], {type:mime||"text/plain;charset=utf-8"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a"); a.href=url; a.download=filename;
-      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    }
-
-    /* ===== Dates ===== */
     function isoToday(){
       const d=new Date();
       const tz=d.getTimezoneOffset()*60000;
@@ -745,11 +832,33 @@ document.addEventListener("DOMContentLoaded", () => {
       const d=new Date(iso+"T00:00:00");
       return ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"][d.getDay()];
     }
-    function sameIsoDay(ts, iso){
-      const d = new Date(ts);
-      const tz=d.getTimezoneOffset()*60000;
-      const isoTs = new Date(d - tz).toISOString().slice(0,10);
-      return isoTs === iso;
+
+    function loadJSON(key, fallback){
+      try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }
+      catch{ return fallback; }
+    }
+    function saveJSON(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
+    function del(key){ localStorage.removeItem(key); }
+
+    /* ===== Toasts ===== */
+    function toast(type, title, msg, ms=1800){
+      const box=$("toasts"); if(!box) return;
+      const el=document.createElement("div");
+      el.className="toast "+(type||"");
+      const ico = type==="good"?"✅":type==="bad"?"⛔":"✨";
+      el.innerHTML = `
+        <div class="ico">${ico}</div>
+        <div style="min-width:0">
+          <div class="title">${title||"Info"}</div>
+          <div class="msg">${msg||""}</div>
+        </div>
+        <button class="x" type="button">✕</button>
+      `;
+      const kill=()=>{ el.style.opacity="0"; el.style.transform="translateY(8px)"; setTimeout(()=>el.remove(), 180); };
+      el.querySelector(".x").addEventListener("click", kill);
+      box.appendChild(el);
+      if(ms>0) setTimeout(kill, ms);
+      try{ if(navigator.vibrate) navigator.vibrate(type==="bad"?[10,20,10]:18); }catch{}
     }
 
     /* ===== Profile ===== */
@@ -757,8 +866,14 @@ document.addEventListener("DOMContentLoaded", () => {
       let p = loadJSON(STORAGE.PROFILE, null);
       if(!p){ p = DEFAULT_PROFILE; saveJSON(STORAGE.PROFILE, p); }
       // patch
-      if(typeof p.moveGoalMin!=="number") p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
-      if(!p.weighMode) p.weighMode = DEFAULT_PROFILE.weighMode;
+      p.heightCm ??= DEFAULT_PROFILE.heightCm;
+      p.startWeight ??= DEFAULT_PROFILE.startWeight;
+      p.targetWeight ??= DEFAULT_PROFILE.targetWeight;
+      p.moveGoalMin ??= DEFAULT_PROFILE.moveGoalMin;
+      p.weighMode ??= DEFAULT_PROFILE.weighMode;
+      p.mealGoal ??= DEFAULT_PROFILE.mealGoal;
+      p.mealMode ??= DEFAULT_PROFILE.mealMode;
+      p.proteinPref ??= DEFAULT_PROFILE.proteinPref;
       return p;
     }
 
@@ -766,46 +881,42 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadWeights(){
       const rows = loadJSON(STORAGE.WEIGHTS, []);
       return Array.isArray(rows)
-        ? rows.filter(r=>r && r.date && typeof r.date==="string").sort((a,b)=>a.date.localeCompare(b.date))
+        ? rows.filter(r=>r && r.date && typeof r.date==="string" && typeof r.weight==="number")
+              .sort((a,b)=>a.date.localeCompare(b.date))
         : [];
     }
     function saveWeight(dateISO, weight){
       const rows = loadWeights();
       const idx = rows.findIndex(r=>r.date===dateISO);
-      const row = { date:dateISO, weight:Number(weight) };
+      const row = {date:dateISO, weight:Number(weight)};
       if(idx>=0) rows[idx]=row; else rows.push(row);
       rows.sort((a,b)=>a.date.localeCompare(b.date));
       saveJSON(STORAGE.WEIGHTS, rows);
     }
 
     function computeStats(profile, rows){
-      const withW = rows.filter(r=>typeof r.weight==="number");
-      const current = withW.length ? withW[withW.length-1].weight : null;
+      const current = rows.length ? rows[rows.length-1].weight : null;
       const lost = (current!=null) ? (Number(profile.startWeight) - current) : null;
 
-      const last7 = withW.slice(-7).map(r=>r.weight);
+      const last7 = rows.slice(-7).map(r=>r.weight);
       const avg7 = last7.length ? last7.reduce((a,b)=>a+b,0)/last7.length : null;
 
-      const prev7 = withW.slice(-14,-7).map(r=>r.weight);
+      const prev7 = rows.slice(-14,-7).map(r=>r.weight);
       const avgPrev7 = prev7.length ? prev7.reduce((a,b)=>a+b,0)/prev7.length : null;
 
-      return { current, lost, avg7, avgPrev7, count: withW.length };
+      return {current,lost,avg7,avgPrev7,count:rows.length};
     }
 
-    function computeStreak(rows){
-      const dates = rows
-        .filter(r=>typeof r.weight==="number" && r.date)
-        .map(r=>r.date)
-        .sort();
+    function computeWeighStreak(rows){
+      const dates = rows.map(r=>r.date).sort();
       if(!dates.length) return 0;
-
-      let streak = 1;
+      let streak=1;
       for(let i=dates.length-1;i>0;i--){
-        const d1 = new Date(dates[i]+"T00:00:00");
-        const d0 = new Date(dates[i-1]+"T00:00:00");
-        const diffDays = Math.round((d1-d0)/(24*3600*1000));
-        if(diffDays===1) streak++;
-        else if(diffDays===0) continue;
+        const d1=new Date(dates[i]+"T00:00:00");
+        const d0=new Date(dates[i-1]+"T00:00:00");
+        const diff=Math.round((d1-d0)/(24*3600*1000));
+        if(diff===1) streak++;
+        else if(diff===0) continue;
         else break;
       }
       return streak;
@@ -815,413 +926,136 @@ document.addEventListener("DOMContentLoaded", () => {
       const tw = Number(profile.targetWeight);
       const cur = stats.current;
       if(cur==null || Number.isNaN(tw)) return null;
-
       const remaining = cur - tw;
-      if(remaining <= 0) return { text:"Objectif atteint", date:null };
+      if(remaining<=0) return {text:"Objectif atteint", date:null};
 
-      if(stats.avg7==null || stats.avgPrev7==null) return { text:"Ajoute plus de données", date:null };
+      if(stats.avg7==null || stats.avgPrev7==null) return {text:"Ajoute des données", date:null};
 
-      const weeklyLoss = (stats.avgPrev7 - stats.avg7); // baisse => positif
-      if(weeklyLoss <= 0.05) return { text:"Tendance stable", date:null };
+      const weeklyLoss = (stats.avgPrev7 - stats.avg7);
+      if(weeklyLoss <= 0.05) return {text:"Tendance stable", date:null};
 
       const weeks = remaining / weeklyLoss;
       const days = Math.ceil(weeks*7);
       const eta = new Date();
       eta.setDate(eta.getDate()+days);
-      return { text:`≈ ${days} jours`, date:eta, weeklyLoss };
+      return {text:`≈ ${days} jours`, date:eta, weeklyLoss};
+    }
+
+    /* ===== Meals checks ===== */
+    function mealKey(dateISO, type){ return dateISO+"_"+type; } // lunch/dinner
+    function loadMealChecks(){ return loadJSON(STORAGE.MEAL_CHECKS, {}); }
+    function saveMealChecks(st){ saveJSON(STORAGE.MEAL_CHECKS, st); }
+    function mealsDone(dateISO){
+      const st=loadMealChecks();
+      const a=!!st[mealKey(dateISO,"lunch")];
+      const b=!!st[mealKey(dateISO,"dinner")];
+      return (a?1:0)+(b?1:0);
+    }
+
+    /* ===== Moves minutes ===== */
+    function loadMoves(){ return loadJSON(STORAGE.MOVES, {}); } // map date -> minutes
+    function saveMoves(m){ saveJSON(STORAGE.MOVES, m); }
+    function addMoveMinutes(dateISO, minutes){
+      const m=loadMoves();
+      m[dateISO] = Math.max(0, Math.round((Number(m[dateISO])||0) + Number(minutes)));
+      saveMoves(m);
+    }
+    function getMoveMinutes(dateISO){
+      const m=loadMoves();
+      return Number(m[dateISO])||0;
+    }
+
+    /* ===== Wins + XP ===== */
+    function loadWins(){ return loadJSON(STORAGE.WINS, {}); }
+    function saveWins(w){ saveJSON(STORAGE.WINS, w); }
+    function loadXP(){ return Number(loadJSON(STORAGE.XP, 0))||0; }
+    function saveXP(x){ saveJSON(STORAGE.XP, Number(x)||0); }
+
+    function computeDayStatus(dateISO, profile){
+      const rows = loadWeights();
+      const hasWeigh = !!rows.find(r=>r.date===dateISO);
+      const mealGoal = Number(profile.mealGoal)||2;
+      const mealsOk = mealsDone(dateISO) >= mealGoal;
+      const moveOk = getMoveMinutes(dateISO) >= (Number(profile.moveGoalMin)||10);
+
+      // mode pesée : daily / 3x / weekly -> on considère "ok" si pesée faite OU non requise ce jour
+      let weighRequired = true;
+      if(profile.weighMode==="3x"){
+        // Lun/Mer/Ven par ex
+        const d=new Date(dateISO+"T00:00:00").getDay(); // 0..6
+        weighRequired = (d===1 || d===3 || d===5);
+      }else if(profile.weighMode==="weekly"){
+        // Lundi
+        const d=new Date(dateISO+"T00:00:00").getDay();
+        weighRequired = (d===1);
+      }
+      const weighOk = weighRequired ? hasWeigh : true;
+
+      const done = (mealsOk?1:0) + (moveOk?1:0) + (weighOk?1:0);
+      const win = done>=2;
+
+      return {mealsOk, moveOk, weighOk, hasWeigh, weighRequired, done, total:3, win, mealGoal};
+    }
+
+    function syncWinAndXP(dateISO){
+      const profile=loadProfile();
+      const status=computeDayStatus(dateISO, profile);
+      const wins=loadWins();
+      const prev = wins[dateISO];
+      wins[dateISO] = { ...status, date: dateISO };
+      saveWins(wins);
+
+      // XP: +10 par objectif atteint (max 30) mais seulement une fois / jour
+      // si déjà calculé avant, on ajuste
+      const prevXP = prev ? ( (prev.mealsOk?10:0)+(prev.moveOk?10:0)+(prev.weighOk?10:0) ) : 0;
+      const newXP  = (status.mealsOk?10:0)+(status.moveOk?10:0)+(status.weighOk?10:0);
+      const delta = newXP - prevXP;
+      if(delta!==0){
+        saveXP(loadXP()+delta);
+      }
+      return status;
+    }
+
+    function levelFromXP(xp){
+      // niveaux simples
+      const lvl = Math.floor(xp/120)+1;
+      const next = lvl*120;
+      const pct = clamp((xp - (lvl-1)*120)/120*100, 0, 100);
+      return {lvl, next, pct};
     }
 
     /* ===== Rings ===== */
-    function setRingProgress(circleId, pct){
-      const el = document.getElementById(circleId);
-      if(!el) return;
-      const C = 113.1;
-      const p = clamp(Number(pct)||0, 0, 100);
+    function setRing(circleId, pct){
+      const el=$(circleId); if(!el) return;
+      const C=113.1;
+      const p=clamp(Number(pct)||0, 0, 100);
       el.style.strokeDasharray = String(C);
-      el.style.strokeDashoffset = String(C * (1 - p/100));
-    }
-    function updateRings({goalPct, streakPct, movePct, goalText, streakText, moveText}){
-      setRingProgress("ringGoal", goalPct);
-      setRingProgress("ringStreak", streakPct);
-      setRingProgress("ringMove", movePct);
-      setText("ringGoalText", goalText || "—");
-      setText("ringStreakText", streakText || "—");
-      setText("ringMoveText", moveText || "—");
-    }
-
-    /* ===== Meals ===== */
-    function mealKey(dateISO, mealType){ return dateISO + "_" + mealType; }
-    function loadMealChecks(){ return loadJSON(STORAGE.MEAL_CHECKS, {}); }
-    function saveMealChecks(obj){ saveJSON(STORAGE.MEAL_CHECKS, obj); }
-
-    function computeMealsDoneForDay(dateISO){
-      const st = loadMealChecks();
-      const a = !!st[mealKey(dateISO,"lunch")];
-      const b = !!st[mealKey(dateISO,"dinner")];
-      return (a?1:0) + (b?1:0);
-    }
-
-    function mealCard(dateISO, mealType){
-      const checks = loadMealChecks();
-      const key = mealKey(dateISO, mealType);
-      const done = !!checks[key];
-
-      const weekday = new Date(dateISO+"T00:00:00").getDay();
-      const protein = mealType==="lunch" ? WEEK_PLAN.lunch[weekday] : WEEK_PLAN.dinner[weekday];
-      const title = mealType==="lunch" ? "Midi" : "Soir";
-      const soupMl = mealType==="lunch" ? MEAL_DEFAULTS.lunchSoupMl : MEAL_DEFAULTS.dinnerSoupMl;
-
-      const el=document.createElement("div");
-      el.className="mealCard";
-      el.innerHTML = `
-        <div class="mealHead">
-          <div style="min-width:0">
-            <div class="mealTitle">${title}</div>
-            <div class="dayLabel">${dayName(dateISO)} • ${dateISO}</div>
-          </div>
-          <label class="check"><input type="checkbox" ${done?"checked":""}/>fait</label>
-        </div>
-
-        <div class="item">
-          <div class="left">
-            <div class="icon">🥣</div>
-            <div style="min-width:0"><b>Soupe maison</b><div class="muted" style="font-size:12px">${soupMl} ml</div></div>
-          </div>
-        </div>
-
-        <div class="item">
-          <div class="left">
-            <div class="icon">🍗</div>
-            <div style="min-width:0"><b>Protéines</b><div class="muted" style="font-size:12px">${mealType==="lunch" ? "≈ 200 g" : "portion légère"}</div></div>
-          </div>
-          <div style="min-width:120px">
-            <select aria-label="Protéines">
-              ${PROTEINS.map(p=>`<option value="${p}" ${p===protein?"selected":""}>${p}</option>`).join("")}
-            </select>
-          </div>
-        </div>
-
-        ${mealType==="lunch" ? `
-        <div class="item">
-          <div class="left">
-            <div class="icon">🫒</div>
-            <div style="min-width:0"><b>Huile d’olive</b><div class="muted" style="font-size:12px">1 c. à café</div></div>
-          </div>
-        </div>` : ""}
-      `;
-
-      const cb = el.querySelector('input[type="checkbox"]');
-      cb.addEventListener("change", ()=>{
-        const st = loadMealChecks();
-        st[key] = cb.checked;
-        saveMealChecks(st);
-        toast("good","Repas", cb.checked ? "Repas coché." : "Coche retirée.", 1400);
-        render();
-      });
-
-      return el;
-    }
-
-    /* ===== Walk ===== */
-    let watchId=null, timerId=null;
-    let walkMap=null, walkLine=null, walkMarker=null;
-
-    function getActiveWalk(){ return loadJSON(STORAGE.WALK_ACTIVE, null); }
-    function setActiveWalk(w){ if(!w) del(STORAGE.WALK_ACTIVE); else saveJSON(STORAGE.WALK_ACTIVE, w); }
-    function loadWalks(){ const rows = loadJSON(STORAGE.WALKS, []); return Array.isArray(rows)?rows:[]; }
-    function saveWalks(rows){ saveJSON(STORAGE.WALKS, rows); }
-
-    function haversineMeters(a,b){
-      const R=6371000;
-      const toRad=(x)=>x*Math.PI/180;
-      const dLat=toRad(b.lat-a.lat);
-      const dLon=toRad(b.lng-a.lng);
-      const lat1=toRad(a.lat), lat2=toRad(b.lat);
-      const s1=Math.sin(dLat/2), s2=Math.sin(dLon/2);
-      const h=s1*s1 + Math.cos(lat1)*Math.cos(lat2)*s2*s2;
-      return 2*R*Math.asin(Math.min(1, Math.sqrt(h)));
-    }
-
-    function stopWatchAndTimer(){
-      if(watchId!=null){ try{ navigator.geolocation.clearWatch(watchId); }catch{} watchId=null; }
-      if(timerId!=null){ clearInterval(timerId); timerId=null; }
-    }
-
-    function ensureLeafletMap(){
-      const box = $("walkMap");
-      if(!box) return;
-      if(typeof L==="undefined") return;
-      if(walkMap) return;
-
-      walkMap = L.map(box, { zoomControl:true });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom:19,
-        attribution:"&copy; OpenStreetMap"
-      }).addTo(walkMap);
-
-      walkLine = L.polyline([], { weight:5 }).addTo(walkMap);
-    }
-
-    function renderWalkOnMap(points, fit=true){
-      ensureLeafletMap();
-      if(!walkMap || typeof L==="undefined") return;
-      if(!points?.length) return;
-
-      const latlngs = points.map(p=>[p.lat,p.lng]);
-      walkLine.setLatLngs(latlngs);
-
-      const last=points[points.length-1];
-      if(!walkMarker) walkMarker = L.circleMarker([last.lat,last.lng], { radius:6, weight:2 }).addTo(walkMap);
-      walkMarker.setLatLng([last.lat,last.lng]);
-
-      if(fit){
-        try{
-          const bounds = L.latLngBounds(latlngs);
-          walkMap.fitBounds(bounds, { padding:[20,20] });
-        }catch{}
-      }
-    }
-
-    function renderWalkStats(w){
-      if(!exists("walkStatus")) return;
-      const now=Date.now();
-      const elapsed = w?.active ? (now - w.startedAt) : (w?.elapsedMs || 0);
-      const distM = w?.distanceM || 0;
-
-      $("walkStatus").value = w?.active ? "En cours" : "Prêt";
-      $("walkTime").value = fmtHMS(elapsed);
-      $("walkDistance").value = (distM/1000).toFixed(2) + " km";
-
-      const hours = elapsed/3600000;
-      const km = distM/1000;
-      const speed = hours>0 ? (km/hours) : 0;
-      $("walkSpeed").value = speed.toFixed(1) + " km/h";
-
-      $("walkStartBtn").disabled = !!w?.active;
-      $("walkStopBtn").disabled  = !w?.active;
-    }
-
-    function renderWalkHistory(){
-      const box=$("walkHistory");
-      if(!box) return;
-
-      const walks=loadWalks();
-      if(!walks.length){
-        box.innerHTML = `<div class="tiny">Aucune marche enregistrée.</div>`;
-        return;
-      }
-
-      box.innerHTML = "";
-      walks.slice(0,20).forEach(w=>{
-        const date = new Date(w.startedAt || Date.now());
-        const d = date.toLocaleDateString("fr-FR", { weekday:"short", year:"numeric", month:"short", day:"numeric" });
-        const t = date.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" });
-
-        const km = ((w.distanceM||0)/1000);
-        const h = ((w.elapsedMs||0)/3600000);
-        const v = (h>0) ? (km/h) : 0;
-
-        const el=document.createElement("div");
-        el.className="histCard";
-        el.innerHTML = `
-          <div class="histTop">
-            <div>
-              <div class="histTitle">Marche • ${d}</div>
-              <div class="histMeta">
-                Début : ${t}<br>
-                Durée : ${fmtHMS(w.elapsedMs||0)} • Distance : ${km.toFixed(2)} km • Vitesse : ${v.toFixed(1)} km/h
-              </div>
-            </div>
-            <div class="tiny">${(w.points?.length||0)} pts</div>
-          </div>
-          <div class="histBtns">
-            <button class="secondary" type="button" data-view="${w.id}">Voir</button>
-            <button class="secondary" type="button" data-del="${w.id}">Supprimer</button>
-          </div>
-        `;
-        box.appendChild(el);
-      });
-
-      box.querySelectorAll("[data-view]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const id=btn.getAttribute("data-view");
-          const w=loadWalks().find(x=>x.id===id);
-          if(!w?.points?.length){ toast("bad","Carte","Aucun point GPS."); return; }
-          setTab("summary"); // on reste stable
-          setTimeout(()=>{ setTab("walk"); renderWalkOnMap(w.points,true); }, 80);
-          toast("info","Carte","Trace chargée.", 1400);
-        });
-      });
-
-      box.querySelectorAll("[data-del]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const id=btn.getAttribute("data-del");
-          if(!confirm("Supprimer cette marche ?")) return;
-          saveWalks(loadWalks().filter(w=>w.id!==id));
-          toast("good","Marche","Supprimée.", 1400);
-          render();
-        });
-      });
-    }
-
-    function renderWalkUI(skipFit=false){
-      const cur=getActiveWalk();
-      renderWalkStats(cur || {active:false, elapsedMs:0, distanceM:0});
-      if(cur?.points?.length) renderWalkOnMap(cur.points, !skipFit);
-      renderWalkHistory();
-    }
-
-    function beginWatch(){
-      if(!navigator.geolocation){ toast("bad","GPS","Géolocalisation indisponible."); return; }
-      if(watchId!=null) return;
-
-      watchId = navigator.geolocation.watchPosition((pos)=>{
-        const cur=getActiveWalk();
-        if(!cur?.active) return;
-
-        const p={ t:Date.now(), lat:pos.coords.latitude, lng:pos.coords.longitude, acc:pos.coords.accuracy };
-
-        if(typeof p.acc==="number" && p.acc>65){
-          if(cur.points.length>0) return;
-        }
-
-        const last=cur.points[cur.points.length-1];
-        if(last){
-          const d=haversineMeters({lat:last.lat,lng:last.lng},{lat:p.lat,lng:p.lng});
-          if(d>180) return;
-          if(d<1.2) return;
-          cur.distanceM += d;
-        }
-        cur.points.push(p);
-        setActiveWalk(cur);
-        renderWalkUI(true);
-        renderHeader();
-      }, (err)=>{
-        let msg="Erreur GPS.";
-        if(err?.code===1) msg="Permission refusée : autorise Position dans Safari.";
-        if(err?.code===2) msg="Position indisponible (essaie dehors).";
-        if(err?.code===3) msg="Timeout GPS (réessaie).";
-        toast("bad","GPS",msg, 2600);
-        renderWalkUI();
-      }, GPS_OPTS);
-    }
-
-    function ensureTimer(){
-      if(timerId!=null) return;
-      timerId = setInterval(()=>{
-        const cur=getActiveWalk();
-        if(cur?.active){
-          renderWalkUI(true);
-          renderHeader();
-        }
-      }, 1000);
-    }
-
-    function startWalk(){
-      if(!navigator.geolocation){ toast("bad","GPS","Géolocalisation indisponible."); return; }
-      const cur=getActiveWalk();
-      if(cur?.active){ toast("bad","Marche","Une marche est déjà en cours."); return; }
-
-      const w={ id:"walk_"+Date.now(), active:true, startedAt:Date.now(), elapsedMs:0, distanceM:0, points:[] };
-      setActiveWalk(w);
-      renderWalkUI();
-      toast("info","Marche","Démarrée.", 1400);
-      beginWatch();
-      ensureTimer();
-    }
-
-    function stopWalk(){
-      const cur=getActiveWalk();
-      if(!cur?.active){ toast("bad","Marche","Aucune marche en cours."); return; }
-
-      cur.active=false;
-      cur.endedAt=Date.now();
-      cur.elapsedMs = cur.endedAt - cur.startedAt;
-
-      const walks=loadWalks();
-      walks.unshift(cur);
-      saveWalks(walks);
-
-      setActiveWalk(null);
-      stopWatchAndTimer();
-      render();
-      toast("good","Marche","Enregistrée ✅", 1800);
-    }
-
-    function clearActiveTrace(){
-      const cur=getActiveWalk();
-      if(cur?.active){
-        if(!confirm("Effacer la trace de la marche en cours ?")) return;
-        cur.points=[]; cur.distanceM=0;
-        setActiveWalk(cur);
-        toast("info","Trace","Effacée.", 1400);
-        renderWalkUI();
-        renderHeader();
-        return;
-      }
-      if(!confirm("Effacer la trace affichée sur la carte (sans toucher à l’historique) ?")) return;
-      if(walkLine) walkLine.setLatLngs([]);
-      if(walkMarker && walkMap){ try{ walkMap.removeLayer(walkMarker);}catch{} walkMarker=null; }
-      toast("info","Carte","Trace retirée.", 1400);
-    }
-
-    function exportWalks(){
-      const payload={ version:1, exportedAt:new Date().toISOString(), walks:loadWalks() };
-      downloadText("coach30_marches.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
-      toast("good","Export","Marche exportée.", 1400);
-    }
-
-    function clearAllWalks(){
-      if(!confirm("Tout effacer : historique des marches ?")) return;
-      del(STORAGE.WALKS);
-      del(STORAGE.WALK_ACTIVE);
-      stopWatchAndTimer();
-      render();
-      toast("info","Marche","Historique effacé.", 1600);
-    }
-
-    function computeMoveMinutesToday(todayISO){
-      const walks = loadWalks();
-      let min = 0;
-      walks.forEach(w=>{
-        if(w?.startedAt && sameIsoDay(w.startedAt, todayISO)){
-          min += (w.elapsedMs||0)/60000;
-        }
-      });
-      const active = getActiveWalk();
-      if(active?.active && active?.startedAt && sameIsoDay(active.startedAt, todayISO)){
-        min += (Date.now() - active.startedAt)/60000;
-      }
-      return min;
+      el.style.strokeDashoffset = String(C*(1-p/100));
     }
 
     /* ===== Chart ===== */
-    function drawWeightChart(profile, rows){
-      const c=$("chart");
-      if(!c) return;
+    function drawChart(profile, rows){
+      const c=$("chart"); if(!c) return;
       const ctx=c.getContext("2d");
       const W=c.width, H=c.height;
       ctx.clearRect(0,0,W,H);
 
-      const data = rows.filter(r=>typeof r.weight==="number")
-        .map(r=>({x:new Date(r.date+"T00:00:00").getTime(), y:r.weight, d:r.date}))
-        .sort((a,b)=>a.x-b.x);
-
-      ctx.fillStyle="#fff";
-      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle="#fff"; ctx.fillRect(0,0,W,H);
       ctx.strokeStyle="rgba(17,24,39,.08)";
       ctx.strokeRect(0.5,0.5,W-1,H-1);
 
-      ctx.fillStyle="rgba(17,24,39,.55)";
-      ctx.font="13px -apple-system, system-ui";
-
-      if(data.length<2){
-        ctx.fillText("Ajoute 2 pesées pour afficher la courbe.", 16, 28);
+      if(rows.length<2){
+        ctx.fillStyle="rgba(17,24,39,.55)";
+        ctx.font="13px -apple-system, system-ui";
+        ctx.fillText("Ajoute 2 pesées pour voir la courbe.", 16, 28);
         return;
       }
 
-      const padL=56, padR=16, padT=14, padB=34;
+      const padL=56,padR=16,padT=14,padB=34;
       const plotW=W-padL-padR, plotH=H-padT-padB;
+
+      const data = rows.map(r=>({x:new Date(r.date+"T00:00:00").getTime(), y:r.weight}))
+                       .sort((a,b)=>a.x-b.x);
 
       const minX=data[0].x, maxX=data[data.length-1].x;
       const ys=data.map(p=>p.y);
@@ -1245,10 +1079,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fillText(yVal.toFixed(1), 12, y+4);
       }
 
-      // target
-      const tw = Number(profile.targetWeight);
+      // target line
+      const tw=Number(profile.targetWeight);
       if(!Number.isNaN(tw)){
-        const yT = yToPx(tw);
+        const yT=yToPx(tw);
         ctx.setLineDash([6,6]);
         ctx.strokeStyle="rgba(255,45,85,.35)";
         ctx.beginPath(); ctx.moveTo(padL,yT); ctx.lineTo(W-padR,yT); ctx.stroke();
@@ -1286,338 +1120,604 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.fillText(`Dernier: ${last.y.toFixed(1)} kg`, 16, H-12);
     }
 
-    /* ===== Coaching logic ===== */
-    function coachLine(profile, stats){
-      if(stats.current==null) return "Commence simple : ajoute ton poids (ou coche tes repas).";
-      if(stats.avg7==null) return "Encore quelques pesées et on aura une tendance fiable.";
-      const diff = stats.current - stats.avg7;
-      if(diff < -0.25) return "Sous la moyenne 7 jours : excellent signal. Continue comme ça.";
-      if(diff >  0.25) return "Au-dessus de la moyenne : souvent eau/sel/sommeil. On reste régulier.";
-      return "Régularité solide. Objectif du jour : 2/3 anneaux.";
-    }
+    /* ===== UI: Meal cards ===== */
+    function buildMealCard(dateISO, type, profile){
+      const st=loadMealChecks();
+      const key=mealKey(dateISO,type);
+      const done=!!st[key];
 
-    /* ===== Score du jour (2/3) ===== */
-    function computeDayScore(selectedISO){
-      const rows = loadWeights();
-      const hasWeigh = !!rows.find(r=>r.date===selectedISO && typeof r.weight==="number");
-      const mealsDone = computeMealsDoneForDay(selectedISO); // 0..2
-      const moveMin = computeMoveMinutesToday(selectedISO);
+      const title = type==="lunch" ? "Midi" : "Soir";
+      const mode = profile.mealMode || "simple";
+      const pref = profile.proteinPref || "Poulet";
 
-      const profile = loadProfile();
-      const goalMin = Number(profile.moveGoalMin) || DEFAULT_PROFILE.moveGoalMin;
+      const mealText = (()=>{
+        if(mode==="social"){
+          return type==="lunch"
+            ? ["Protéine + légumes","Évite boissons sucrées","Dessert ? petit ou partagé"]
+            : ["Protéine + léger","Marche 10 min après si possible","Hydrate-toi"];
+        }
+        if(mode==="normal"){
+          return type==="lunch"
+            ? ["Protéine + féculent + légumes","Portion simple","Eau"]
+            : ["Protéine + légumes","Dessert optionnel : skyr","Stop quand satisfait"];
+        }
+        // simple
+        return type==="lunch"
+          ? ["Soupe/volume + protéine", `Protéine: ${pref}`, "1 c. café huile d’olive si faim"]
+          : ["Protéine + léger", `Protéine: ${pref}`, "Pas de grignotage après"];
+      })();
 
-      const okWeigh = hasWeigh ? 1 : 0;
-      const okMeals = (mealsDone>=2) ? 1 : 0;
-      const okMove  = (moveMin >= goalMin) ? 1 : 0;
+      const el=document.createElement("div");
+      el.className="mealCard";
+      el.innerHTML = `
+        <div class="mealHead">
+          <div style="min-width:0">
+            <div class="mealTitle">${title}</div>
+            <div class="dayLabel">${dayName(dateISO)} • ${dateISO}</div>
+          </div>
+          <label class="check"><input type="checkbox" ${done?"checked":""}/>fait</label>
+        </div>
 
-      const done = okWeigh + okMeals + okMove;
-      return { done, total:3, hasWeigh, mealsDone, moveMin, goalMin };
-    }
+        ${mealText.map((t,i)=>`
+          <div class="item">
+            <div class="left">
+              <div class="icon">${i===0?"🥣":i===1?"🍗":"✅"}</div>
+              <div style="min-width:0">
+                <b>${t}</b>
+                <div class="sub">${i===0?"Objectif: volume":i===1?"Objectif: satiété":"Objectif: constance"}</div>
+              </div>
+            </div>
+          </div>
+        `).join("")}
+      `;
 
-    function nextAction(score){
-      if(!score.hasWeigh) return "Ajoute ta pesée";
-      if(score.mealsDone<2) return "Coche tes repas";
-      if(score.moveMin < score.goalMin) return "Marche 10 min";
-      return "Journée gagnée 🎉";
-    }
-
-    /* ===== Header render ===== */
-    function renderHeader(){
-      const profile = loadProfile();
-      const rows = loadWeights();
-      const stats = computeStats(profile, rows);
-      const todayISO = isoToday();
-
-      const idx = Math.floor(Date.now()/(10*60*1000)) % MOTIVATION.length;
-      setText("headerSubtitle", MOTIVATION[idx]);
-      setText("headerPill", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
-
-      // goal ring
-      const sw = Number(profile.startWeight);
-      const tw = Number(profile.targetWeight);
-      let goalPct = 0;
-      if(!Number.isNaN(sw) && !Number.isNaN(tw) && stats.current!=null){
-        const total = (sw - tw);
-        const done  = (sw - stats.current);
-        goalPct = total>0 ? (done/total)*100 : 0;
-        goalPct = clamp(goalPct, 0, 100);
-      }
-
-      // streak (21 days)
-      const streak = computeStreak(rows);
-      const streakPct = clamp((streak/21)*100, 0, 100);
-
-      // move
-      const moveMin = computeMoveMinutesToday(todayISO);
-      const goalMin = Number(profile.moveGoalMin) || DEFAULT_PROFILE.moveGoalMin;
-      const movePct = clamp((moveMin/goalMin)*100, 0, 100);
-
-      updateRings({
-        goalPct,
-        streakPct,
-        movePct,
-        goalText: (stats.current!=null && !Number.isNaN(tw)) ? `${fmt(stats.current,1)} → ${fmt(tw,1)} kg` : "—",
-        streakText: streak ? `${streak} j` : "—",
-        moveText: `${Math.round(moveMin)} / ${goalMin} min`
+      const cb=el.querySelector('input[type="checkbox"]');
+      cb.addEventListener("change", ()=>{
+        const s=loadMealChecks();
+        s[key]=cb.checked;
+        saveMealChecks(s);
+        syncWinAndXP(dateISO);
+        toast("good","Repas", cb.checked?"Coché ✅":"Décoché", 1200);
+        renderAll();
       });
+
+      return el;
+    }
+
+    /* ===== Coach / Next action ===== */
+    function coachText(status, profile, stats, dateISO){
+      if(!status.hasWeigh && status.weighRequired){
+        return "Ta meilleure action maintenant : une pesée. 10 secondes. Ça remet le train sur les rails.";
+      }
+      if(!status.mealsOk){
+        return `Objectif repas: coche ${status.mealGoal}/${status.mealGoal}. Reste simple : protéine + volume.`;
+      }
+      if(!status.moveOk){
+        return "Le hack anti-flemme : marche 2 minutes maintenant. Tu verras, tu finiras souvent à 10.";
+      }
+      if(stats.avg7==null) return "Continue. Encore quelques données et on aura une tendance solide.";
+      const diff = (stats.current!=null && stats.avg7!=null) ? (stats.current - stats.avg7) : 0;
+      if(diff > 0.25) return "Au-dessus de la moyenne 7 jours : c’est souvent eau/sel/sommeil. On ne panique pas. Constance.";
+      if(diff < -0.25) return "Sous la moyenne 7 jours : excellent signal. Ne change rien.";
+      return "Journée gagnée. Maintiens ce rythme : simple, mesurable, faisable.";
+    }
+
+    function nextAction(status){
+      if(!status.weighOk) return {type:"weigh", label:"Ajouter la pesée"};
+      if(!status.mealsOk) return {type:"meals", label:"Cocher les repas"};
+      if(!status.moveOk) return {type:"move", label:"Démarrer 2 minutes"};
+      return {type:"win", label:"Journée gagnée 🎉"};
+    }
+
+    /* ===== Anti-fringale sheet ===== */
+    function openSheet(){
+      const back=$("sheetBack"), sheet=$("sheet");
+      back.classList.add("show");
+      sheet.classList.add("show");
+    }
+    function closeSheet(){
+      const back=$("sheetBack"), sheet=$("sheet");
+      back.classList.remove("show");
+      sheet.classList.remove("show");
+    }
+
+    function renderCravingSheet(dateISO){
+      const hour = new Date().getHours();
+      const late = hour>=21;
+      const mid = hour>=15 && hour<21;
+
+      const list = [
+        {t:"Option 1 : protéine rapide", d:"Skyr / œufs / thon. 10 minutes après, l’envie baisse."},
+        {t:"Option 2 : volume (croquant)", d:"Carottes/concombres + sel/citron. Tu occupes la bouche sans exploser les calories."},
+        {t:"Option 3 : boisson + pause", d:"Grand verre d’eau ou thé. Attends 10 minutes. Si l’envie reste → Option 1."},
+      ];
+
+      if(late) list.unshift({t:"Mode soirée : coupe le déclencheur", d:"Brosse-toi les dents + tisane. Puis éloigne snacks (hors vue)."});
+      if(mid) list.unshift({t:"Mode goûter : snack cadré", d:"1 fruit + skyr / 1 poignée d’amandes (mesurée). Stop après."});
+
+      const box=$("sheetList");
+      box.innerHTML = list.map(x=>`
+        <div class="sheetItem">
+          <b>${x.t}</b>
+          <div class="sub">${x.d}</div>
+        </div>
+      `).join("");
+      $("sheetSub").textContent = `On choisit une option facile. Date: ${dateISO}.`;
+    }
+
+    /* ===== Movement timer ===== */
+    let tMode = "10"; // "2" or "10"
+    let tRunning=false;
+    let tStartMs=0;
+    let tElapsedMs=0;
+    let tTick=null;
+
+    function fmtMMSS(ms){
+      const s = Math.max(0, Math.floor(ms/1000));
+      const m = Math.floor(s/60);
+      const ss = s%60;
+      return `${pad2(m)}:${pad2(ss)}`;
+    }
+
+    function targetMs(){
+      const p=loadProfile();
+      const base = (tMode==="2") ? 2 : (Number(p.moveGoalMin)||10);
+      return base*60*1000;
+    }
+
+    function updateTimerUI(dateISO){
+      const goalMs=targetMs();
+      const curMs=tElapsedMs + (tRunning ? (Date.now()-tStartMs) : 0);
+      $("moveTimer").textContent = fmtMMSS(curMs);
+      const pct = clamp((curMs/goalMs)*100, 0, 100);
+      $("moveBar").style.width = pct.toFixed(0)+"%";
+
+      const goalMin = Math.round(goalMs/60000);
+      const doneMin = getMoveMinutes(dateISO);
+      $("moveMeta").textContent = `Aujourd’hui: ${doneMin} min • Objectif: ${goalMin} min • Mode: ${tMode==="2"?"KO (2 min)":"Objectif"}`;
+      $("moveStartBtn").disabled = tRunning;
+      $("moveStopBtn").disabled = !tRunning;
+    }
+
+    function timerStart(dateISO){
+      if(tRunning) return;
+      tRunning=true;
+      tStartMs=Date.now();
+      tTick=setInterval(()=>{
+        updateTimerUI(dateISO);
+      }, 250);
+      toast("info","Mouvement","C’est parti. Même 2 minutes comptent.", 1400);
+    }
+
+    function timerStopAndSave(dateISO){
+      if(!tRunning) return;
+      const addMs = Date.now()-tStartMs;
+      tElapsedMs += addMs;
+      tRunning=false;
+      clearInterval(tTick); tTick=null;
+
+      const minutes = Math.max(0, Math.round(tElapsedMs/60000));
+      if(minutes>0){
+        addMoveMinutes(dateISO, minutes);
+        syncWinAndXP(dateISO);
+        toast("good","Mouvement", `+${minutes} min enregistrées ✅`, 1600);
+      }else{
+        toast("info","Mouvement","Stop. Même 30s c’est un départ.", 1400);
+      }
+      // reset session buffer
+      tElapsedMs=0;
+      updateTimerUI(dateISO);
+      renderAll();
     }
 
     /* ===== Tabs ===== */
     function setTab(which){
-      const map = {
-        summary: ["tabSummary","secSummary"],
-        meals:   ["tabMeals","secMeals"],
-        walk:    ["tabWalk","secWalk"],
-        profile: ["tabProfile","secProfile"],
+      const map={
+        today:["tabToday","secToday"],
+        meals:["tabMeals","secMeals"],
+        move:["tabMove","secMove"],
+        progress:["tabProgress","secProgress"],
+        profile:["tabProfile","secProfile"]
       };
       Object.entries(map).forEach(([k,[t,s]])=>{
-        $(t)?.classList.toggle("active", k===which);
-        $(s)?.classList.toggle("active", k===which);
+        $(t).classList.toggle("active", k===which);
+        $(s).classList.toggle("active", k===which);
       });
-
-      // petite correction Leaflet quand on affiche la carte
-      if(which==="walk"){
-        setTimeout(()=>{
-          try{ if(walkMap) walkMap.invalidateSize(); }catch{}
-        }, 80);
-      }
+      // petit fix iOS: remonter en haut si besoin
+      try{ window.scrollTo({top:0, behavior:"smooth"}); }catch{ window.scrollTo(0,0); }
     }
 
-    /* ===== Render main ===== */
-    function render(){
-      const profile = loadProfile();
-      const rows = loadWeights();
-      const stats = computeStats(profile, rows);
+    /* ===== Header compact on scroll (stable iPhone) ===== */
+    function initHeaderCompact(){
+      const header=$("appHeader");
+      if(!header) return;
+      const sentinel=document.createElement("div");
+      sentinel.style.height="1px";
+      sentinel.style.width="1px";
+      header.after(sentinel);
 
-      const todayISO = isoToday();
-      const selectedISO = $("date")?.value || todayISO;
+      const io=new IntersectionObserver((entries)=>{
+        const e=entries[0];
+        header.classList.toggle("compact", !e.isIntersecting);
+      }, {threshold:0});
+      io.observe(sentinel);
+    }
 
-      // profile fields
-      if(exists("height")) $("height").value = profile.heightCm ?? "";
-      if(exists("startWeight")) $("startWeight").value = profile.startWeight ?? "";
-      if(exists("targetWeight")) $("targetWeight").value = profile.targetWeight ?? "";
-      if(exists("omegaTarget")) $("omegaTarget").value = String(profile.omegaTarget ?? 3);
-      if(exists("moveGoalMin")) $("moveGoalMin").value = String(profile.moveGoalMin ?? DEFAULT_PROFILE.moveGoalMin);
-      if(exists("weighMode")) $("weighMode").value = profile.weighMode ?? "daily";
+    /* ===== Render ===== */
+    function renderHeader(dateISO){
+      const p=loadProfile();
+      const rows=loadWeights();
+      const stats=computeStats(p, rows);
 
-      // autofill weight input if already exists
-      const existing = rows.find(r=>r.date===selectedISO);
-      if(existing && exists("weight")){
-        if($("weight").value==="" || $("weight").dataset.autofill==="1"){
-          $("weight").value = existing.weight;
-          $("weight").dataset.autofill="1";
-        }
-      }
+      // subtitle rotating
+      const idx=Math.floor(Date.now()/(10*60*1000)) % MOTIVATION.length;
+      $("headerSubtitle").textContent = MOTIVATION[idx];
+
+      $("headerPill").textContent = stats.current!=null ? `${fmt(stats.current,1)} kg` : "—";
+
+      const status=syncWinAndXP(dateISO);
+
+      // Rings values + progress
+      const mealGoal=Number(p.mealGoal)||2;
+      const md = mealsDone(dateISO);
+      const mpct = clamp((md/mealGoal)*100, 0, 100);
+
+      const mv = getMoveMinutes(dateISO);
+      const mGoal=Number(p.moveGoalMin)||10;
+      const mvPct = clamp((mv/mGoal)*100, 0, 100);
+
+      const weighPct = status.weighOk ? 100 : 0;
+
+      setRing("ringMeals", mpct);
+      setRing("ringMove", mvPct);
+      setRing("ringWeigh", weighPct);
+
+      $("ringMealsText").textContent = `${md}/${mealGoal} cochés`;
+      $("ringMoveText").textContent  = `${mv}/${mGoal} min`;
+      $("ringWeighText").textContent = status.weighRequired ? (status.hasWeigh ? "faite ✅" : "à faire") : "non requis";
+
+      return {p, rows, stats, status};
+    }
+
+    function renderToday(dateISO, ctx){
+      const {p, rows, stats, status} = ctx;
 
       // Highlights
-      const score = computeDayScore(selectedISO);
-      setText("hScore", `${score.done}/${score.total}`);
-      setText("hScoreSub", `Pesée: ${score.hasWeigh?"OK":"—"} • Repas: ${score.mealsDone}/2 • Marche: ${Math.round(score.moveMin)}/${score.goalMin} min`);
-      setText("hNext", "✨ " + nextAction(score));
+      $("hScore").textContent = `${status.done}/3`;
+      $("hScoreSub").textContent = `Repas: ${status.mealsOk?"OK":"—"} • Mouvement: ${status.moveOk?"OK":"—"} • Pesée: ${status.weighOk?"OK":"—"}`;
 
+      const action = nextAction(status);
+      $("hNext").textContent = "✨ " + action.label;
+
+      // Trend
       const trend = (stats.avgPrev7!=null && stats.avg7!=null) ? (stats.avgPrev7 - stats.avg7) : null;
       if(trend==null){
-        setText("hTrend","—");
-        setText("hTrendSub","Ajoute plus de pesées pour une tendance.");
+        $("hTrend").textContent="—";
+        $("hTrendSub").textContent="Ajoute plus de pesées pour une tendance fiable.";
       }else{
         const dir = trend>0.05 ? "⬇︎" : trend<-0.05 ? "⬆︎" : "→";
         const lbl = trend>0 ? `baisse ${trend.toFixed(1)} kg/sem` : `hausse ${Math.abs(trend).toFixed(1)} kg/sem`;
-        setText("hTrend", `${dir} ${lbl}`);
-        setText("hTrendSub","Comparaison moyenne 7j vs 7j précédents.");
+        $("hTrend").textContent = `${dir} ${lbl}`;
+        $("hTrendSub").textContent = "Comparaison des 7 derniers jours vs les 7 précédents.";
       }
 
-      setText("hNow", stats.current!=null ? `${fmt(stats.current,1)} kg` : "—");
-      setText("hNowSub", `Moyenne 7 jours : ${stats.avg7!=null ? fmt(stats.avg7,1)+" kg" : "—"}`);
+      $("hNow").textContent = stats.current!=null ? `${fmt(stats.current,1)} kg` : "—";
+      $("hNowSub").textContent = `Moyenne 7 jours : ${stats.avg7!=null ? fmt(stats.avg7,1)+" kg" : "—"}`;
 
-      const eta = estimateETA(profile, stats);
+      const eta = estimateETA(p, stats);
       if(!eta){
-        setText("hETA","—");
-        setText("hETASub","Ajoute des données pour estimer.");
+        $("hETA").textContent="—";
+        $("hETASub").textContent="Ajoute des données pour estimer.";
       }else{
         if(eta.date){
-          const d = eta.date.toLocaleDateString("fr-FR", { year:"numeric", month:"short", day:"numeric" });
-          setText("hETA", eta.text);
-          setText("hETASub", `Objectif vers ${d} (si tendance ≈ ${eta.weeklyLoss.toFixed(1)} kg/sem)`);
+          const d=eta.date.toLocaleDateString("fr-FR",{year:"numeric",month:"short",day:"numeric"});
+          $("hETA").textContent=eta.text;
+          $("hETASub").textContent=`Objectif vers ${d} (≈ ${eta.weeklyLoss.toFixed(1)} kg/sem)`;
         }else{
-          setText("hETA", eta.text);
-          setText("hETASub", "On stabilise les habitudes.");
+          $("hETA").textContent=eta.text;
+          $("hETASub").textContent="On stabilise la routine.";
         }
       }
 
-      setText("coachLine", coachLine(profile, stats));
+      $("coachLine").textContent = coachText(status, p, stats, dateISO);
 
-      // chart
-      drawWeightChart(profile, rows);
+      // Chart
+      drawChart(p, rows);
 
-      // meals today + week
-      if(exists("todayMeals")){
-        $("todayMeals").innerHTML="";
-        $("todayMeals").appendChild(mealCard(selectedISO,"lunch"));
-        $("todayMeals").appendChild(mealCard(selectedISO,"dinner"));
-      }
-      if(exists("weekMeals")){
-        $("weekMeals").innerHTML="";
-        for(let i=0;i<7;i++){
-          const d=addDays(todayISO, i);
-          $("weekMeals").appendChild(mealCard(d,"lunch"));
-          $("weekMeals").appendChild(mealCard(d,"dinner"));
+      // Meals today
+      const box=$("todayMeals");
+      box.innerHTML="";
+      box.appendChild(buildMealCard(dateISO,"lunch",p));
+      box.appendChild(buildMealCard(dateISO,"dinner",p));
+
+      // Next action button behavior
+      $("nextActionBtn").onclick = ()=>{
+        const s = syncWinAndXP(dateISO);
+        const a = nextAction(s);
+        if(a.type==="weigh"){
+          try{ $("weight").focus(); }catch{}
+          toast("info","Action","Ajoute ta pesée.", 1400);
+        }else if(a.type==="meals"){
+          setTab("meals");
+          toast("info","Action","Coche tes repas.", 1400);
+        }else if(a.type==="move"){
+          setTab("move");
+          tMode="2";
+          updateTimerUI(dateISO);
+          timerStart(dateISO);
+        }else{
+          toast("good","Bravo","Journée gagnée 🎉 (2/3)", 1800);
         }
-      }
-
-      // header rings
-      renderHeader();
-
-      // walk UI
-      renderWalkUI();
+      };
     }
 
-    /* ===== Header compact on scroll ===== */
-    (function initHeaderScroll(){
-      const header = $("appHeader");
-      if(!header) return;
+    function renderMeals(dateISO, ctx){
+      const {p} = ctx;
+      $("mealMode").value = p.mealMode || "simple";
+      $("proteinPref").value = p.proteinPref || "Poulet";
 
-      // Sentinel just after header; when it goes out of view => compact
-      const sentinel = document.createElement("div");
-      sentinel.style.height = "1px";
-      sentinel.style.width = "1px";
-      sentinel.style.position = "relative";
-      sentinel.style.top = "0";
-      header.after(sentinel);
-
-      const io = new IntersectionObserver((entries)=>{
-        const e = entries[0];
-        const compact = !e.isIntersecting;
-        header.classList.toggle("compact", compact);
-      }, { root:null, threshold:0 });
-
-      io.observe(sentinel);
-    })();
-
-    /* ===== Events ===== */
-    $("tabSummary")?.addEventListener("click", ()=>setTab("summary"));
-    $("tabMeals")?.addEventListener("click", ()=>setTab("meals"));
-    $("tabWalk")?.addEventListener("click", ()=>setTab("walk"));
-    $("tabProfile")?.addEventListener("click", ()=>setTab("profile"));
-
-    $("date")?.addEventListener("change", ()=>{
-      if(exists("weight")){
-        $("weight").dataset.autofill="1";
-        $("weight").value="";
+      // week
+      const week=$("weekMeals");
+      week.innerHTML="";
+      const start=isoToday();
+      for(let i=0;i<7;i++){
+        const d=addDays(start,i);
+        week.appendChild(buildMealCard(d,"lunch",p));
+        week.appendChild(buildMealCard(d,"dinner",p));
       }
-      render();
+    }
+
+    function renderMove(dateISO, ctx){
+      const p=ctx.p;
+      // ensure timer ui coherent
+      updateTimerUI(dateISO);
+
+      // history 7 days
+      let lines=[];
+      for(let i=6;i>=0;i--){
+        const d=addDays(isoToday(), -i);
+        const m=getMoveMinutes(d);
+        lines.push(`${dayName(d)} ${d} : ${m} min`);
+      }
+      $("moveHistory").textContent = lines.join(" • ");
+    }
+
+    function renderProgress(dateISO, ctx){
+      const {p, rows, stats} = ctx;
+      const wins=loadWins();
+      const xp=loadXP();
+      const lv=levelFromXP(xp);
+
+      // 7 days wins
+      let winCount=0;
+      const days=[];
+      for(let i=6;i>=0;i--){
+        const d=addDays(isoToday(), -i);
+        const w=wins[d]?.win ? 1 : 0;
+        winCount += w;
+        days.push(`${dayName(d)}:${w?"✅":"—"}`);
+      }
+      $("pWin7").textContent = `${winCount}/7`;
+      $("pWin7Sub").textContent = days.join("  ");
+
+      const streak=computeWeighStreak(rows);
+      $("pStreak").textContent = streak ? `${streak} j` : "—";
+
+      $("pXP").textContent = `Niv ${lv.lvl} • ${xp} XP`;
+      $("pXPSub").textContent = `Prochain niveau à ${lv.next} XP (progression ${lv.pct.toFixed(0)}%).`;
+
+      $("pLost").textContent = (stats.lost!=null) ? `${stats.lost>=0?"+":""}${fmt(stats.lost,1)} kg` : "—";
+      $("pLostSub").textContent = `Départ: ${fmt(p.startWeight,1)} • Objectif: ${fmt(p.targetWeight,1)}.`;
+    }
+
+    function renderProfile(dateISO, ctx){
+      const p=ctx.p;
+      $("height").value = p.heightCm ?? "";
+      $("startWeight").value = p.startWeight ?? "";
+      $("targetWeight").value = p.targetWeight ?? "";
+      $("moveGoalMin").value = p.moveGoalMin ?? 10;
+      $("weighMode").value = p.weighMode ?? "daily";
+      $("mealGoal").value = String(p.mealGoal ?? 2);
+    }
+
+    function renderAll(){
+      const dateISO = $("date")?.value || isoToday();
+      const ctx = renderHeader(dateISO);
+      renderToday(dateISO, ctx);
+      renderMeals(dateISO, ctx);
+      renderMove(dateISO, ctx);
+      renderProgress(dateISO, ctx);
+      renderProfile(dateISO, ctx);
+    }
+
+    /* ===== Events wiring ===== */
+    $("tabToday").addEventListener("click", ()=>setTab("today"));
+    $("tabMeals").addEventListener("click", ()=>setTab("meals"));
+    $("tabMove").addEventListener("click", ()=>setTab("move"));
+    $("tabProgress").addEventListener("click", ()=>setTab("progress"));
+    $("tabProfile").addEventListener("click", ()=>setTab("profile"));
+
+    $("date").addEventListener("change", ()=>{
+      $("weight").dataset.autofill="1";
+      $("weight").value="";
+      renderAll();
     });
 
-    $("saveWeightBtn")?.addEventListener("click", ()=>{
-      const d=$("date")?.value;
-      const w=$("weight")?.value ? Number($("weight").value) : null;
+    $("saveWeightBtn").addEventListener("click", ()=>{
+      const d=$("date").value;
+      const w=$("weight").value ? Number($("weight").value) : null;
       if(!d){ toast("bad","Date","Choisis une date."); return; }
       if(w===null || Number.isNaN(w)){ toast("bad","Poids","Entre ton poids."); return; }
       saveWeight(d,w);
-      if(exists("weight")) $("weight").dataset.autofill="0";
-      render();
-      toast("good","Poids","Enregistré ✅", 1600);
+      $("weight").dataset.autofill="0";
+      syncWinAndXP(d);
+      toast("good","Poids","Enregistré ✅", 1500);
+      renderAll();
     });
 
-    $("saveProfileBtn")?.addEventListener("click", ()=>{
-      const p={
-        heightCm: $("height")?.value ? Number($("height").value) : null,
-        startWeight: $("startWeight")?.value ? Number($("startWeight").value) : null,
-        targetWeight: $("targetWeight")?.value ? Number($("targetWeight").value) : null,
-        omegaTarget: $("omegaTarget")?.value ? Number($("omegaTarget").value) : 3,
-        moveGoalMin: $("moveGoalMin")?.value ? Number($("moveGoalMin").value) : DEFAULT_PROFILE.moveGoalMin,
-        weighMode: $("weighMode")?.value || "daily"
-      };
-      if(!p.startWeight || !p.targetWeight){
-        toast("bad","Profil","Remplis poids de départ et objectif.");
-        return;
-      }
-      if(!p.moveGoalMin || p.moveGoalMin<5) p.moveGoalMin = DEFAULT_PROFILE.moveGoalMin;
-      saveJSON(STORAGE.PROFILE, p);
-      render();
-      setTab("summary");
-      toast("good","Profil","Enregistré ✅", 1600);
+    // meal mode changes
+    $("mealMode").addEventListener("change", ()=>{
+      const p=loadProfile();
+      p.mealMode = $("mealMode").value;
+      saveJSON(STORAGE.PROFILE,p);
+      toast("info","Repas","Mode mis à jour.", 1200);
+      renderAll();
+    });
+    $("proteinPref").addEventListener("change", ()=>{
+      const p=loadProfile();
+      p.proteinPref = $("proteinPref").value;
+      saveJSON(STORAGE.PROFILE,p);
+      toast("info","Repas","Préférence mise à jour.", 1200);
+      renderAll();
     });
 
-    $("resetChecksBtn")?.addEventListener("click", ()=>{
+    $("resetChecksBtn").addEventListener("click", ()=>{
       if(!confirm("Réinitialiser toutes les coches repas ?")) return;
       del(STORAGE.MEAL_CHECKS);
-      toast("info","Repas","Coches réinitialisées.", 1600);
-      render();
+      toast("info","Repas","Coches réinitialisées.", 1400);
+      renderAll();
     });
 
-    $("walkStartBtn")?.addEventListener("click", startWalk);
-    $("walkStopBtn")?.addEventListener("click", stopWalk);
-    $("walkClearBtn")?.addEventListener("click", clearActiveTrace);
-    $("walkExportBtn")?.addEventListener("click", exportWalks);
-    $("walkClearAllBtn")?.addEventListener("click", clearAllWalks);
+    // Anti-fringale
+    function cravingOpen(){
+      const dateISO = $("date")?.value || isoToday();
+      renderCravingSheet(dateISO);
+      openSheet();
+    }
+    $("cravingBtn").addEventListener("click", cravingOpen);
+    $("cravingBtn2").addEventListener("click", cravingOpen);
+    $("sheetCloseBtn").addEventListener("click", closeSheet);
+    $("sheetBack").addEventListener("click", closeSheet);
 
-    $("exportBackupBtn")?.addEventListener("click", ()=>{
+    // Movement
+    $("moveStartBtn").addEventListener("click", ()=>{
+      const d=$("date")?.value || isoToday();
+      timerStart(d);
+    });
+    $("moveStopBtn").addEventListener("click", ()=>{
+      const d=$("date")?.value || isoToday();
+      timerStopAndSave(d);
+    });
+    $("moveAdd5Btn").addEventListener("click", ()=>{
+      const d=$("date")?.value || isoToday();
+      addMoveMinutes(d, 5);
+      syncWinAndXP(d);
+      toast("good","Mouvement","+5 min ✅", 1200);
+      renderAll();
+    });
+    $("move2minBtn").addEventListener("click", ()=>{
+      tMode="2";
+      const d=$("date")?.value || isoToday();
+      updateTimerUI(d);
+      toast("info","Mode","KO : objectif 2 minutes.", 1200);
+    });
+    $("move10minBtn").addEventListener("click", ()=>{
+      tMode="10";
+      const d=$("date")?.value || isoToday();
+      updateTimerUI(d);
+      toast("info","Mode","Objectif normal.", 1200);
+    });
+
+    // Profile save
+    $("saveProfileBtn").addEventListener("click", ()=>{
+      const p=loadProfile();
+      p.heightCm = $("height").value ? Number($("height").value) : p.heightCm;
+      p.startWeight = $("startWeight").value ? Number($("startWeight").value) : p.startWeight;
+      p.targetWeight = $("targetWeight").value ? Number($("targetWeight").value) : p.targetWeight;
+      p.moveGoalMin = $("moveGoalMin").value ? Math.max(2, Number($("moveGoalMin").value)) : p.moveGoalMin;
+      p.weighMode = $("weighMode").value;
+      p.mealGoal = Math.max(1, Number($("mealGoal").value)||2);
+
+      if(!p.startWeight || !p.targetWeight){
+        toast("bad","Profil","Remplis poids de départ et objectif.", 1800);
+        return;
+      }
+
+      saveJSON(STORAGE.PROFILE, p);
+      toast("good","Profil","Enregistré ✅", 1500);
+      renderAll();
+      setTab("today");
+    });
+
+    // Backup / Import / Reset
+    $("exportBackupBtn").addEventListener("click", ()=>{
       const payload={
-        version:3,
+        version:1,
         exportedAt:new Date().toISOString(),
         profile: loadProfile(),
         weights: loadWeights(),
         mealChecks: loadMealChecks(),
-        walks: loadWalks(),
-        walkActive: getActiveWalk()
+        moves: loadMoves(),
+        xp: loadXP(),
+        wins: loadWins(),
       };
-      downloadText("coach30_backup.json", JSON.stringify(payload,null,2), "application/json;charset=utf-8");
-      toast("good","Backup","Exporté.", 1400);
+      const blob=new Blob([JSON.stringify(payload,null,2)], {type:"application/json;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url; a.download="coach30_backup.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      toast("good","Backup","Exporté ✅", 1400);
     });
 
-    $("importBackupBtn")?.addEventListener("click", ()=> $("importFile")?.click());
-    $("importFile")?.addEventListener("change", async (e)=>{
+    $("importBackupBtn").addEventListener("click", ()=> $("importFile").click());
+    $("importFile").addEventListener("change", async (e)=>{
       const f=e.target.files?.[0];
       if(!f) return;
       try{
-        const text = await f.text();
-        const payload = JSON.parse(text);
+        const text=await f.text();
+        const payload=JSON.parse(text);
         if(!payload) throw new Error("Fichier invalide");
-        if(!confirm("Importer ce backup et remplacer tes données ?")) return;
+        if(!confirm("Importer et remplacer tes données ?")) return;
 
         if(payload.profile) saveJSON(STORAGE.PROFILE, payload.profile);
         if(Array.isArray(payload.weights)) saveJSON(STORAGE.WEIGHTS, payload.weights);
         if(payload.mealChecks) saveJSON(STORAGE.MEAL_CHECKS, payload.mealChecks);
-        if(Array.isArray(payload.walks)) saveJSON(STORAGE.WALKS, payload.walks);
-        if(payload.walkActive) saveJSON(STORAGE.WALK_ACTIVE, payload.walkActive);
+        if(payload.moves) saveJSON(STORAGE.MOVES, payload.moves);
+        if(typeof payload.xp==="number") saveJSON(STORAGE.XP, payload.xp);
+        if(payload.wins) saveJSON(STORAGE.WINS, payload.wins);
 
-        stopWatchAndTimer();
-        const aw = getActiveWalk();
-        if(aw?.active){ beginWatch(); ensureTimer(); }
-
-        render();
-        toast("good","Import","Terminé ✅", 1800);
+        toast("good","Import","Terminé ✅", 1600);
+        renderAll();
       }catch(err){
-        toast("bad","Import","Échec : " + (err?.message||""), 2600);
+        toast("bad","Import","Échec : "+(err?.message||""), 2400);
       }finally{
         e.target.value="";
       }
     });
 
-    $("clearAllBtn")?.addEventListener("click", ()=>{
-      if(!confirm("Tout effacer (profil + poids + repas + marches) ?")) return;
-      del(STORAGE.PROFILE);
-      del(STORAGE.WEIGHTS);
-      del(STORAGE.MEAL_CHECKS);
-      del(STORAGE.WALKS);
-      del(STORAGE.WALK_ACTIVE);
-      stopWatchAndTimer();
-      if(exists("weight")) $("weight").value="";
-      render();
-      toast("info","Reset","Données effacées.", 1800);
+    $("clearAllBtn").addEventListener("click", ()=>{
+      if(!confirm("Tout effacer ?")) return;
+      Object.values(STORAGE).forEach(del);
+      toast("info","Reset","Données effacées.", 1600);
+      // reset timer state
+      tRunning=false; tElapsedMs=0; if(tTick) clearInterval(tTick);
+      init();
     });
 
     /* ===== Init ===== */
-    if(exists("date")) $("date").value = isoToday();
+    function init(){
+      // set date
+      $("date").value = isoToday();
 
-    const aw = getActiveWalk();
-    if(aw?.active){
-      beginWatch();
-      ensureTimer();
+      // autofill if existing weight today
+      const today=isoToday();
+      const rows=loadWeights();
+      const ex=rows.find(r=>r.date===today);
+      if(ex){
+        $("weight").value = ex.weight;
+        $("weight").dataset.autofill="1";
+      }
+
+      // header compact
+      initHeaderCompact();
+
+      renderAll();
+      setTab("today");
     }
 
-    setTab("summary");
-    render();
+    init();
+
   })();
 });
 </script>

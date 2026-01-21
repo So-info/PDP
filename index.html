@@ -2,29 +2,37 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>FitMotiv • Suivi</title>
 
-  <!-- Chart.js (CDN) -->
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
   <style>
     :root{
-      --bg0:#070A12;
-      --bg1:#0B1020;
+      --bg0:#06070F;
+      --bg1:#0A0D1A;
+      --bg2:#0B1227;
+
       --card: rgba(255,255,255,.08);
       --card2: rgba(255,255,255,.10);
-      --stroke: rgba(255,255,255,.12);
-      --txt:#F3F6FF;
-      --muted: rgba(243,246,255,.75);
-      --muted2: rgba(243,246,255,.55);
-      --accent:#7C5CFF;
-      --accent2:#2EE59D;
-      --danger:#FF4D6D;
-      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --stroke: rgba(255,255,255,.14);
+
+      --txt:#F6F7FF;
+      --muted: rgba(246,247,255,.78);
+      --muted2: rgba(246,247,255,.55);
+
+      --a1:#7C5CFF;   /* violet */
+      --a2:#2EE59D;   /* vert */
+      --a3:#FF4D6D;   /* rose */
+      --a4:#4DC9FF;   /* bleu */
+
+      --shadow: 0 18px 70px rgba(0,0,0,.58);
       --radius: 18px;
       --radius2: 26px;
+
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
     }
 
     *{box-sizing:border-box}
@@ -34,130 +42,107 @@
       font-family: ui-rounded, system-ui, -apple-system, "SF Pro Display","SF Pro Text", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       color:var(--txt);
       background:
-        radial-gradient(900px 600px at 15% 10%, rgba(124,92,255,.30), transparent 55%),
-        radial-gradient(900px 600px at 85% 15%, rgba(46,229,157,.18), transparent 55%),
-        radial-gradient(900px 600px at 60% 90%, rgba(255,77,109,.12), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
+        radial-gradient(1100px 700px at 18% 8%, rgba(124,92,255,.35), transparent 55%),
+        radial-gradient(900px 650px at 88% 12%, rgba(46,229,157,.20), transparent 60%),
+        radial-gradient(900px 650px at 70% 92%, rgba(255,77,109,.16), transparent 60%),
+        radial-gradient(900px 650px at 12% 88%, rgba(77,201,255,.14), transparent 62%),
+        linear-gradient(180deg, var(--bg0), var(--bg2));
       overflow-x:hidden;
     }
 
-    /* App frame */
     .app{
-      max-width: 460px;
+      max-width: 470px;
       margin: 0 auto;
       min-height: 100vh;
-      padding: 18px 16px calc(96px + var(--safe-bottom));
+      padding: calc(14px + var(--safe-top)) 16px calc(110px + var(--safe-bottom));
     }
 
+    /* Top */
     .topbar{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
       gap:12px;
-      margin-top: 8px;
-      margin-bottom: 14px;
+      margin: 6px 0 14px;
     }
-
     .brand{
       display:flex;
       flex-direction:column;
-      gap:3px;
+      gap:4px;
     }
     .brand .title{
-      font-weight: 850;
+      font-weight: 950;
       letter-spacing: .2px;
-      font-size: 20px;
+      font-size: 22px;
       line-height: 1.05;
     }
     .brand .subtitle{
-      font-size: 12.5px;
+      font-size: 12.8px;
       color: var(--muted);
+      line-height: 1.1rem;
     }
 
     .pill{
       display:inline-flex;
       align-items:center;
-      gap:8px;
+      gap:10px;
       padding: 10px 12px;
       background: rgba(255,255,255,.06);
       border: 1px solid var(--stroke);
       border-radius: 999px;
-      box-shadow: 0 12px 30px rgba(0,0,0,.25);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 14px 32px rgba(0,0,0,.28);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       font-size: 12.5px;
       color: var(--muted);
       user-select:none;
+      white-space:nowrap;
     }
     .dot{
       width:10px;height:10px;border-radius:50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      background: linear-gradient(135deg, var(--a1), var(--a2));
       box-shadow: 0 0 0 4px rgba(124,92,255,.18);
     }
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
+    /* Cards */
+    .grid{display:grid; grid-template-columns: 1fr; gap: 12px;}
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius2);
-      box-shadow: var(--shadow);
-      padding: 14px;
       position:relative;
       overflow:hidden;
+      border-radius: var(--radius2);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      border: 1px solid var(--stroke);
+      box-shadow: var(--shadow);
+      padding: 14px;
     }
-
     .card::before{
       content:"";
       position:absolute;
       inset:-2px;
       background:
-        radial-gradient(380px 200px at 20% 0%, rgba(124,92,255,.22), transparent 60%),
-        radial-gradient(380px 200px at 90% 30%, rgba(46,229,157,.14), transparent 60%);
+        radial-gradient(420px 240px at 20% 0%, rgba(124,92,255,.22), transparent 60%),
+        radial-gradient(420px 240px at 92% 32%, rgba(46,229,157,.12), transparent 60%),
+        radial-gradient(420px 240px at 30% 90%, rgba(77,201,255,.10), transparent 60%);
       pointer-events:none;
     }
     .card > *{position:relative}
 
     .h2{
-      font-size: 14px;
-      letter-spacing:.25px;
-      font-weight: 800;
-      margin: 0 0 10px 0;
-      color: var(--txt);
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      font-weight: 950;
+      letter-spacing: .25px;
     }
+    .small{font-size: 12px; color: var(--muted2);}
 
-    .small{
-      font-size: 12px;
-      color: var(--muted2);
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-
-    label{
-      display:block;
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom:6px;
-    }
-
-    .field{
-      flex:1 1 130px;
-      min-width: 130px;
-    }
-
+    /* Inputs */
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;}
+    .field{flex:1 1 140px; min-width:140px;}
+    label{display:block; font-size: 12px; color: var(--muted); margin-bottom:6px;}
     input{
       width:100%;
       padding: 12px 12px;
@@ -174,33 +159,41 @@
       box-shadow: 0 0 0 4px rgba(124,92,255,.18);
     }
 
+    /* Buttons */
     .btn{
       border:none;
       cursor:pointer;
       padding: 12px 14px;
       border-radius: 16px;
-      font-weight: 850;
+      font-weight: 950;
       letter-spacing: .2px;
       font-size: 14px;
       color:#0B1020;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      box-shadow: 0 14px 30px rgba(124,92,255,.22);
-      transition: transform .08s ease, filter .2s ease;
+      background: linear-gradient(135deg, var(--a1), var(--a2));
+      box-shadow: 0 16px 34px rgba(124,92,255,.22);
+      transition: transform .08s ease, filter .2s ease, opacity .2s ease;
       user-select:none;
       width:100%;
     }
-    .btn:active{transform: scale(.98)}
+    .btn:active{transform: scale(.985)}
     .btn.secondary{
       background: rgba(255,255,255,.08);
       color: var(--txt);
       border: 1px solid rgba(255,255,255,.14);
-      box-shadow: 0 14px 30px rgba(0,0,0,.18);
+      box-shadow: 0 16px 34px rgba(0,0,0,.20);
     }
     .btn.danger{
       background: rgba(255,77,109,.16);
       color: #FFD5DE;
       border: 1px solid rgba(255,77,109,.25);
       box-shadow:none;
+    }
+    .btn.ghost{
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow:none;
+      font-weight: 850;
     }
 
     .kpis{
@@ -215,26 +208,18 @@
       border: 1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
     }
-    .kpi .v{
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing:.2px;
-    }
-    .kpi .l{
-      font-size: 12px;
+    .kpi .v{font-size: 18px; font-weight: 950; letter-spacing:.2px;}
+    .kpi .l{font-size: 12px; color: var(--muted2); margin-top: 2px;}
+
+    .hint{
+      margin-top: 10px;
       color: var(--muted2);
-      margin-top: 2px;
+      font-size: 12px;
+      line-height: 1.25rem;
     }
 
-    .list{
-      margin: 10px 0 0 0;
-      padding:0;
-      list-style:none;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-
+    /* List items */
+    .list{margin: 10px 0 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
     .item{
       display:flex;
       gap:10px;
@@ -245,27 +230,16 @@
       align-items:flex-start;
     }
     .badge{
-      width:34px;height:34px;border-radius: 12px;
+      width:36px;height:36px;border-radius: 13px;
       display:flex;align-items:center;justify-content:center;
-      background: linear-gradient(135deg, rgba(124,92,255,.35), rgba(46,229,157,.25));
+      background: linear-gradient(135deg, rgba(124,92,255,.32), rgba(46,229,157,.22));
       border: 1px solid rgba(255,255,255,.14);
       flex: 0 0 auto;
+      font-size: 16px;
     }
-    .item .t{
-      font-weight: 850;
-      font-size: 13.5px;
-      margin:0;
-    }
-    .item .d{
-      margin: 3px 0 0 0;
-      color: var(--muted);
-      font-size: 12.5px;
-      line-height: 1.25rem;
-    }
-    .chips{
-      margin-top:8px;
-      display:flex;gap:8px;flex-wrap:wrap;
-    }
+    .t{font-weight: 950; font-size: 13.5px; margin:0;}
+    .d{margin: 3px 0 0 0; color: var(--muted); font-size: 12.7px; line-height: 1.25rem;}
+    .chips{margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;}
     .chip{
       font-size: 11.5px;
       padding: 6px 10px;
@@ -281,76 +255,165 @@
       border-radius: var(--radius);
       background: rgba(0,0,0,.18);
       border: 1px solid rgba(255,255,255,.12);
+      height: 220px;
     }
 
-    .hint{
+    /* Logs */
+    .tools{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top: 8px;
+    }
+    .tools .field{flex: 1 1 160px; min-width: 160px;}
+    .mutebar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
       margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.10);
       color: var(--muted2);
       font-size: 12px;
-      line-height: 1.25rem;
     }
 
-    /* Tabs (bottom) */
+    .logActions{
+      display:flex;
+      gap:8px;
+      margin-top:8px;
+    }
+    .logActions button{flex:1}
+
+    .logBtns{
+      display:flex;
+      gap:8px;
+      margin-top: 8px;
+      flex-wrap:wrap;
+    }
+    .miniBtn{
+      padding: 8px 10px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      font-weight: 850;
+      cursor:pointer;
+      user-select:none;
+    }
+    .miniBtn:active{transform:scale(.99)}
+
+    /* Sections */
+    .section{display:none}
+    .section.active{display:block}
+
+    /* Bottom tab bar (iOS-ish) */
     .tabs{
       position: fixed;
       left: 0; right: 0; bottom: 0;
-      padding: 10px 14px calc(10px + var(--safe-bottom));
-      background: rgba(10,14,28,.65);
+      padding: 10px 14px calc(12px + var(--safe-bottom));
+      background: rgba(10,14,26,.60);
       border-top: 1px solid rgba(255,255,255,.12);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      display:flex;
-      justify-content:center;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       z-index: 30;
     }
     .tabsInner{
-      width: min(460px, 100%);
+      width: min(470px, 100%);
+      margin: 0 auto;
       display:flex;
       gap: 10px;
+      position:relative;
     }
+
     .tabBtn{
       flex:1;
       border:none;
       cursor:pointer;
-      padding: 10px 12px;
+      padding: 11px 12px;
       border-radius: 18px;
       background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.10);
       color: var(--muted);
-      font-weight: 850;
+      font-weight: 950;
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:8px;
-      transition: filter .2s ease, transform .08s ease;
+      gap:10px;
+      transition: transform .08s ease, background .2s ease, color .2s ease, border-color .2s ease;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+    }
+    .tabBtn .ico{
+      width:28px;height:28px;border-radius: 12px;
+      display:flex;align-items:center;justify-content:center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      font-size: 15px;
     }
     .tabBtn:active{transform:scale(.99)}
     .tabBtn.active{
-      background: linear-gradient(135deg, rgba(124,92,255,.35), rgba(46,229,157,.25));
       color: var(--txt);
       border-color: rgba(255,255,255,.16);
-      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+      background: linear-gradient(135deg, rgba(124,92,255,.22), rgba(46,229,157,.14));
+      box-shadow: 0 18px 40px rgba(0,0,0,.25);
     }
-    .ico{font-size: 16px}
-
-    .section{display:none}
-    .section.active{display:block}
-
-    .split{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
+    .tabBtn.active::after{
+      content:"";
+      position:absolute;
+      left: 16px; right: 16px; bottom: 6px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--a1), var(--a2));
+      opacity:.95;
     }
 
-    .footerActions{
+    /* Modal (edit) */
+    .backdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 16px 16px calc(16px + var(--safe-bottom));
+      z-index: 60;
+    }
+    .backdrop.show{display:flex}
+    .sheet{
+      width: min(470px, 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+      box-shadow: 0 30px 90px rgba(0,0,0,.65);
+      overflow:hidden;
+    }
+    .sheetHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .sheetHeader .h{
+      font-weight: 950;
+      letter-spacing:.2px;
+    }
+    .sheetBody{padding: 14px;}
+    .sheetFooter{
       display:flex;
       gap:10px;
-      margin-top:10px;
+      padding: 12px 14px 14px;
+      border-top: 1px solid rgba(255,255,255,.10);
     }
-    .footerActions > button{flex:1}
-
-    /* iPhone-ish spacing */
-    .spacer{height:6px}
+    .sheetFooter button{flex:1}
   </style>
 </head>
 
@@ -359,17 +422,18 @@
     <div class="topbar">
       <div class="brand">
         <div class="title">FitMotiv</div>
-        <div class="subtitle">Suivi poids • repas simples • motivation</div>
+        <div class="subtitle">Pesée du jour • Graphique • Repas simples • Motivation</div>
       </div>
-      <div class="pill" id="streakPill" title="Série de jours avec une pesée">
+      <div class="pill" title="Série de jours consécutifs avec une pesée">
         <span class="dot"></span>
-        <span><span id="streak">0</span> jour(s) • régularité</span>
+        <span><b id="streak">0</b> jour(s) • régularité</span>
       </div>
     </div>
 
     <!-- ACCUEIL -->
     <section id="home" class="section active">
       <div class="grid">
+
         <div class="card">
           <div class="h2">
             <span>Pesée du jour</span>
@@ -387,9 +451,8 @@
             </div>
           </div>
 
-          <div class="spacer"></div>
-
-          <button class="btn" id="saveBtn">Enregistrer la pesée</button>
+          <div style="height:8px"></div>
+          <button class="btn" id="saveBtn">Enregistrer</button>
 
           <div class="kpis">
             <div class="kpi">
@@ -402,12 +465,17 @@
             </div>
           </div>
 
-          <p class="hint">Astuce : pèse-toi au même moment (ex : matin), et vise la régularité plutôt que la perfection.</p>
+          <p class="hint">Focus : régularité + constance. Le résultat suit.</p>
 
-          <div class="footerActions">
-            <button class="btn secondary" id="exportBtn">Exporter (JSON)</button>
+          <div class="logActions">
+            <button class="btn secondary" id="exportJsonBtn">Exporter JSON</button>
+            <button class="btn secondary" id="exportCsvBtn">Exporter CSV</button>
+          </div>
+          <div class="logActions">
+            <button class="btn ghost" id="importBtn">Importer JSON</button>
             <button class="btn danger" id="clearBtn">Tout effacer</button>
           </div>
+          <input id="importFile" type="file" accept="application/json" style="display:none;" />
         </div>
 
         <div class="card">
@@ -415,11 +483,36 @@
             <span>Évolution</span>
             <span class="small" id="rangeLabel">—</span>
           </div>
+
           <div class="chartWrap">
-            <canvas id="weightChart" height="160"></canvas>
+            <canvas id="weightChart"></canvas>
           </div>
+
+          <div class="mutebar">
+            <span>Min: <b id="minW">—</b> • Max: <b id="maxW">—</b></span>
+            <span>Entrées: <b id="countW">0</b></span>
+          </div>
+
+          <div class="tools">
+            <div class="field">
+              <label for="searchInput">Rechercher (date ou poids)</label>
+              <input id="searchInput" placeholder="ex: 2026-01 ou 78.4" />
+            </div>
+            <div class="field">
+              <label for="sortSelect">Tri</label>
+              <input id="sortSelect" list="sortOptions" />
+              <datalist id="sortOptions">
+                <option value="Date (récent → ancien)"></option>
+                <option value="Date (ancien → récent)"></option>
+                <option value="Poids (haut → bas)"></option>
+                <option value="Poids (bas → haut)"></option>
+              </datalist>
+            </div>
+          </div>
+
           <ul class="list" id="historyList"></ul>
         </div>
+
       </div>
     </section>
 
@@ -431,12 +524,9 @@
             <span>Repas simples & rapides</span>
             <span class="small">protéines + légumes</span>
           </div>
-
           <ul class="list" id="mealList"></ul>
-
           <p class="hint">
-            Base “perte de poids” : protéines maigres (poisson/poulet/œufs) + légumes (surgelés OK) + féculents dosés (si besoin).
-            Bois de l’eau, et garde des portions cohérentes.
+            “Simple qui marche” : protéines (poisson/poulet/œufs) + légumes (surgelés OK) + féculents dosés si besoin.
           </p>
         </div>
       </div>
@@ -452,84 +542,126 @@
           </div>
 
           <div class="item">
-            <div class="badge">🔥</div>
+            <div class="badge">⚡</div>
             <div>
               <p class="t" id="quote">—</p>
               <p class="d" id="quoteSub">—</p>
               <div class="chips">
                 <span class="chip">Discipline</span>
                 <span class="chip">Régularité</span>
-                <span class="chip">Sommeil</span>
+                <span class="chip">Mental</span>
               </div>
             </div>
           </div>
 
-          <div class="split" style="margin-top:10px;">
-            <div class="item">
-              <div class="badge">✅</div>
-              <div>
-                <p class="t">Checklist du jour</p>
-                <p class="d">
-                  <label style="display:flex; gap:10px; align-items:center; margin:8px 0 0;">
-                    <input type="checkbox" id="c1" style="width:18px;height:18px;"> 20–30 min de marche
-                  </label>
-                  <label style="display:flex; gap:10px; align-items:center; margin:8px 0 0;">
-                    <input type="checkbox" id="c2" style="width:18px;height:18px;"> 1 portion de légumes en plus
-                  </label>
-                  <label style="display:flex; gap:10px; align-items:center; margin:8px 0 0;">
-                    <input type="checkbox" id="c3" style="width:18px;height:18px;"> Couché(e) un peu plus tôt
-                  </label>
-                </p>
+          <div style="height:10px"></div>
+
+          <div class="item">
+            <div class="badge">✅</div>
+            <div style="width:100%">
+              <p class="t">Checklist du jour</p>
+              <div class="d">
+                <label style="display:flex; gap:10px; align-items:center; margin:10px 0 0;">
+                  <input type="checkbox" id="c1" style="width:18px;height:18px;"> 20–30 min de marche
+                </label>
+                <label style="display:flex; gap:10px; align-items:center; margin:10px 0 0;">
+                  <input type="checkbox" id="c2" style="width:18px;height:18px;"> 1 portion de légumes en plus
+                </label>
+                <label style="display:flex; gap:10px; align-items:center; margin:10px 0 0;">
+                  <input type="checkbox" id="c3" style="width:18px;height:18px;"> Sommeil (un peu plus tôt)
+                </label>
+              </div>
+              <div class="logBtns">
+                <button class="miniBtn" id="newQuoteBtn">Nouvelle punchline</button>
+                <button class="miniBtn" id="resetChecksBtn">Reset checklist</button>
               </div>
             </div>
-
-            <button class="btn secondary" id="newQuoteBtn">Nouvelle punchline</button>
           </div>
 
-          <p class="hint">
-            Objectif : être “assez bon” 80% du temps. Une mauvaise journée ne ruine pas ton plan — abandonner oui.
-          </p>
+          <p class="hint">Une mauvaise journée n’annule pas ton plan. Le lendemain compte plus.</p>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- Tabs -->
+  <!-- Bottom tabs -->
   <nav class="tabs" aria-label="Navigation">
     <div class="tabsInner">
-      <button class="tabBtn active" data-tab="home"><span class="ico">📈</span>Accueil</button>
-      <button class="tabBtn" data-tab="meals"><span class="ico">🥗</span>Repas</button>
-      <button class="tabBtn" data-tab="motivation"><span class="ico">🏋️</span>Motivation</button>
+      <button class="tabBtn active" data-tab="home">
+        <span class="ico">📈</span><span>Accueil</span>
+      </button>
+      <button class="tabBtn" data-tab="meals">
+        <span class="ico">🥗</span><span>Repas</span>
+      </button>
+      <button class="tabBtn" data-tab="motivation">
+        <span class="ico">🏋️</span><span>Motivation</span>
+      </button>
     </div>
   </nav>
+
+  <!-- Edit sheet -->
+  <div class="backdrop" id="editBackdrop" role="dialog" aria-modal="true">
+    <div class="sheet">
+      <div class="sheetHeader">
+        <div class="h">Modifier une entrée</div>
+        <button class="miniBtn" id="closeEditBtn">Fermer</button>
+      </div>
+      <div class="sheetBody">
+        <div class="row">
+          <div class="field">
+            <label for="editDate">Date</label>
+            <input id="editDate" type="date" />
+          </div>
+          <div class="field">
+            <label for="editWeight">Poids (kg)</label>
+            <input id="editWeight" type="number" step="0.1" inputmode="decimal" />
+          </div>
+        </div>
+        <p class="hint" style="margin-bottom:0;">Astuce : modifier la date déplacera l’entrée si besoin.</p>
+      </div>
+      <div class="sheetFooter">
+        <button class="btn secondary" id="deleteEntryBtn">Supprimer</button>
+        <button class="btn" id="saveEditBtn">Enregistrer</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     // ---------- Helpers ----------
     const $ = (sel) => document.querySelector(sel);
     const $$ = (sel) => Array.from(document.querySelectorAll(sel));
-    const fmtDate = (iso) => {
-      // iso: YYYY-MM-DD
-      if(!iso) return "—";
-      const [y,m,d] = iso.split("-").map(Number);
-      const dt = new Date(y, (m-1), d);
-      return dt.toLocaleDateString("fr-FR", { weekday:"short", year:"numeric", month:"short", day:"2-digit" });
-    };
+
+    const pad = (n) => String(n).padStart(2,"0");
     const todayISO = () => {
       const d = new Date();
-      const pad = (n) => String(n).padStart(2,"0");
       return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
     };
 
+    const fmtDate = (iso) => {
+      if(!iso) return "—";
+      const [y,m,d] = iso.split("-").map(Number);
+      const dt = new Date(y, m-1, d);
+      return dt.toLocaleDateString("fr-FR", { weekday:"short", year:"numeric", month:"short", day:"2-digit" });
+    };
+
+    function prevDayISO(iso){
+      const [y,m,d] = iso.split("-").map(Number);
+      const dt = new Date(y, m-1, d);
+      dt.setDate(dt.getDate()-1);
+      return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+    }
+
     // ---------- Storage ----------
-    const KEY = "fitmotiv.weights.v1";
-    const CK  = "fitmotiv.checks.v1";
+    const KEY = "fitmotiv.weights.v2";
+    const CK  = "fitmotiv.checks.v2";
 
     function loadEntries(){
       try{
         const raw = localStorage.getItem(KEY);
         const arr = raw ? JSON.parse(raw) : [];
-        // normalize
-        return Array.isArray(arr) ? arr.filter(e => e && e.date && typeof e.weight === "number") : [];
+        return Array.isArray(arr)
+          ? arr.filter(e => e && e.date && typeof e.weight === "number")
+          : [];
       }catch{ return []; }
     }
 
@@ -537,12 +669,25 @@
       localStorage.setItem(KEY, JSON.stringify(entries));
     }
 
+    function normalize(entries){
+      // merge duplicate dates keeping last
+      const map = new Map();
+      entries.forEach(e => map.set(e.date, {date:e.date, weight:Number(e.weight)}));
+      const out = Array.from(map.values()).filter(e => e.date && Number.isFinite(e.weight) && e.weight > 0);
+      out.sort((a,b)=>a.date.localeCompare(b.date));
+      return out;
+    }
+
     function upsertEntry(entries, date, weight){
       const i = entries.findIndex(e => e.date === date);
       if(i >= 0) entries[i].weight = weight;
       else entries.push({date, weight});
-      entries.sort((a,b) => a.date.localeCompare(b.date));
+      entries = normalize(entries);
       return entries;
+    }
+
+    function deleteEntry(entries, date){
+      return entries.filter(e => e.date !== date);
     }
 
     function clearAll(){
@@ -552,14 +697,14 @@
 
     // ---------- Meals ----------
     const meals = [
-      { icon:"🐟", title:"Poisson + légumes surgelés", desc:"Saumon ou colin au four + poêlée de légumes (brocoli, haricots verts).", tags:["Rapide","Riche en protéines","Omega-3"] },
-      { icon:"🍗", title:"Poulet + salade croquante", desc:"Blanc de poulet (airfryer/poêle) + salade + tomates + concombre + yaourt citron.", tags:["Simple","Faible en gras","Satiétant"] },
-      { icon:"🍳", title:"Omelette protéines", desc:"2–3 œufs (ou 1 œuf + blancs) + épinards surgelés + champignons.", tags:["10 min","Budget","Anti-fringale"] },
-      { icon:"🥣", title:"Bol thon express", desc:"Thon nature + skyr/yaourt + moutarde + cornichons + crudités.", tags:["Sans cuisson","Protéiné","Prêt vite"] },
-      { icon:"🥩", title:"Steak haché 5% + légumes", desc:"Steak 5% + ratatouille surgelée + épices (paprika, ail).", tags:["Sport","Très simple","Satiété"] },
-      { icon:"🦃", title:"Dinde + wok de légumes", desc:"Émincé de dinde + mélange wok surgelé + sauce soja light.", tags:["Wok","Goût","Lean"] },
-      { icon:"🧀", title:"Skyr + fruits + noix (portion)", desc:"Skyr nature + fruits rouges + 10–15g de noix.", tags:["Petit-déj","Protéines","Sucré malin"] },
+      { icon:"🐟", title:"Poisson + légumes surgelés", desc:"Saumon/colin au four + haricots verts/brocoli (poêle).", tags:["Rapide","Protéines","Omega-3"] },
+      { icon:"🍗", title:"Poulet + salade croquante", desc:"Blanc de poulet + salade + concombre + yaourt citron.", tags:["Simple","Satiété","Lean"] },
+      { icon:"🍳", title:"Omelette protéinée", desc:"2–3 œufs (ou 1 + blancs) + épinards surgelés + champignons.", tags:["10 min","Budget","Anti-fringale"] },
+      { icon:"🥣", title:"Bol thon express", desc:"Thon nature + skyr + moutarde + cornichons + crudités.", tags:["Sans cuisson","Très protéiné","Prêt vite"] },
+      { icon:"🦃", title:"Dinde + wok", desc:"Émincé de dinde + mélange wok surgelé + sauce soja light.", tags:["Goût","Wok","Sport"] },
+      { icon:"🥩", title:"Steak 5% + ratatouille", desc:"Steak haché 5% + ratatouille surgelée + épices.", tags:["Simple","Satiétant","Protéines"] },
       { icon:"🍲", title:"Soupe + protéines", desc:"Soupe de légumes + œufs durs ou poulet effiloché.", tags:["Confort","Volume","Light"] },
+      { icon:"🧀", title:"Skyr + fruits (portion)", desc:"Skyr nature + fruits rouges + 10–15g de noix.", tags:["Petit-déj","Sucré malin","Protéines"] },
     ];
 
     function renderMeals(){
@@ -582,14 +727,14 @@
 
     // ---------- Motivation ----------
     const quotes = [
-      {q:"La motivation te lance. La discipline te transforme.", s:"Aujourd’hui : 1 action simple, pas 100 excuses."},
-      {q:"Tu ne manques pas de temps. Tu manques de priorité.", s:"10 minutes suffisent pour gagner."},
-      {q:"Ton futur toi te remercie déjà.", s:"Répète les bons choix, même petits."},
-      {q:"Régulier > parfait.", s:"Objectif : cohérence, pas perfection."},
-      {q:"Chaque séance est un vote pour la personne que tu veux devenir.", s:"Vote aujourd’hui."},
-      {q:"Le corps change quand l’esprit tient bon.", s:"Fais le prochain bon choix."},
-      {q:"Tu ne perds pas du poids. Tu gagnes une vie.", s:"Un repas à la fois, un jour à la fois."},
+      {q:"La motivation te lance. La discipline te transforme.", s:"Aujourd’hui : une action simple, et on avance."},
+      {q:"Régulier > parfait.", s:"80% bien fait vaut mieux que 0% parfait."},
+      {q:"Tu n’es qu’à une décision d’un meilleur toi.", s:"Choisis le prochain bon choix."},
+      {q:"Ton futur toi te remercie déjà.", s:"Les petites victoires se cumulent."},
+      {q:"Chaque séance est un vote pour ta meilleure version.", s:"Vote aujourd’hui."},
+      {q:"Le corps suit ce que le mental répète.", s:"Répète : je continue."},
     ];
+
     function pickQuote(){
       const x = quotes[Math.floor(Math.random()*quotes.length)];
       $("#quote").textContent = x.q;
@@ -610,7 +755,6 @@
     function initChecks(){
       let st = loadChecks();
       const t = todayISO();
-      // reset if new day
       if(st.date !== t){
         st = {c1:false,c2:false,c3:false, date:t};
         saveChecks(st);
@@ -625,15 +769,42 @@
           saveChecks(cur);
         });
       });
+
+      $("#resetChecksBtn").addEventListener("click", ()=>{
+        const st2 = {c1:false,c2:false,c3:false, date: todayISO()};
+        saveChecks(st2);
+        ["c1","c2","c3"].forEach(id => $("#"+id).checked = false);
+      });
     }
 
     // ---------- Chart ----------
     let chart;
 
+    function makeGradient(ctx){
+      const g = ctx.createLinearGradient(0, 0, 0, 220);
+      g.addColorStop(0, "rgba(124,92,255,0.42)");
+      g.addColorStop(0.55, "rgba(46,229,157,0.10)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      return g;
+    }
+
     function buildChart(entries){
-      const ctx = $("#weightChart");
+      const canvas = $("#weightChart");
+      const ctx = canvas.getContext("2d");
+
       const labels = entries.map(e => e.date);
       const data = entries.map(e => e.weight);
+
+      // dynamic bounds (nicer)
+      let min = Math.min(...data, 0);
+      let max = Math.max(...data, 0);
+      if(data.length){
+        const pad = Math.max(0.6, (max - min) * 0.18);
+        min = Math.floor((min - pad) * 10) / 10;
+        max = Math.ceil((max + pad) * 10) / 10;
+      }
+
+      const gradient = makeGradient(ctx);
 
       const cfg = {
         type: "line",
@@ -642,23 +813,30 @@
           datasets: [{
             label: "Poids (kg)",
             data,
-            tension: 0.35,
+            tension: 0.38,
             borderWidth: 3,
-            pointRadius: 3,
-            pointHoverRadius: 5,
+            pointRadius: 3.4,
+            pointHoverRadius: 5.5,
             fill: true,
-            backgroundColor: "rgba(124,92,255,0.12)",
-            borderColor: "rgba(124,92,255,0.95)",
-            pointBackgroundColor: "rgba(46,229,157,0.95)",
+            backgroundColor: gradient,
+            borderColor: "rgba(124,92,255,0.98)",
+            pointBackgroundColor: "rgba(46,229,157,0.98)",
             pointBorderColor: "rgba(0,0,0,0)",
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          animation: { duration: 550 },
           plugins: {
             legend: { display:false },
             tooltip: {
+              backgroundColor: "rgba(10,14,26,.92)",
+              borderColor: "rgba(255,255,255,.14)",
+              borderWidth: 1,
+              titleColor: "rgba(246,247,255,.95)",
+              bodyColor: "rgba(246,247,255,.85)",
+              displayColors: false,
               callbacks: {
                 title: (items)=> items?.[0]?.label ? fmtDate(items[0].label) : "",
                 label: (item)=> ` ${item.formattedValue} kg`
@@ -668,13 +846,15 @@
           scales: {
             x: {
               ticks: {
-                color: "rgba(243,246,255,.65)",
+                color: "rgba(246,247,255,.65)",
                 maxTicksLimit: 6
               },
               grid: { color: "rgba(255,255,255,.06)" }
             },
             y: {
-              ticks: { color: "rgba(243,246,255,.65)" },
+              suggestedMin: data.length ? min : undefined,
+              suggestedMax: data.length ? max : undefined,
+              ticks: { color: "rgba(246,247,255,.65)" },
               grid: { color: "rgba(255,255,255,.06)" }
             }
           }
@@ -682,14 +862,60 @@
       };
 
       if(chart) chart.destroy();
-      chart = new Chart(ctx, cfg);
+      chart = new Chart(canvas, cfg);
     }
 
-    // ---------- UI Rendering ----------
-    function renderHistory(entries){
-      const ul = $("#historyList");
-      ul.innerHTML = "";
+    // ---------- Logs (complete) ----------
+    function computeStreak(entries){
+      if(!entries.length) return 0;
+      const set = new Set(entries.map(e=>e.date));
+      let cur = set.has(todayISO()) ? todayISO() : entries.at(-1).date;
+      let streak = 0;
+      while(set.has(cur)){
+        streak++;
+        cur = prevDayISO(cur);
+      }
+      return streak;
+    }
 
+    function stats(entries){
+      if(!entries.length) return {min:null,max:null};
+      let min = entries[0].weight, max = entries[0].weight;
+      for(const e of entries){
+        if(e.weight < min) min = e.weight;
+        if(e.weight > max) max = e.weight;
+      }
+      return {min,max};
+    }
+
+    // Filter + sort
+    function getFilteredSorted(entries){
+      const q = ($("#searchInput").value || "").trim().toLowerCase();
+      let out = entries;
+
+      if(q){
+        out = out.filter(e =>
+          e.date.toLowerCase().includes(q) ||
+          String(e.weight).toLowerCase().includes(q)
+        );
+      }
+
+      const sortLabel = ($("#sortSelect").value || "Date (récent → ancien)").trim();
+      const byDateAsc = (a,b)=>a.date.localeCompare(b.date);
+      const byDateDesc = (a,b)=>b.date.localeCompare(a.date);
+      const byWAsc = (a,b)=>a.weight - b.weight;
+      const byWDesc = (a,b)=>b.weight - a.weight;
+
+      if(sortLabel === "Date (ancien → récent)") out = [...out].sort(byDateAsc);
+      else if(sortLabel === "Poids (haut → bas)") out = [...out].sort(byWDesc);
+      else if(sortLabel === "Poids (bas → haut)") out = [...out].sort(byWAsc);
+      else out = [...out].sort(byDateDesc);
+
+      return out;
+    }
+
+    function renderHistory(entries){
+      // KPIs & meta
       const last = entries.at(-1);
       const first = entries[0];
 
@@ -702,7 +928,7 @@
         $("#kpiDelta").textContent = "—";
       }
 
-      // Range label
+      // Range
       if(entries.length >= 2){
         $("#rangeLabel").textContent = `${fmtDate(entries[0].date)} → ${fmtDate(entries.at(-1).date)}`;
       } else if(entries.length === 1){
@@ -711,66 +937,57 @@
         $("#rangeLabel").textContent = "Aucune donnée";
       }
 
-      // Streak (days with weigh-in ending today if exists, otherwise ending at latest entry)
-      const streak = computeStreak(entries);
-      $("#streak").textContent = streak;
+      // streak
+      $("#streak").textContent = computeStreak(entries);
 
-      // List latest first
-      const rev = [...entries].reverse();
-      rev.slice(0, 12).forEach((e, idx) => {
+      // stats
+      const s = stats(entries);
+      $("#minW").textContent = s.min == null ? "—" : `${s.min.toFixed(1)} kg`;
+      $("#maxW").textContent = s.max == null ? "—" : `${s.max.toFixed(1)} kg`;
+      $("#countW").textContent = String(entries.length);
+
+      // full logs (filtered/sorted)
+      const ul = $("#historyList");
+      ul.innerHTML = "";
+
+      const shown = getFilteredSorted(entries);
+
+      if(!shown.length){
         const li = document.createElement("li");
         li.className = "item";
-        const badge = idx === 0 ? "⭐" : "📌";
         li.innerHTML = `
-          <div class="badge">${badge}</div>
+          <div class="badge">🔎</div>
+          <div>
+            <p class="t">Aucune entrée</p>
+            <p class="d">Change la recherche/tri, ou ajoute une pesée.</p>
+          </div>
+        `;
+        ul.appendChild(li);
+        return;
+      }
+
+      shown.forEach((e, idx) => {
+        const li = document.createElement("li");
+        li.className = "item";
+        const isLatest = (entries.at(-1)?.date === e.date);
+        li.innerHTML = `
+          <div class="badge">${isLatest ? "⭐" : "📌"}</div>
           <div style="flex:1;">
             <p class="t">${fmtDate(e.date)}</p>
-            <p class="d"><b style="color:rgba(243,246,255,.95)">${e.weight.toFixed(1)} kg</b></p>
+            <p class="d"><b style="color:rgba(246,247,255,.95)">${e.weight.toFixed(1)} kg</b></p>
+            <div class="chips">
+              <span class="chip">Date: ${e.date}</span>
+              <span class="chip">Tap pour modifier</span>
+            </div>
           </div>
         `;
+        li.addEventListener("click", ()=> openEditSheet(e.date));
         ul.appendChild(li);
       });
-
-      if(entries.length > 12){
-        const li = document.createElement("li");
-        li.className = "item";
-        li.innerHTML = `
-          <div class="badge">…</div>
-          <div>
-            <p class="t">${entries.length} entrées enregistrées</p>
-            <p class="d">Le graphique affiche tout l’historique.</p>
-          </div>
-        `;
-        ul.appendChild(li);
-      }
-    }
-
-    function computeStreak(entries){
-      if(!entries.length) return 0;
-      // Use a set of dates
-      const set = new Set(entries.map(e=>e.date));
-      // base date: if today exists use today, else use latest date
-      let cur = set.has(todayISO()) ? todayISO() : entries.at(-1).date;
-
-      // walk backwards day by day
-      let streak = 0;
-      while(set.has(cur)){
-        streak++;
-        cur = prevDayISO(cur);
-      }
-      return streak;
-    }
-
-    function prevDayISO(iso){
-      const [y,m,d] = iso.split("-").map(Number);
-      const dt = new Date(y, m-1, d);
-      dt.setDate(dt.getDate()-1);
-      const pad = (n)=>String(n).padStart(2,"0");
-      return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
     }
 
     function refresh(){
-      const entries = loadEntries();
+      const entries = loadEntries().sort((a,b)=>a.date.localeCompare(b.date));
       buildChart(entries);
       renderHistory(entries);
     }
@@ -793,26 +1010,34 @@
           alert("Entre un poids valide (ex: 78.4).");
           return;
         }
-        const entries = upsertEntry(loadEntries(), date, Math.round(w*10)/10);
+        let entries = loadEntries();
+        entries = upsertEntry(entries, date, Math.round(w*10)/10);
         saveEntries(entries);
+
         $("#weightInput").value = "";
         refresh();
-        // quick feedback
+
         const btn = $("#saveBtn");
         const old = btn.textContent;
         btn.textContent = "Enregistré ✅";
         setTimeout(()=> btn.textContent = old, 900);
       });
 
+      // search / sort refresh
+      $("#searchInput").addEventListener("input", refresh);
+      $("#sortSelect").addEventListener("input", refresh);
+
+      // clear
       $("#clearBtn").addEventListener("click", () => {
-        const ok = confirm("Tout effacer ? (pesées + checklist).");
+        const ok = confirm("Tout effacer ? (pesées + checklist)");
         if(!ok) return;
         clearAll();
         refresh();
         initChecks();
       });
 
-      $("#exportBtn").addEventListener("click", () => {
+      // export JSON
+      $("#exportJsonBtn").addEventListener("click", () => {
         const entries = loadEntries();
         const blob = new Blob([JSON.stringify(entries, null, 2)], {type:"application/json"});
         const url = URL.createObjectURL(blob);
@@ -824,6 +1049,43 @@
         a.remove();
         URL.revokeObjectURL(url);
       });
+
+      // export CSV
+      $("#exportCsvBtn").addEventListener("click", () => {
+        const entries = loadEntries().sort((a,b)=>a.date.localeCompare(b.date));
+        const header = "date,weight\n";
+        const rows = entries.map(e => `${e.date},${e.weight}`).join("\n");
+        const csv = header + rows + "\n";
+        const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "fitmotiv-poids.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      // import JSON
+      $("#importBtn").addEventListener("click", ()=> $("#importFile").click());
+      $("#importFile").addEventListener("change", async (ev)=>{
+        const file = ev.target.files?.[0];
+        if(!file) return;
+        try{
+          const text = await file.text();
+          const data = JSON.parse(text);
+          if(!Array.isArray(data)) throw new Error("Format invalide");
+          const merged = normalize([...loadEntries(), ...data]);
+          saveEntries(merged);
+          refresh();
+          alert("Import réussi ✅");
+        }catch(err){
+          alert("Import impossible. Vérifie que c’est un JSON d’entrées (date/weight).");
+        }finally{
+          ev.target.value = "";
+        }
+      });
     }
 
     // ---------- Tabs ----------
@@ -832,11 +1094,65 @@
         btn.addEventListener("click", ()=>{
           $$(".tabBtn").forEach(b=>b.classList.remove("active"));
           btn.classList.add("active");
-
           const id = btn.dataset.tab;
           $$(".section").forEach(s=>s.classList.remove("active"));
           $("#"+id).classList.add("active");
         });
+      });
+    }
+
+    // ---------- Edit Sheet ----------
+    let editOriginalDate = null;
+
+    function openEditSheet(date){
+      const entries = loadEntries();
+      const e = entries.find(x => x.date === date);
+      if(!e) return;
+
+      editOriginalDate = date;
+      $("#editDate").value = e.date;
+      $("#editWeight").value = e.weight.toFixed(1);
+
+      $("#editBackdrop").classList.add("show");
+    }
+
+    function closeEditSheet(){
+      $("#editBackdrop").classList.remove("show");
+      editOriginalDate = null;
+    }
+
+    function initEditSheet(){
+      $("#closeEditBtn").addEventListener("click", closeEditSheet);
+      $("#editBackdrop").addEventListener("click", (ev)=>{
+        if(ev.target.id === "editBackdrop") closeEditSheet();
+      });
+
+      $("#saveEditBtn").addEventListener("click", ()=>{
+        const newDate = $("#editDate").value;
+        const newW = Number($("#editWeight").value);
+        if(!newDate){ alert("Choisis une date."); return; }
+        if(!Number.isFinite(newW) || newW <= 0){ alert("Poids invalide."); return; }
+
+        let entries = loadEntries();
+
+        // delete old then upsert new
+        if(editOriginalDate) entries = deleteEntry(entries, editOriginalDate);
+        entries = upsertEntry(entries, newDate, Math.round(newW*10)/10);
+        saveEntries(entries);
+
+        closeEditSheet();
+        refresh();
+      });
+
+      $("#deleteEntryBtn").addEventListener("click", ()=>{
+        if(!editOriginalDate) return;
+        const ok = confirm("Supprimer cette entrée ?");
+        if(!ok) return;
+        let entries = loadEntries();
+        entries = deleteEntry(entries, editOriginalDate);
+        saveEntries(entries);
+        closeEditSheet();
+        refresh();
       });
     }
 
@@ -848,6 +1164,7 @@
     initTabs();
     initHome();
     initChecks();
+    initEditSheet();
     refresh();
   </script>
 </body>

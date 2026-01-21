@@ -6,28 +6,28 @@
 <title>FitMotiv</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <style>
 :root{
-  --bg:#050505;
-  --card:#121212;
+  --bg:#000;
+  --card:#0f0f0f;
   --stroke:rgba(255,255,255,.1);
-  --txt:#f4f4f4;
+  --txt:#f5f5f5;
   --muted:#999;
   --orange:#ff7a00;
   --orange2:#ff9f43;
   --green:#2ecc71;
-  --danger:#ff453a;
+  --red:#ff453a;
   --radius:22px;
 }
 
-/* RESET */
 *{box-sizing:border-box}
 body{
   margin:0;
-  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui;
   background:
-    radial-gradient(800px 500px at 20% 0%, rgba(255,122,0,.15), transparent),
+    radial-gradient(900px 600px at 20% 0%, rgba(255,122,0,.18), transparent),
     #000;
   color:var(--txt);
 }
@@ -35,117 +35,64 @@ body{
 .app{
   max-width:460px;
   margin:auto;
-  padding:20px 16px 110px;
+  padding:20px 16px 120px;
+}
+
+h3{margin:0 0 10px;font-size:16px}
+
+.card{
+  background:linear-gradient(180deg,#151515,#0b0b0b);
+  border:1px solid var(--stroke);
+  border-radius:var(--radius);
+  padding:16px;
+  margin-bottom:14px;
+  box-shadow:0 25px 70px rgba(0,0,0,.8);
 }
 
 /* HEADER */
 .header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
   margin-bottom:16px;
 }
-.title{
-  font-size:24px;
-  font-weight:900;
-}
-.subtitle{
-  font-size:13px;
-  color:var(--muted);
-}
+.title{font-size:24px;font-weight:900}
+.subtitle{font-size:13px;color:var(--muted)}
 
 .streak{
-  display:flex;
-  align-items:center;
-  gap:8px;
   padding:8px 12px;
   border-radius:999px;
   background:#111;
   border:1px solid var(--stroke);
-}
-.streak span{
   color:var(--orange);
 }
 
-/* CARD */
-.card{
-  background:linear-gradient(180deg,#141414,#0c0c0c);
-  border:1px solid var(--stroke);
-  border-radius:var(--radius);
-  padding:16px;
-  margin-bottom:14px;
-  box-shadow:0 20px 50px rgba(0,0,0,.7);
-}
-
-/* PESÉE */
-.weigh-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-}
-.weigh-header h3{
-  margin:0;
-  font-size:15px;
-  font-weight:800;
-}
-.date-chip{
-  display:flex;
-  align-items:center;
-  gap:6px;
-  padding:6px 10px;
-  background:rgba(255,122,0,.12);
-  border:1px solid rgba(255,122,0,.25);
-  border-radius:999px;
-  font-size:12px;
-}
-
-/* INPUT GROUP */
+/* INPUT */
 .input-group{
   display:flex;
-  background:#0d0d0d;
+  background:#0a0a0a;
   border-radius:18px;
   border:1px solid var(--stroke);
   overflow:hidden;
 }
-.input-cell{
-  flex:1;
-  padding:12px;
-}
-.input-cell + .input-cell{
-  border-left:1px solid rgba(255,255,255,.08);
-}
-.label{
-  font-size:12px;
-  color:var(--muted);
-  display:flex;
-  gap:6px;
-  margin-bottom:6px;
-}
+.cell{flex:1;padding:12px}
+.cell+.cell{border-left:1px solid rgba(255,255,255,.08)}
+label{font-size:12px;color:var(--muted)}
 input{
   width:100%;
   padding:10px;
   border:none;
-  border-radius:12px;
   background:#000;
   color:var(--txt);
-  font-size:14px;
+  border-radius:12px;
+  margin-top:6px;
 }
-input:focus{
-  outline:none;
-  box-shadow:0 0 0 3px rgba(255,122,0,.3);
-}
+input:focus{outline:none;box-shadow:0 0 0 3px rgba(255,122,0,.35)}
 
-.weight-wrap{
-  position:relative;
-}
-.weight-wrap span{
-  position:absolute;
-  right:12px;
-  top:50%;
+.weightWrap{position:relative}
+.weightWrap span{
+  position:absolute;right:12px;top:50%;
   transform:translateY(-50%);
-  color:#777;
-  font-size:12px;
+  font-size:12px;color:#777;
 }
 
 /* BUTTON */
@@ -153,55 +100,60 @@ input:focus{
   margin-top:14px;
   width:100%;
   padding:14px;
-  border-radius:18px;
   border:none;
-  font-size:16px;
+  border-radius:18px;
   font-weight:900;
-  color:#111;
+  font-size:16px;
   background:linear-gradient(135deg,var(--orange),var(--orange2));
-  box-shadow:0 0 0 rgba(255,122,0,.7);
-  animation:pulse 2.5s infinite;
+  color:#111;
+  animation:pulse 2.2s infinite;
 }
 @keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(255,122,0,.4)}
-  70%{box-shadow:0 0 0 16px rgba(255,122,0,0)}
+  0%{box-shadow:0 0 0 0 rgba(255,122,0,.5)}
+  70%{box-shadow:0 0 0 18px rgba(255,122,0,0)}
   100%{box-shadow:0 0 0 0 rgba(255,122,0,0)}
 }
 
 /* KPI */
-.kpis{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:14px;
-}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .kpi{
-  background:#0d0d0d;
+  background:#0b0b0b;
+  border:1px solid var(--stroke);
   border-radius:18px;
   padding:12px;
-  border:1px solid var(--stroke);
 }
-.kpi .value{
-  font-size:20px;
-  font-weight:900;
+.kpi .v{font-size:20px;font-weight:900}
+.kpi .l{font-size:12px;color:var(--muted)}
+
+/* PROGRESS */
+.progress{
+  height:10px;
+  background:#111;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:8px;
 }
-.kpi .label{
+.progress span{
+  display:block;height:100%;
+  background:linear-gradient(90deg,var(--orange),var(--orange2));
+}
+
+/* BADGES */
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.badge{
+  padding:6px 10px;
   font-size:12px;
-  color:var(--muted);
+  border-radius:999px;
+  background:rgba(255,122,0,.15);
+  border:1px solid rgba(255,122,0,.3);
 }
 
 /* GRAPH */
-.chart-box{
-  height:240px;
-  margin-top:10px;
-}
+.chart{height:240px}
 
-/* BOTTOM NAV */
+/* NAV */
 .nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
+  position:fixed;bottom:0;left:0;right:0;
   background:rgba(0,0,0,.7);
   backdrop-filter:blur(14px);
   border-top:1px solid var(--stroke);
@@ -217,15 +169,14 @@ input:focus{
   flex:1;
   background:#111;
   border:1px solid var(--stroke);
-  color:#aaa;
-  padding:10px;
   border-radius:16px;
+  padding:10px;
+  color:#aaa;
   font-weight:700;
 }
 .nav button.active{
   background:rgba(255,122,0,.15);
   color:var(--orange);
-  border-color:rgba(255,122,0,.3);
 }
 </style>
 </head>
@@ -236,50 +187,54 @@ input:focus{
   <div class="header">
     <div>
       <div class="title">🔥 FitMotiv</div>
-      <div class="subtitle">Suivi poids • Discipline • Résultats</div>
+      <div class="subtitle">Discipline • Suivi • Résultats</div>
     </div>
-    <div class="streak">🟠 <span id="streak">0</span> jours</div>
+    <div class="streak">🔥 <span id="streak">0</span> j</div>
   </div>
 
   <!-- PESÉE -->
   <div class="card">
-    <div class="weigh-header">
-      <h3>⚖️ Pesée du jour</h3>
-      <div class="date-chip">📅 <span id="todayLabel">—</span></div>
-    </div>
-
+    <h3>⚖️ Pesée du jour</h3>
     <div class="input-group">
-      <div class="input-cell">
-        <div class="label">📆 Date</div>
-        <input type="date" id="dateInput">
+      <div class="cell">
+        <label>📅 Date</label>
+        <input type="date" id="date">
       </div>
-      <div class="input-cell">
-        <div class="label">⚖️ Poids</div>
-        <div class="weight-wrap">
-          <input type="number" step="0.1" id="weightInput" placeholder="ex: 78.4">
+      <div class="cell">
+        <label>⚖️ Poids</label>
+        <div class="weightWrap">
+          <input type="number" step="0.1" id="weight" placeholder="ex: 78.4">
           <span>kg</span>
         </div>
       </div>
     </div>
 
-    <button class="save" id="saveBtn">🚀 Enregistrer</button>
+    <button class="save" id="save">🚀 Enregistrer</button>
 
     <div class="kpis">
       <div class="kpi">
-        <div class="value" id="lastWeight">—</div>
-        <div class="label">⭐ Dernière pesée</div>
+        <div class="v" id="last">—</div>
+        <div class="l">Dernière pesée</div>
       </div>
       <div class="kpi">
-        <div class="value" id="delta">—</div>
-        <div class="label">📉 Évolution</div>
+        <div class="v" id="delta">—</div>
+        <div class="l">Évolution</div>
       </div>
     </div>
+  </div>
+
+  <!-- OBJECTIF -->
+  <div class="card">
+    <h3>🎯 Objectif</h3>
+    <input id="goal" type="number" placeholder="Poids cible (kg)">
+    <div class="progress"><span id="progress"></span></div>
+    <div class="badges" id="badges"></div>
   </div>
 
   <!-- GRAPH -->
   <div class="card">
     <h3>📈 Évolution</h3>
-    <div class="chart-box">
+    <div class="chart">
       <canvas id="chart"></canvas>
     </div>
   </div>
@@ -295,49 +250,77 @@ input:focus{
 </div>
 
 <script>
-const KEY="fitmotiv_logs_v3";
+const KEY="fitmotiv_all";
 const today=new Date().toISOString().slice(0,10);
-dateInput.value=today;
-todayLabel.textContent=new Date().toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+date.value=today;
 
 let logs=JSON.parse(localStorage.getItem(KEY)||"[]");
+let goal=localStorage.getItem("goal")||"";
 
-function refresh(){
-  logs.sort((a,b)=>a.date.localeCompare(b.date));
-  if(logs.length){
-    lastWeight.textContent=logs.at(-1).w+" kg";
-    delta.textContent=(logs.at(-1).w-logs[0].w).toFixed(1)+" kg";
-    streak.textContent=logs.length;
-  }
-  chart.data.labels=logs.map(l=>l.date);
-  chart.data.datasets[0].data=logs.map(l=>l.w);
-  chart.update();
-}
+if(goal) document.getElementById("goal").value=goal;
 
-saveBtn.onclick=()=>{
-  const d=dateInput.value;
-  const w=parseFloat(weightInput.value);
-  if(!w) return;
-  logs=logs.filter(l=>l.date!==d);
-  logs.push({date:d,w});
-  localStorage.setItem(KEY,JSON.stringify(logs));
-  weightInput.value="";
-  refresh();
-};
-
-const ctx=document.getElementById("chart");
-const chart=new Chart(ctx,{
+const chart=new Chart(chart,{
   type:"line",
   data:{labels:[],datasets:[{
     data:[],
     borderColor:"#ff7a00",
-    backgroundColor:"rgba(255,122,0,.2)",
+    backgroundColor:"rgba(255,122,0,.25)",
     fill:true,
     tension:.35,
     pointRadius:4
   }]},
   options:{plugins:{legend:{display:false}}}
 });
+
+function refresh(){
+  logs.sort((a,b)=>a.d.localeCompare(b.d));
+  if(!logs.length) return;
+
+  last.textContent=logs.at(-1).w+" kg";
+  const diff=(logs.at(-1).w-logs[0].w).toFixed(1);
+  delta.textContent=(diff>0?"+":"")+diff+" kg";
+  delta.style.color=diff<0?"var(--green)":"var(--orange)";
+
+  streak.textContent=logs.length;
+
+  chart.data.labels=logs.map(l=>l.d);
+  chart.data.datasets[0].data=logs.map(l=>l.w);
+  chart.update();
+
+  if(goal){
+    const start=logs[0].w;
+    const cur=logs.at(-1).w;
+    const pct=Math.min(100,((start-cur)/(start-goal))*100);
+    progress.style.width=pct+"%";
+    if(cur<=goal){
+      confetti({particleCount:200,spread:100});
+    }
+  }
+
+  badges.innerHTML="";
+  if(logs.length>=1) badges.innerHTML+="<div class='badge'>🏁 Départ</div>";
+  if(logs.length>=7) badges.innerHTML+="<div class='badge'>🔥 7 jours</div>";
+  if(diff<=-2) badges.innerHTML+="<div class='badge'>💪 -2 kg</div>";
+  if(diff<=-5) badges.innerHTML+="<div class='badge'>🏆 -5 kg</div>";
+}
+
+save.onclick=()=>{
+  const d=date.value;
+  const w=parseFloat(weight.value);
+  if(!w) return;
+  logs=logs.filter(l=>l.d!==d);
+  logs.push({d,w});
+  localStorage.setItem(KEY,JSON.stringify(logs));
+  weight.value="";
+  confetti({particleCount:80,spread:60});
+  refresh();
+};
+
+document.getElementById("goal").onchange=e=>{
+  goal=e.target.value;
+  localStorage.setItem("goal",goal);
+  refresh();
+};
 
 refresh();
 </script>

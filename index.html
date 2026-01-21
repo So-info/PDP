@@ -9,11 +9,10 @@
 
   <style>
     :root{
-      /* Palette noir/orange épurée */
       --bg:#050505;
       --bg2:#0B0B0B;
+
       --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.08);
       --stroke: rgba(255,255,255,.10);
 
       --txt:#F3F3F3;
@@ -128,9 +127,7 @@
     }
     .small{font-size: 12px; color: var(--muted2);}
 
-    /* Inputs */
-    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;}
-    .field{flex:1 1 140px; min-width:140px;}
+    /* Inputs (global) */
     label{display:block; font-size: 12px; color: var(--muted); margin-bottom:6px;}
     input{
       width:100%;
@@ -184,21 +181,6 @@
       font-weight: 900;
     }
 
-    .kpis{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .kpi{
-      padding: 12px;
-      border-radius: var(--radius);
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.05);
-    }
-    .kpi .v{font-size: 18px; font-weight: 950;}
-    .kpi .l{font-size: 12px; color: var(--muted2); margin-top: 2px;}
-
     .hint{
       margin-top: 10px;
       color: var(--muted2);
@@ -206,7 +188,14 @@
       line-height: 1.25rem;
     }
 
-    /* List items */
+    .actions2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    /* Lists */
     .list{margin: 10px 0 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px;}
     .item{
       display:flex;
@@ -260,7 +249,6 @@
       font-size: 12px;
     }
 
-    /* Tools */
     .tools{
       display:flex;
       gap:10px;
@@ -270,18 +258,11 @@
     }
     .tools .field{flex: 1 1 160px; min-width: 160px;}
 
-    .actions2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      margin-top:10px;
-    }
-
     /* Sections */
     .section{display:none}
     .section.active{display:block}
 
-    /* Bottom bar (épurée iOS) */
+    /* Bottom tabs */
     .tabs{
       position: fixed;
       left: 0; right: 0; bottom: 0;
@@ -374,8 +355,132 @@
     }
     .sheetFooter button{flex:1}
 
-    /* Petite touche premium: sélection texte douce */
     ::selection{background: rgba(255,122,0,.28);}
+
+    /* ----------------------------
+       Pesée du jour (v4) – refaite
+       ---------------------------- */
+    .weighCard .head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom: 12px;
+    }
+    .weighCard .head .title{
+      font-size: 15px;
+      font-weight: 950;
+      letter-spacing: .2px;
+      margin:0;
+    }
+    .weighCard .dateChip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(255,122,0,.10);
+      border: 1px solid rgba(255,122,0,.22);
+      color: rgba(243,243,243,.92);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+    .weighCard .dateChip .miniDot{
+      width:8px;height:8px;border-radius:50%;
+      background: var(--orange);
+      box-shadow: 0 0 0 3px rgba(255,122,0,.18);
+    }
+
+    .inputGroup{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      overflow:hidden;
+    }
+    .inputRow{
+      display:flex;
+      align-items:stretch;
+    }
+    .inputRow .cell{
+      flex:1;
+      padding: 10px 12px 12px;
+      position:relative;
+    }
+    .inputRow .cell + .cell{
+      border-left: 1px solid rgba(255,255,255,.08);
+    }
+    .inputGroup .label2{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size: 12px;
+      color: var(--muted2);
+      margin: 0 0 6px;
+    }
+    .inputGroup .label2 .ic{
+      width:22px;height:22px;border-radius: 10px;
+      display:flex;align-items:center;justify-content:center;
+      background: rgba(255,122,0,.10);
+      border: 1px solid rgba(255,122,0,.18);
+      font-size: 12px;
+    }
+    .inputGroup input{
+      border: none !important;
+      background: rgba(0,0,0,.18) !important;
+      padding: 12px 12px !important;
+      border-radius: 14px !important;
+    }
+    .inputGroup input:focus{
+      box-shadow: 0 0 0 4px rgba(255,122,0,.14) !important;
+    }
+
+    .weightWrap{position:relative;}
+    .weightWrap .unit{
+      position:absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: rgba(243,243,243,.45);
+      pointer-events:none;
+    }
+    .weightWrap input{ padding-right: 42px !important; }
+
+    .weighPrimary{
+      margin-top: 12px;
+      border-radius: 18px;
+      padding: 13px 14px;
+      background: linear-gradient(135deg, rgba(255,122,0,1), rgba(255,154,61,1));
+      box-shadow:
+        0 16px 36px rgba(255,122,0,.18),
+        inset 0 1px 0 rgba(255,255,255,.25);
+    }
+    .weighPrimary:active{ transform: scale(.985); }
+
+    .kpisClean{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .kpiClean{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      padding: 12px;
+    }
+    .kpiClean .v{
+      font-weight: 950;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+    .kpiClean .l{
+      margin-top: 4px;
+      font-size: 12px;
+      color: var(--muted2);
+    }
+    .kpiClean.good .v{ color: rgba(255,154,61,.95); }
+    .kpiClean.neutral .v{ color: rgba(243,243,243,.92); }
   </style>
 </head>
 
@@ -396,38 +501,47 @@
     <section id="home" class="section active">
       <div class="grid">
 
-        <div class="card">
-          <div class="h2">
-            <span>Pesée du jour</span>
-            <span class="small" id="todayLabel">—</span>
-          </div>
-
-          <div class="row">
-            <div class="field">
-              <label for="dateInput">Date</label>
-              <input id="dateInput" type="date" />
-            </div>
-            <div class="field">
-              <label for="weightInput">Poids (kg)</label>
-              <input id="weightInput" type="number" inputmode="decimal" step="0.1" placeholder="ex: 78.4" />
+        <!-- Pesée du jour (refaite) -->
+        <div class="card weighCard">
+          <div class="head">
+            <p class="title">Pesée du jour</p>
+            <div class="dateChip">
+              <span class="miniDot"></span>
+              <span id="todayLabel">—</span>
             </div>
           </div>
 
-          <div style="height:10px"></div>
-          <button class="btn" id="saveBtn">Enregistrer</button>
+          <div class="inputGroup">
+            <div class="inputRow">
+              <div class="cell">
+                <div class="label2"><span class="ic">📅</span> Date</div>
+                <input id="dateInput" type="date" />
+              </div>
 
-          <div class="kpis">
-            <div class="kpi">
+              <div class="cell">
+                <div class="label2"><span class="ic">⚖️</span> Poids</div>
+                <div class="weightWrap">
+                  <input id="weightInput" type="number" inputmode="decimal" step="0.1" placeholder="ex: 78.4" />
+                  <span class="unit">kg</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn weighPrimary" id="saveBtn">Enregistrer</button>
+
+          <div class="kpisClean">
+            <div class="kpiClean neutral">
               <div class="v" id="kpiLast">—</div>
               <div class="l">Dernière pesée</div>
             </div>
-            <div class="kpi">
+            <div class="kpiClean good">
               <div class="v" id="kpiDelta">—</div>
               <div class="l">Évolution (vs 1ère)</div>
             </div>
           </div>
 
-          <p class="hint">Épuré = efficace. Rentre ta donnée, et laisse le temps faire.</p>
+          <p class="hint">Épuré = efficace. Tu notes, tu suis, tu avances.</p>
 
           <div class="actions2">
             <button class="btn secondary" id="exportJsonBtn">Exporter JSON</button>
@@ -438,6 +552,7 @@
           <input id="importFile" type="file" accept="application/json" style="display:none;" />
         </div>
 
+        <!-- Évolution + logs -->
         <div class="card">
           <div class="h2">
             <span>Évolution</span>
@@ -472,7 +587,6 @@
 
           <ul class="list" id="historyList"></ul>
         </div>
-
       </div>
     </section>
 
@@ -566,17 +680,17 @@
         <button class="btn ghost" id="closeEditBtn" style="width:auto;padding:8px 12px;border-radius:14px;">Fermer</button>
       </div>
       <div class="sheetBody">
-        <div class="row">
-          <div class="field">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+          <div style="flex:1 1 140px; min-width:140px;">
             <label for="editDate">Date</label>
             <input id="editDate" type="date" />
           </div>
-          <div class="field">
+          <div style="flex:1 1 140px; min-width:140px;">
             <label for="editWeight">Poids (kg)</label>
             <input id="editWeight" type="number" step="0.1" inputmode="decimal" />
           </div>
         </div>
-        <p class="hint" style="margin-bottom:0;">Tap sur une ligne dans les logs pour modifier/supprimer.</p>
+        <p class="hint" style="margin-bottom:0;">Tap sur une ligne des logs pour modifier/supprimer.</p>
       </div>
       <div class="sheetFooter">
         <button class="btn danger" id="deleteEntryBtn">Supprimer</button>
@@ -606,8 +720,8 @@
     };
 
     // Storage
-    const KEY="fitmotiv.weights.darkorange.v1";
-    const CK ="fitmotiv.checks.darkorange.v1";
+    const KEY="fitmotiv.weights.darkorange.v2";
+    const CK ="fitmotiv.checks.darkorange.v2";
 
     const loadEntries=()=>{
       try{
@@ -723,7 +837,6 @@
       const labels=entries.map(e=>e.date);
       const data=entries.map(e=>e.weight);
 
-      // bornes plus jolies
       let min=Math.min(...data,0), max=Math.max(...data,0);
       if(data.length){
         const p=Math.max(0.6,(max-min)*0.18);
@@ -783,7 +896,7 @@
       });
     };
 
-    // Logs
+    // Logs / stats
     const computeStreak=(entries)=>{
       if(!entries.length) return 0;
       const set=new Set(entries.map(e=>e.date));
@@ -792,6 +905,7 @@
       while(set.has(cur)){ s++; cur=prevDayISO(cur); }
       return s;
     };
+
     const stats=(entries)=>{
       if(!entries.length) return {min:null,max:null};
       let mn=entries[0].weight, mx=entries[0].weight;

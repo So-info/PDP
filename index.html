@@ -18,7 +18,6 @@
   --orange:#ff7a00;
   --orange2:#ff9f43;
   --green:#2ecc71;
-  --red:#ff453a;
   --radius:22px;
 }
 
@@ -38,8 +37,7 @@ body{
   padding:20px 16px 120px;
 }
 
-h3{margin:0 0 10px;font-size:16px}
-
+/* ---------- COMMON ---------- */
 .card{
   background:linear-gradient(180deg,#151515,#0b0b0b);
   border:1px solid var(--stroke);
@@ -48,8 +46,11 @@ h3{margin:0 0 10px;font-size:16px}
   margin-bottom:14px;
   box-shadow:0 25px 70px rgba(0,0,0,.8);
 }
+h3{margin:0 0 10px;font-size:16px}
+.section{display:none}
+.section.active{display:block}
 
-/* HEADER */
+/* ---------- HEADER ---------- */
 .header{
   display:flex;
   justify-content:space-between;
@@ -57,7 +58,6 @@ h3{margin:0 0 10px;font-size:16px}
 }
 .title{font-size:24px;font-weight:900}
 .subtitle{font-size:13px;color:var(--muted)}
-
 .streak{
   padding:8px 12px;
   border-radius:999px;
@@ -66,7 +66,7 @@ h3{margin:0 0 10px;font-size:16px}
   color:var(--orange);
 }
 
-/* INPUT */
+/* ---------- INPUT ---------- */
 .input-group{
   display:flex;
   background:#0a0a0a;
@@ -95,7 +95,7 @@ input:focus{outline:none;box-shadow:0 0 0 3px rgba(255,122,0,.35)}
   font-size:12px;color:#777;
 }
 
-/* BUTTON */
+/* ---------- BUTTON ---------- */
 .save{
   margin-top:14px;
   width:100%;
@@ -114,7 +114,7 @@ input:focus{outline:none;box-shadow:0 0 0 3px rgba(255,122,0,.35)}
   100%{box-shadow:0 0 0 0 rgba(255,122,0,0)}
 }
 
-/* KPI */
+/* ---------- KPI ---------- */
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
 .kpi{
   background:#0b0b0b;
@@ -125,7 +125,7 @@ input:focus{outline:none;box-shadow:0 0 0 3px rgba(255,122,0,.35)}
 .kpi .v{font-size:20px;font-weight:900}
 .kpi .l{font-size:12px;color:var(--muted)}
 
-/* PROGRESS */
+/* ---------- PROGRESS ---------- */
 .progress{
   height:10px;
   background:#111;
@@ -138,20 +138,20 @@ input:focus{outline:none;box-shadow:0 0 0 3px rgba(255,122,0,.35)}
   background:linear-gradient(90deg,var(--orange),var(--orange2));
 }
 
-/* BADGES */
-.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.badge{
-  padding:6px 10px;
-  font-size:12px;
-  border-radius:999px;
-  background:rgba(255,122,0,.15);
-  border:1px solid rgba(255,122,0,.3);
+/* ---------- LIST ---------- */
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.item{
+  padding:12px;
+  border-radius:18px;
+  background:#0b0b0b;
+  border:1px solid var(--stroke);
 }
 
-/* GRAPH */
-.chart{height:240px}
-
-/* NAV */
+/* ---------- NAV ---------- */
 .nav{
   position:fixed;bottom:0;left:0;right:0;
   background:rgba(0,0,0,.7);
@@ -192,116 +192,109 @@ input:focus{outline:none;box-shadow:0 0 0 3px rgba(255,122,0,.35)}
     <div class="streak">🔥 <span id="streak">0</span> j</div>
   </div>
 
-  <!-- PESÉE -->
-  <div class="card">
-    <h3>⚖️ Pesée du jour</h3>
-    <div class="input-group">
-      <div class="cell">
-        <label>📅 Date</label>
-        <input type="date" id="date">
-      </div>
-      <div class="cell">
-        <label>⚖️ Poids</label>
-        <div class="weightWrap">
-          <input type="number" step="0.1" id="weight" placeholder="ex: 78.4">
-          <span>kg</span>
+  <!-- ACCUEIL -->
+  <section id="home" class="section active">
+
+    <div class="card">
+      <h3>⚖️ Pesée du jour</h3>
+      <div class="input-group">
+        <div class="cell">
+          <label>📅 Date</label>
+          <input type="date" id="date">
+        </div>
+        <div class="cell">
+          <label>⚖️ Poids</label>
+          <div class="weightWrap">
+            <input type="number" step="0.1" id="weight">
+            <span>kg</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <button class="save" id="save">🚀 Enregistrer</button>
+      <button class="save" id="save">🚀 Enregistrer</button>
 
-    <div class="kpis">
-      <div class="kpi">
-        <div class="v" id="last">—</div>
-        <div class="l">Dernière pesée</div>
-      </div>
-      <div class="kpi">
-        <div class="v" id="delta">—</div>
-        <div class="l">Évolution</div>
+      <div class="kpis">
+        <div class="kpi"><div class="v" id="last">—</div><div class="l">Dernière</div></div>
+        <div class="kpi"><div class="v" id="delta">—</div><div class="l">Évolution</div></div>
       </div>
     </div>
-  </div>
 
-  <!-- OBJECTIF -->
-  <div class="card">
-    <h3>🎯 Objectif</h3>
-    <input id="goal" type="number" placeholder="Poids cible (kg)">
-    <div class="progress"><span id="progress"></span></div>
-    <div class="badges" id="badges"></div>
-  </div>
-
-  <!-- GRAPH -->
-  <div class="card">
-    <h3>📈 Évolution</h3>
-    <div class="chart">
-      <canvas id="chart"></canvas>
+    <div class="card">
+      <h3>📈 Évolution</h3>
+      <canvas id="chart" height="220"></canvas>
     </div>
-  </div>
+
+  </section>
+
+  <!-- REPAS -->
+  <section id="meals" class="section">
+    <div class="card">
+      <h3>🥗 Repas simples</h3>
+      <div class="list">
+        <div class="item">🐟 Poisson + légumes surgelés</div>
+        <div class="item">🍗 Poulet + salade</div>
+        <div class="item">🍳 Omelette + épinards</div>
+        <div class="item">🥣 Thon + skyr</div>
+        <div class="item">🍲 Soupe + œufs durs</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOTIVATION -->
+  <section id="motivation" class="section">
+    <div class="card">
+      <h3>🏋️ Motivation</h3>
+      <div class="item">🔥 Régulier > parfait</div>
+      <div class="item">💪 La discipline bat la motivation</div>
+      <div class="item">🎯 Un jour à la fois</div>
+      <div class="item">🏆 Chaque effort compte</div>
+    </div>
+  </section>
 
 </div>
 
+<!-- NAV -->
 <div class="nav">
   <div class="nav-inner">
-    <button class="active">📈 Accueil</button>
-    <button>🥗 Repas</button>
-    <button>🏋️ Motivation</button>
+    <button class="active" data-tab="home">📈 Accueil</button>
+    <button data-tab="meals">🥗 Repas</button>
+    <button data-tab="motivation">🏋️ Motivation</button>
   </div>
 </div>
 
 <script>
-const KEY="fitmotiv_all";
+/* -------- TABS -------- */
+document.querySelectorAll(".nav button").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+    document.getElementById(btn.dataset.tab).classList.add("active");
+  };
+});
+
+/* -------- LOGIC -------- */
+const KEY="fitmotiv_tabs";
 const today=new Date().toISOString().slice(0,10);
 date.value=today;
 
 let logs=JSON.parse(localStorage.getItem(KEY)||"[]");
-let goal=localStorage.getItem("goal")||"";
 
-if(goal) document.getElementById("goal").value=goal;
-
-const chart=new Chart(chart,{
+const chart=new Chart(document.getElementById("chart"),{
   type:"line",
-  data:{labels:[],datasets:[{
-    data:[],
-    borderColor:"#ff7a00",
-    backgroundColor:"rgba(255,122,0,.25)",
-    fill:true,
-    tension:.35,
-    pointRadius:4
-  }]},
+  data:{labels:[],datasets:[{data:[],borderColor:"#ff7a00",backgroundColor:"rgba(255,122,0,.25)",fill:true,tension:.35}]},
   options:{plugins:{legend:{display:false}}}
 });
 
 function refresh(){
-  logs.sort((a,b)=>a.d.localeCompare(b.d));
   if(!logs.length) return;
-
+  logs.sort((a,b)=>a.d.localeCompare(b.d));
   last.textContent=logs.at(-1).w+" kg";
-  const diff=(logs.at(-1).w-logs[0].w).toFixed(1);
-  delta.textContent=(diff>0?"+":"")+diff+" kg";
-  delta.style.color=diff<0?"var(--green)":"var(--orange)";
-
+  delta.textContent=(logs.at(-1).w-logs[0].w).toFixed(1)+" kg";
   streak.textContent=logs.length;
-
   chart.data.labels=logs.map(l=>l.d);
   chart.data.datasets[0].data=logs.map(l=>l.w);
   chart.update();
-
-  if(goal){
-    const start=logs[0].w;
-    const cur=logs.at(-1).w;
-    const pct=Math.min(100,((start-cur)/(start-goal))*100);
-    progress.style.width=pct+"%";
-    if(cur<=goal){
-      confetti({particleCount:200,spread:100});
-    }
-  }
-
-  badges.innerHTML="";
-  if(logs.length>=1) badges.innerHTML+="<div class='badge'>🏁 Départ</div>";
-  if(logs.length>=7) badges.innerHTML+="<div class='badge'>🔥 7 jours</div>";
-  if(diff<=-2) badges.innerHTML+="<div class='badge'>💪 -2 kg</div>";
-  if(diff<=-5) badges.innerHTML+="<div class='badge'>🏆 -5 kg</div>";
 }
 
 save.onclick=()=>{
@@ -312,13 +305,7 @@ save.onclick=()=>{
   logs.push({d,w});
   localStorage.setItem(KEY,JSON.stringify(logs));
   weight.value="";
-  confetti({particleCount:80,spread:60});
-  refresh();
-};
-
-document.getElementById("goal").onchange=e=>{
-  goal=e.target.value;
-  localStorage.setItem("goal",goal);
+  confetti({particleCount:80,spread:70});
   refresh();
 };
 
